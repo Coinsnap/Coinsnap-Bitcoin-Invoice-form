@@ -1,0 +1,515 @@
+/**
+ * Bitcoin Invoice Form - Admin Styles
+ */
+
+/* General Admin Styles - matching wp-bitcoin-newsletter */
+.bif-admin-page {
+    max-width: 1200px;
+}
+
+.bif-admin-page h1 {
+    color: #23282d;
+    margin-bottom: 20px;
+}
+
+.bif-admin .notice { margin-top: 10px; }
+
+/* Test entry styling - matching wp-bitcoin-newsletter */
+.bif-test-entry {
+	background-color: #fff3cd !important;
+	border-left: 4px solid #ffc107 !important;
+}
+
+.bif-test-mode {
+	background-color: #d1ecf1 !important;
+	color: #0c5460 !important;
+	font-weight: bold;
+	padding: 2px 6px;
+	border-radius: 3px;
+}
+
+/* Settings sections styling - matching wp-bitcoin-newsletter */
+.bif-admin h2 {
+	margin-top: 30px;
+	margin-bottom: 15px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid #ddd;
+}
+
+.bif-admin .description {
+	font-style: italic;
+	color: #666;
+	margin-bottom: 15px;
+}
+
+/* Settings Page */
+.bif-settings-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.bif-settings-section h2 {
+    margin-top: 0;
+    color: #23282d;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.bif-settings-section p {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* Conditional settings styling - matching wp-bitcoin-newsletter */
+.provider-settings,
+.payment-provider-settings {
+	margin-bottom: 20px;
+	display: none; /* Initially hidden, shown by JavaScript */
+}
+
+.payment-provider-settings {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
+	padding: 15px;
+}
+
+/* Provider settings containers */
+#bif-coinsnap-settings-wrapper,
+#bif-btcpay-settings-wrapper {
+	display: none; /* Initially hidden, shown by JavaScript */
+	transition: opacity 0.3s ease-in-out;
+}
+
+#bif-coinsnap-settings-wrapper.show,
+#bif-btcpay-settings-wrapper.show {
+	display: block;
+}
+
+/* Form Fields */
+.bif-field-config {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.bif-field-config h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-weight: bold;
+}
+
+.bif-field-config label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.bif-field-config input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.bif-field-config input[type="text"],
+.bif-field-config input[type="number"],
+.bif-field-config select {
+    flex: 1;
+    min-width: 150px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.bif-field-config .description {
+    margin: 8px 0 0 0;
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* Button Text Config */
+.bif-button-text-config {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.bif-button-text-config h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-weight: bold;
+}
+
+.bif-button-text-config label {
+    margin: 0;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.bif-button-text-config input {
+    flex: 1;
+    min-width: 200px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Payment Config */
+.bif-payment-config p {
+    margin: 10px 0 5px 0;
+}
+
+.bif-payment-config label {
+    font-weight: 500;
+}
+
+.bif-payment-config input,
+.bif-payment-config select,
+.bif-payment-config textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.bif-payment-config textarea {
+    height: 60px;
+    resize: vertical;
+}
+
+/* Email Config */
+.bif-email-config p {
+    margin: 10px 0 5px 0;
+}
+
+.bif-email-config label {
+    font-weight: 500;
+}
+
+.bif-email-config input,
+.bif-email-config textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.bif-email-config textarea {
+    height: 200px;
+    resize: vertical;
+    font-family: monospace;
+}
+
+/* Redirect Config */
+.bif-redirect-config p {
+    margin: 10px 0 5px 0;
+}
+
+.bif-redirect-config label {
+    font-weight: 500;
+}
+
+.bif-redirect-config input,
+.bif-redirect-config textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.bif-redirect-config textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+/* Shortcode Config */
+.bif-shortcode-config p {
+    margin: 10px 0 5px 0;
+}
+
+.bif-shortcode-config input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f1f1f1;
+    font-family: monospace;
+    cursor: text;
+}
+
+.bif-shortcode-config input:focus {
+    background: #fff;
+    border-color: #0073aa;
+}
+
+/* Transactions Page */
+.bif-transactions-filters {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.bif-transactions-filters .alignleft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.bif-transactions-filters select,
+.bif-transactions-filters input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Transaction Status */
+.bif-status {
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.bif-status-paid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.bif-status-unpaid {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.bif-status-failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.bif-status-refunded {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Logs Page */
+.bif-logs-info {
+    background: #f1f1f1;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.bif-logs-info p {
+    margin: 5px 0;
+}
+
+.bif-logs-actions {
+    margin-bottom: 20px;
+}
+
+.bif-log-entries {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.bif-log-entry {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.bif-log-entry:last-child {
+    border-bottom: none;
+}
+
+.bif-log-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.bif-log-timestamp {
+    color: #666;
+}
+
+.bif-log-level {
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.bif-log-message {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Log Level Colors */
+.bif-log-emergency .bif-log-level {
+    background: #dc3545;
+    color: white;
+}
+
+.bif-log-alert .bif-log-level {
+    background: #fd7e14;
+    color: white;
+}
+
+.bif-log-critical .bif-log-level {
+    background: #dc3545;
+    color: white;
+}
+
+.bif-log-error .bif-log-level {
+    background: #dc3545;
+    color: white;
+}
+
+.bif-log-warning .bif-log-level {
+    background: #ffc107;
+    color: black;
+}
+
+.bif-log-notice .bif-log-level {
+    background: #17a2b8;
+    color: white;
+}
+
+.bif-log-info .bif-log-level {
+    background: #28a745;
+    color: white;
+}
+
+.bif-log-debug .bif-log-level {
+    background: #6c757d;
+    color: white;
+}
+
+.bif-log-unknown .bif-log-level {
+    background: #6c757d;
+    color: white;
+}
+
+/* Modal Styles */
+.bif-modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.bif-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    border-radius: 4px;
+}
+
+.bif-modal-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.bif-modal-close:hover {
+    color: #000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bif-transactions-filters .alignleft {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .bif-transactions-filters select,
+    .bif-transactions-filters input {
+        width: 100%;
+    }
+    
+    .bif-modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 15px;
+    }
+}
+
+/* WordPress Admin Integration */
+.wp-admin .bif-admin-page .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.wp-admin .bif-admin-page .form-table td {
+    padding: 15px 10px;
+}
+
+.wp-admin .bif-admin-page .description {
+    font-style: italic;
+    color: #666;
+}
+
+/* Button Styles */
+.bif-admin-page .button {
+    margin-right: 5px;
+}
+
+.bif-admin-page .button-primary {
+    background: #0073aa;
+    border-color: #0073aa;
+}
+
+.bif-admin-page .button-primary:hover {
+    background: #005a87;
+    border-color: #005a87;
+}
+
+/* Notice Styles */
+.bif-admin-page .notice {
+    margin: 15px 0;
+}
+
+.bif-admin-page .notice-success {
+    border-left-color: #46b450;
+}
+
+.bif-admin-page .notice-error {
+    border-left-color: #dc3232;
+}
+
+.bif-admin-page .notice-warning {
+    border-left-color: #ffb900;
+}
+
+.bif-admin-page .notice-info {
+    border-left-color: #00a0d2;
+}
