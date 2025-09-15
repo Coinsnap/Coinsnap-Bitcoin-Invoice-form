@@ -99,6 +99,11 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'currency_required'   => '1',
 			'currency_label'      => __( 'Currency', 'bif' ),
 			'currency_order'      => '55',
+			'discount_enabled'    => '1',
+			'discount_required'   => '0',
+			'discount_label'      => __( 'Discount (%)', 'bif' ),
+			'discount_order'      => '57',
+			'discount_default'    => '5',
 			'description_enabled' => '1',
 			'description_required' => '0',
 			'description_label'   => __( 'Description/Notes', 'bif' ),
@@ -128,6 +133,9 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 		// Currency field
 		self::render_toggle_row( 'currency', $values );
+
+		// Discount field
+		self::render_toggle_row( 'discount', $values );
 
 		// Description field
 		self::render_toggle_row( 'description', $values );
@@ -355,7 +363,7 @@ Description: {description}', 'bif' ),
 			$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
 			
 			// Ensure checkbox values are properly set (unchecked checkboxes don't send values)
-			$field_names = array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' );
+			$field_names = array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'discount', 'description' );
 			foreach ( $field_names as $field_name ) {
 				$enabled_key = $field_name . '_enabled';
 				$required_key = $field_name . '_required';
