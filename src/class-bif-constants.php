@@ -39,5 +39,5 @@ class BIF_Constants {
 	public const CPT_INVOICE_FORM = 'bif_invoice_form';
 
 	/** Shortcode. */
-	public const SHORTCODE_INVOICE_FORM = 'bif_invoice_form';
+	public const SHORTCODE_INVOICE_FORM = 'coinsnap_invoice_form';
 }

@@ -99,13 +99,8 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'currency_required'   => '1',
 			'currency_label'      => __( 'Currency', 'bif' ),
 			'currency_order'      => '55',
-			'discount_enabled'    => '1',
-			'discount_required'   => '0',
-			'discount_label'      => __( 'Discount (%)', 'bif' ),
-			'discount_order'      => '57',
-			'discount_default'    => '5',
 			'description_enabled' => '1',
-			'description_required' => '0',
+			'description_required' => '1',
 			'description_label'   => __( 'Description/Notes', 'bif' ),
 			'description_order'   => '60',
 			'button_text'         => __( 'Pay with Bitcoin', 'bif' ),
@@ -133,9 +128,6 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 		// Currency field
 		self::render_toggle_row( 'currency', $values );
-
-		// Discount field
-		self::render_toggle_row( 'discount', $values );
 
 		// Description field
 		self::render_toggle_row( 'description', $values );
@@ -170,27 +162,32 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$label    = $values[ $label_key ] ?? ucfirst( str_replace( '_', ' ', $field_name ) );
 		$order    = $values[ $order_key ] ?? '10';
 
-		// Core fields that are always required and don't need a required checkbox
-		$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
+		// Core fields that are always required and don't need enabled/required checkboxes
+		$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'description', 'email' );
 
 		echo '<fieldset class="bif-field-config" style="border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:4px;background:#fafafa;">';
 		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html( ucwords( str_replace( '_', ' ', $field_name ) ) ) . '</legend>';
 		
 		echo '<div class="bif-field-options" style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;margin-top:10px;">';
 		
-		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
-		echo '<input type="checkbox" name="bif_fields[' . esc_attr( $enabled_key ) . ']" value="1" ' . checked( '1', $enabled, false ) . ' id="' . esc_attr( $enabled_key ) . '" />';
-		echo '<label for="' . esc_attr( $enabled_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Enabled', 'bif' ) . '</label>';
-		echo '</div>';
-		
-		// Only show required checkbox for non-core fields
+		// Only show enabled checkbox for non-core fields
 		if ( ! in_array( $field_name, $core_required_fields, true ) ) {
+			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
+			echo '<input type="checkbox" name="bif_fields[' . esc_attr( $enabled_key ) . ']" value="1" ' . checked( '1', $enabled, false ) . ' id="' . esc_attr( $enabled_key ) . '" />';
+			echo '<label for="' . esc_attr( $enabled_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Enabled', 'bif' ) . '</label>';
+			echo '</div>';
+			
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" name="bif_fields[' . esc_attr( $required_key ) . ']" value="1" ' . checked( '1', $required, false ) . ' id="' . esc_attr( $required_key ) . '" />';
 			echo '<label for="' . esc_attr( $required_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Required', 'bif' ) . '</label>';
 			echo '</div>';
 		} else {
-			// For core fields, show a disabled checkbox to indicate they're always required
+			// For core fields, show disabled checkboxes to indicate they're always enabled and required
+			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
+			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
+			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Enabled', 'bif' ) . ' <em>(' . esc_html__( 'always', 'bif' ) . ')</em></label>';
+			echo '</div>';
+			
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
 			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Required', 'bif' ) . ' <em>(' . esc_html__( 'always', 'bif' ) . ')</em></label>';
@@ -360,10 +357,10 @@ Description: {description}', 'bif' ),
 			$fields = array_map( 'sanitize_text_field', wp_unslash( $_POST['bif_fields'] ) );
 			
 			// Core fields that are always required
-			$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
+			$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'description', 'email' );
 			
 			// Ensure checkbox values are properly set (unchecked checkboxes don't send values)
-			$field_names = array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'discount', 'description' );
+			$field_names = array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' );
 			foreach ( $field_names as $field_name ) {
 				$enabled_key = $field_name . '_enabled';
 				$required_key = $field_name . '_required';
@@ -376,8 +373,9 @@ Description: {description}', 'bif' ),
 					$fields[ $required_key ] = '0';
 				}
 				
-				// Force core fields to always be required
+				// Force core fields to always be enabled and required
 				if ( in_array( $field_name, $core_required_fields, true ) ) {
+					$fields[ $enabled_key ] = '1';
 					$fields[ $required_key ] = '1';
 				}
 			}

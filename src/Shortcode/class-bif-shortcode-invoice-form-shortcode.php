@@ -23,11 +23,11 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 	 * Register the shortcode.
 	 */
 	public static function register(): void {
-		// Register the new shortcode name
+		// Register the main shortcode name
 		add_shortcode( BIF_Constants::SHORTCODE_INVOICE_FORM, array( __CLASS__, 'render' ) );
 		
 		// Register the old shortcode name for backward compatibility
-		add_shortcode( 'coinsnap_invoice_form', array( __CLASS__, 'render' ) );
+		add_shortcode( 'bif_invoice_form', array( __CLASS__, 'render' ) );
 	}
 
 	/**
@@ -87,13 +87,8 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'currency_required'   => '1',
 				'currency_label'      => __( 'Currency', 'bif' ),
 				'currency_order'      => '55',
-				'discount_enabled'    => '1',
-				'discount_required'   => '0',
-				'discount_label'      => __( 'Discount (%)', 'bif' ),
-				'discount_order'      => '57',
-				'discount_default'    => '5',
 				'description_enabled' => '1',
-				'description_required' => '0',
+				'description_required' => '1',
 				'description_label'   => __( 'Description/Notes', 'bif' ),
 				'description_order'   => '60',
 				'button_text'         => __( 'Pay with Bitcoin', 'bif' ),
@@ -125,13 +120,8 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'currency_required'   => '1',
 				'currency_label'      => __( 'Currency', 'bif' ),
 				'currency_order'      => '55',
-				'discount_enabled'    => '1',
-				'discount_required'   => '0',
-				'discount_label'      => __( 'Discount (%)', 'bif' ),
-				'discount_order'      => '57',
-				'discount_default'    => '5',
 				'description_enabled' => '1',
-				'description_required' => '0',
+				'description_required' => '1',
 				'description_label'   => __( 'Description/Notes', 'bif' ),
 				'description_order'   => '60',
 				'button_text'         => __( 'Pay with Bitcoin', 'bif' ),
@@ -172,7 +162,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				<?php
 				// Render enabled fields in order
 				$field_order = array();
-				foreach ( array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'discount', 'description' ) as $field ) {
+				foreach ( array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' ) as $field ) {
 					$enabled = $fields[ $field . '_enabled' ] ?? '0';
 					if ( '1' === $enabled || 'on' === $enabled || true === $enabled ) {
 						$order = intval( $fields[ $field . '_order' ] ?? '10' );
@@ -246,10 +236,6 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 					echo '<option value="' . esc_attr( $currency ) . '">' . esc_html( $currency ) . '</option>';
 				}
 				echo '</select>';
-				break;
-			case 'discount':
-				$default_value = $fields['discount_default'] ?? '5';
-				echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . $required_attr . ' step="0.01" min="0" max="100" value="' . esc_attr( $default_value ) . '" />';
 				break;
 			case 'email':
 				echo '<input type="email" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . $required_attr . ' />';

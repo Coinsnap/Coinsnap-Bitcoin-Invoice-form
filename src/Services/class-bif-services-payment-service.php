@@ -74,21 +74,6 @@ class BIF_Services_Payment_Service {
 				);
 			}
 
-			// Apply discount if provided
-			$discount_percentage = 0;
-			if ( ! empty( $data['bif_discount'] ) ) {
-				$discount_percentage = floatval( $data['bif_discount'] );
-			} elseif ( ! empty( $fields['discount_default'] ) ) {
-				$discount_percentage = floatval( $fields['discount_default'] );
-			}
-
-			// Apply discount (ensure it's between 0 and 100)
-			$discount_percentage = max( 0, min( 100, $discount_percentage ) );
-			if ( $discount_percentage > 0 ) {
-				$discount_amount = $amount * ( $discount_percentage / 100 );
-				$amount = $amount - $discount_amount;
-			}
-
 			// Convert amount to smallest currency unit (e.g., cents for USD)
 			$amount_cents = intval( round( $amount * 100 ) );
 
@@ -117,8 +102,6 @@ class BIF_Services_Payment_Service {
 				'company'         => sanitize_text_field( $data['bif_company'] ?? '' ),
 				'invoice_number'  => sanitize_text_field( $data['bif_invoice_number'] ?? '' ),
 				'description'     => sanitize_textarea_field( $data['bif_description'] ?? '' ),
-				'discount_percentage' => $discount_percentage,
-				'original_amount' => $amount + ( $discount_percentage > 0 ? $amount * ( $discount_percentage / 100 ) : 0 ),
 			);
 
 			// Create payment provider

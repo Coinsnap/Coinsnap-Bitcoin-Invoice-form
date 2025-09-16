@@ -134,7 +134,8 @@ class BIF_Rest_Routes {
 		$data = $request->get_json_params();
 		$result = BIF_Services_Payment_Service::handle_webhook( 'coinsnap', $data );
 
-		return new \WP_REST_Response( $result, $result['success'] ? 200 : 400 );
+		// Always return 200 to acknowledge webhook receipt
+		return new \WP_REST_Response( $result, 200 );
 	}
 
 	/**
@@ -147,6 +148,7 @@ class BIF_Rest_Routes {
 		$data = $request->get_json_params();
 		$result = BIF_Services_Payment_Service::handle_webhook( 'btcpay', $data );
 
-		return new \WP_REST_Response( $result, $result['success'] ? 200 : 400 );
+		// Always return 200 to acknowledge webhook receipt
+		return new \WP_REST_Response( $result, 200 );
 	}
 }
