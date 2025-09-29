@@ -37,22 +37,22 @@ class BIF_Admin_Logs_Page {
 		// Handle log clearing
 		if ( isset( $_POST['clear_logs'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'bif_clear_logs' ) ) {
 			BIF_Logger::clear_log();
-			echo '<div class="notice notice-success"><p>' . esc_html__( 'Logs cleared successfully.', 'bif' ) . '</p></div>';
+			echo '<div class="notice notice-success"><p>' . esc_html__( 'Logs cleared successfully.', 'coinsnap-bitcoin-invoice-form' ) . '</p></div>';
 			$recent_entries = array();
 			$log_file_size = 0;
 		}
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Plugin Logs', 'bif' ); ?></h1>
+			<h1><?php esc_html_e( 'Plugin Logs', 'coinsnap-bitcoin-invoice-form' ); ?></h1>
 
 			<div class="bif-logs-info">
 				<p>
-					<strong><?php esc_html_e( 'Log File:', 'bif' ); ?></strong> 
+					<strong><?php esc_html_e( 'Log File:', 'coinsnap-bitcoin-invoice-form' ); ?></strong> 
 					<code><?php echo esc_html( $log_file_path ); ?></code>
 				</p>
 				<p>
-					<strong><?php esc_html_e( 'File Size:', 'bif' ); ?></strong> 
+					<strong><?php esc_html_e( 'File Size:', 'coinsnap-bitcoin-invoice-form' ); ?></strong> 
 					<?php echo esc_html( size_format( $log_file_size ) ); ?>
 				</p>
 			</div>
@@ -60,17 +60,17 @@ class BIF_Admin_Logs_Page {
 			<div class="bif-logs-actions">
 				<form method="post" style="display: inline;">
 					<?php wp_nonce_field( 'bif_clear_logs' ); ?>
-					<input type="submit" name="clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'bif' ); ?>" 
-						   onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to clear all logs?', 'bif' ); ?>');" />
+					<input type="submit" name="clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'coinsnap-bitcoin-invoice-form' ); ?>" 
+						   onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to clear all logs?', 'coinsnap-bitcoin-invoice-form' ); ?>');" />
 				</form>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=bif-settings' ) ); ?>" class="button">
-					<?php esc_html_e( 'Log Settings', 'bif' ); ?>
+					<?php esc_html_e( 'Log Settings', 'coinsnap-bitcoin-invoice-form' ); ?>
 				</a>
 			</div>
 
 			<div class="bif-logs-content">
 				<?php if ( empty( $recent_entries ) ) : ?>
-					<p><?php esc_html_e( 'No log entries found.', 'bif' ); ?></p>
+					<p><?php esc_html_e( 'No log entries found.', 'coinsnap-bitcoin-invoice-form' ); ?></p>
 				<?php else : ?>
 					<div class="bif-log-entries">
 						<?php foreach ( $recent_entries as $entry ) : ?>

@@ -85,7 +85,7 @@ class BIF_Admin_Transactions_Page {
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Invoice Transactions', 'bif' ); ?></h1>
+			<h1><?php esc_html_e( 'Invoice Transactions', 'coinsnap-bitcoin-invoice-form' ); ?></h1>
 
 			<!-- Filters -->
 			<div class="tablenav top">
@@ -94,7 +94,7 @@ class BIF_Admin_Transactions_Page {
 					
 					<div class="alignleft actions">
 						<select name="form_id">
-							<option value=""><?php esc_html_e( 'All Forms', 'bif' ); ?></option>
+							<option value=""><?php esc_html_e( 'All Forms', 'coinsnap-bitcoin-invoice-form' ); ?></option>
 							<?php foreach ( $forms as $form ) : ?>
 								<option value="<?php echo esc_attr( $form->ID ); ?>" <?php selected( isset( $_GET['form_id'] ) ? intval( $_GET['form_id'] ) : '', $form->ID ); ?>>
 									<?php echo esc_html( $form->post_title ); ?>
@@ -103,17 +103,17 @@ class BIF_Admin_Transactions_Page {
 						</select>
 
 						<select name="payment_status">
-							<option value=""><?php esc_html_e( 'All Statuses', 'bif' ); ?></option>
-							<option value="unpaid" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'unpaid' ); ?>><?php esc_html_e( 'Unpaid', 'bif' ); ?></option>
-							<option value="paid" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'paid' ); ?>><?php esc_html_e( 'Paid', 'bif' ); ?></option>
-							<option value="failed" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'failed' ); ?>><?php esc_html_e( 'Failed', 'bif' ); ?></option>
-							<option value="refunded" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'refunded' ); ?>><?php esc_html_e( 'Refunded', 'bif' ); ?></option>
+							<option value=""><?php esc_html_e( 'All Statuses', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+							<option value="unpaid" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'unpaid' ); ?>><?php esc_html_e( 'Unpaid', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+							<option value="paid" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'paid' ); ?>><?php esc_html_e( 'Paid', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+							<option value="failed" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'failed' ); ?>><?php esc_html_e( 'Failed', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+							<option value="refunded" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'refunded' ); ?>><?php esc_html_e( 'Refunded', 'coinsnap-bitcoin-invoice-form' ); ?></option>
 						</select>
 
-						<input type="date" name="date_from" value="<?php echo esc_attr( isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'From Date', 'bif' ); ?>" />
-						<input type="date" name="date_to" value="<?php echo esc_attr( isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'To Date', 'bif' ); ?>" />
+						<input type="date" name="date_from" value="<?php echo esc_attr( isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'From Date', 'coinsnap-bitcoin-invoice-form' ); ?>" />
+						<input type="date" name="date_to" value="<?php echo esc_attr( isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'To Date', 'coinsnap-bitcoin-invoice-form' ); ?>" />
 
-						<input type="submit" class="button" value="<?php esc_attr_e( 'Filter', 'bif' ); ?>" />
+						<input type="submit" class="button" value="<?php esc_attr_e( 'Filter', 'coinsnap-bitcoin-invoice-form' ); ?>" />
 					</div>
 				</form>
 			</div>
@@ -122,21 +122,21 @@ class BIF_Admin_Transactions_Page {
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Transaction ID', 'bif' ); ?></th>
-						<th><?php esc_html_e( 'Form', 'bif' ); ?></th>
-						<th><?php esc_html_e( 'Invoice Number', 'bif' ); ?></th>
-						<th><?php esc_html_e( 'Customer', 'bif' ); ?></th>
-						<th><?php esc_html_e( 'Amount', 'bif' ); ?></th>
-						<th><?php esc_html_e( 'Status', 'bif' ); ?></th>
-						<th><?php esc_html_e( 'Date', 'bif' ); ?></th>
-						<th><?php esc_html_e( 'Actions', 'bif' ); ?></th>
+						<th><?php esc_html_e( 'Transaction ID', 'coinsnap-bitcoin-invoice-form' ); ?></th>
+						<th><?php esc_html_e( 'Form', 'coinsnap-bitcoin-invoice-form' ); ?></th>
+						<th><?php esc_html_e( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ); ?></th>
+						<th><?php esc_html_e( 'Customer', 'coinsnap-bitcoin-invoice-form' ); ?></th>
+						<th><?php esc_html_e( 'Amount', 'coinsnap-bitcoin-invoice-form' ); ?></th>
+						<th><?php esc_html_e( 'Status', 'coinsnap-bitcoin-invoice-form' ); ?></th>
+						<th><?php esc_html_e( 'Date', 'coinsnap-bitcoin-invoice-form' ); ?></th>
+						<th><?php esc_html_e( 'Actions', 'coinsnap-bitcoin-invoice-form' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php if ( empty( $transactions ) ) : ?>
 						<tr>
 							<td colspan="8" style="text-align: center; padding: 20px;">
-								<?php esc_html_e( 'No transactions found.', 'bif' ); ?>
+								<?php esc_html_e( 'No transactions found.', 'coinsnap-bitcoin-invoice-form' ); ?>
 							</td>
 						</tr>
 					<?php else : ?>
@@ -148,7 +148,7 @@ class BIF_Admin_Transactions_Page {
 								<td>
 									<?php
 									$form = get_post( $transaction->form_id );
-									echo $form ? esc_html( $form->post_title ) : esc_html__( 'Unknown Form', 'bif' );
+									echo $form ? esc_html( $form->post_title ) : esc_html__( 'Unknown Form', 'coinsnap-bitcoin-invoice-form' );
 									?>
 								</td>
 								<td>
@@ -175,7 +175,7 @@ class BIF_Admin_Transactions_Page {
 								<td>
 									<?php if ( $transaction->payment_url ) : ?>
 										<a href="<?php echo esc_url( $transaction->payment_url ); ?>" target="_blank" class="button button-small">
-											<?php esc_html_e( 'View Payment', 'bif' ); ?>
+											<?php esc_html_e( 'View Payment', 'coinsnap-bitcoin-invoice-form' ); ?>
 										</a>
 									<?php endif; ?>
 								</td>

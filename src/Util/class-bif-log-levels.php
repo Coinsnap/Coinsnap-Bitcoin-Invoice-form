@@ -99,14 +99,14 @@ class BIF_Log_Levels {
 	 */
 	public static function get_level_names(): array {
 		return array(
-			self::EMERGENCY => __( 'Emergency', 'bif' ),
-			self::ALERT     => __( 'Alert', 'bif' ),
-			self::CRITICAL  => __( 'Critical', 'bif' ),
-			self::ERROR     => __( 'Error', 'bif' ),
-			self::WARNING   => __( 'Warning', 'bif' ),
-			self::NOTICE    => __( 'Notice', 'bif' ),
-			self::INFO      => __( 'Info', 'bif' ),
-			self::DEBUG     => __( 'Debug', 'bif' ),
+			self::EMERGENCY => __( 'Emergency', 'coinsnap-bitcoin-invoice-form' ),
+			self::ALERT     => __( 'Alert', 'coinsnap-bitcoin-invoice-form' ),
+			self::CRITICAL  => __( 'Critical', 'coinsnap-bitcoin-invoice-form' ),
+			self::ERROR     => __( 'Error', 'coinsnap-bitcoin-invoice-form' ),
+			self::WARNING   => __( 'Warning', 'coinsnap-bitcoin-invoice-form' ),
+			self::NOTICE    => __( 'Notice', 'coinsnap-bitcoin-invoice-form' ),
+			self::INFO      => __( 'Info', 'coinsnap-bitcoin-invoice-form' ),
+			self::DEBUG     => __( 'Debug', 'coinsnap-bitcoin-invoice-form' ),
 		);
 	}
 }

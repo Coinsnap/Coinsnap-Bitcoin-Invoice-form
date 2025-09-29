@@ -39,7 +39,7 @@ class BIF_Services_Payment_Service {
 		if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Invalid form ID.', 'bif' ),
+					'message' => __( 'Invalid form ID.', 'coinsnap-bitcoin-invoice-form' ),
 				);
 			}
 
@@ -70,7 +70,7 @@ class BIF_Services_Payment_Service {
 			if ( $amount <= 0 ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Invalid amount.', 'bif' ),
+					'message' => __( 'Invalid amount.', 'coinsnap-bitcoin-invoice-form' ),
 				);
 			}
 
@@ -119,7 +119,7 @@ class BIF_Services_Payment_Service {
 				) );
 				return array(
 					'success' => false,
-					'message' => __( 'Failed to create payment invoice.', 'bif' ),
+					'message' => __( 'Failed to create payment invoice.', 'coinsnap-bitcoin-invoice-form' ),
 				);
 			}
 
@@ -159,7 +159,7 @@ class BIF_Services_Payment_Service {
 				) );
 				return array(
 					'success' => false,
-					'message' => __( 'Failed to save transaction.', 'bif' ),
+					'message' => __( 'Failed to save transaction.', 'coinsnap-bitcoin-invoice-form' ),
 				);
 			}
 
@@ -176,7 +176,7 @@ class BIF_Services_Payment_Service {
 			$redirect_config = wp_parse_args( $redirect_config, array(
 				'success_page' => '',
 				'error_page'   => '',
-				'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'bif' ),
+				'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
 			) );
 
 			return array(
@@ -201,7 +201,7 @@ class BIF_Services_Payment_Service {
 			) );
 			return array(
 				'success' => false,
-				'message' => __( 'An error occurred while creating the invoice.', 'bif' ),
+				'message' => __( 'An error occurred while creating the invoice.', 'coinsnap-bitcoin-invoice-form' ),
 			);
 		}
 	}
@@ -231,7 +231,7 @@ class BIF_Services_Payment_Service {
 			if ( empty( $webhook_result ) || empty( $webhook_result['invoice_id'] ) ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Invalid webhook data.', 'bif' ),
+					'message' => __( 'Invalid webhook data.', 'coinsnap-bitcoin-invoice-form' ),
 				);
 			}
 
@@ -274,7 +274,7 @@ class BIF_Services_Payment_Service {
 
 			return array(
 				'success' => true,
-				'message' => __( 'Webhook processed successfully.', 'bif' ),
+				'message' => __( 'Webhook processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
 			);
 
 		} catch ( \Exception $e ) {
@@ -285,7 +285,7 @@ class BIF_Services_Payment_Service {
 			) );
 			return array(
 				'success' => false,
-				'message' => __( 'An error occurred while processing the webhook.', 'bif' ),
+				'message' => __( 'An error occurred while processing the webhook.', 'coinsnap-bitcoin-invoice-form' ),
 			);
 		}
 	}
@@ -310,7 +310,7 @@ class BIF_Services_Payment_Service {
 			if ( ! $transaction ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Transaction not found.', 'bif' ),
+					'message' => __( 'Transaction not found.', 'coinsnap-bitcoin-invoice-form' ),
 				);
 			}
 
@@ -366,7 +366,7 @@ class BIF_Services_Payment_Service {
 			) );
 			return array(
 				'success' => false,
-				'message' => __( 'An error occurred while checking payment status.', 'bif' ),
+				'message' => __( 'An error occurred while checking payment status.', 'coinsnap-bitcoin-invoice-form' ),
 			);
 		}
 	}
@@ -394,7 +394,7 @@ class BIF_Services_Payment_Service {
 		$email_config = get_post_meta( $transaction->form_id, '_bif_email', true );
 		$email_config = wp_parse_args( $email_config, array(
 			'admin_email'     => get_option( 'admin_email' ),
-			'email_subject'   => __( 'New Invoice Payment Received', 'bif' ),
+			'email_subject'   => __( 'New Invoice Payment Received', 'coinsnap-bitcoin-invoice-form' ),
 			'email_template'  => __( 'A new invoice payment has been received:
 
 Invoice Number: {invoice_number}
@@ -407,7 +407,7 @@ Payment Details:
 Transaction ID: {transaction_id}
 Payment Provider: {payment_provider}
 
-Description: {description}', 'bif' ),
+Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		) );
 
 		// Replace placeholders in email template

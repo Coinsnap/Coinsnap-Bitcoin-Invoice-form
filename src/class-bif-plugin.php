@@ -70,8 +70,8 @@ class BIF_Plugin {
 	 */
 	public function register_admin_menu(): void {
 		add_menu_page(
-			__( 'Bitcoin Invoice Forms', 'bif' ),
-			__( 'Bitcoin Invoice Forms', 'bif' ),
+			__( 'Bitcoin Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
+			__( 'Bitcoin Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
 			'manage_options',
 			'bif-transactions',
 			array( TransactionsPage::class, 'render_page' ),
@@ -82,8 +82,8 @@ class BIF_Plugin {
 		// Add explicit submenu for transactions (same as main page).
 		add_submenu_page(
 			'bif-transactions',
-			__( 'Transactions', 'bif' ),
-			__( 'Transactions', 'bif' ),
+			__( 'Transactions', 'coinsnap-bitcoin-invoice-form' ),
+			__( 'Transactions', 'coinsnap-bitcoin-invoice-form' ),
 			'manage_options',
 			'bif-transactions',
 			array( TransactionsPage::class, 'render_page' )
@@ -91,16 +91,16 @@ class BIF_Plugin {
 
 		add_submenu_page(
 			'bif-transactions',
-			__( 'Invoice Forms', 'bif' ),
-			__( 'Invoice Forms', 'bif' ),
+			__( 'Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
+			__( 'Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
 			'manage_options',
 			'edit.php?post_type=' . BIF_Constants::CPT_INVOICE_FORM
 		);
 
 		add_submenu_page(
 			'bif-transactions',
-			__( 'Settings', 'bif' ),
-			__( 'Settings', 'bif' ),
+			__( 'Settings', 'coinsnap-bitcoin-invoice-form' ),
+			__( 'Settings', 'coinsnap-bitcoin-invoice-form' ),
 			'manage_options',
 			'bif-settings',
 			array( AdminSettings::class, 'render_page' )
@@ -108,8 +108,8 @@ class BIF_Plugin {
 
 		add_submenu_page(
 			'bif-transactions',
-			__( 'Logs', 'bif' ),
-			__( 'Logs', 'bif' ),
+			__( 'Logs', 'coinsnap-bitcoin-invoice-form' ),
+			__( 'Logs', 'coinsnap-bitcoin-invoice-form' ),
 			'manage_options',
 			'bif-logs',
 			array( LogsPage::class, 'render_page' )
@@ -127,11 +127,11 @@ class BIF_Plugin {
 	 * Enqueue frontend assets.
 	 */
 	public function enqueue_frontend(): void {
-		wp_register_style( 'bif-frontend', BIF_PLUGIN_URL . 'assets/css/frontend.css', array(), BIF_VERSION );
-		wp_register_script( 'bif-frontend', BIF_PLUGIN_URL . 'assets/js/frontend.js', array( 'jquery' ), BIF_VERSION, true );
+		wp_register_style( 'coinsnap-bitcoin-invoice-form-frontend', COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL . 'assets/css/frontend.css', array(), COINSNAP_BITCOIN_INVOICE_FORM_VERSION );
+		wp_register_script( 'coinsnap-bitcoin-invoice-form-frontend', COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL . 'assets/js/frontend.js', array( 'jquery' ), COINSNAP_BITCOIN_INVOICE_FORM_VERSION, true );
 
 		wp_localize_script(
-			'bif-frontend',
+			'coinsnap-bitcoin-invoice-form-frontend',
 			'BIF',
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
@@ -140,8 +140,8 @@ class BIF_Plugin {
 			)
 		);
 
-		wp_enqueue_style( 'bif-frontend' );
-		wp_enqueue_script( 'bif-frontend' );
+		wp_enqueue_style( 'coinsnap-bitcoin-invoice-form-frontend' );
+		wp_enqueue_script( 'coinsnap-bitcoin-invoice-form-frontend' );
 	}
 
 	/**
@@ -153,12 +153,12 @@ class BIF_Plugin {
 			return;
 		}
 
-		wp_register_style( 'bif-admin', BIF_PLUGIN_URL . 'assets/css/admin.css', array(), BIF_VERSION );
-		wp_register_script( 'bif-admin', BIF_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery' ), BIF_VERSION, true );
+		wp_register_style( 'coinsnap-bitcoin-invoice-form-admin', COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL . 'assets/css/admin.css', array(), COINSNAP_BITCOIN_INVOICE_FORM_VERSION );
+		wp_register_script( 'coinsnap-bitcoin-invoice-form-admin', COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery' ), COINSNAP_BITCOIN_INVOICE_FORM_VERSION, true );
 
 		// Localize script with REST API data
 		wp_localize_script(
-			'bif-admin',
+			'coinsnap-bitcoin-invoice-form-admin',
 			'bifRestUrl',
 			array(
 				'restUrl' => esc_url_raw( get_rest_url( null, BIF_Constants::REST_NAMESPACE . '/' ) ),
@@ -166,7 +166,7 @@ class BIF_Plugin {
 			)
 		);
 
-		wp_enqueue_style( 'bif-admin' );
-		wp_enqueue_script( 'bif-admin' );
+		wp_enqueue_style( 'coinsnap-bitcoin-invoice-form-admin' );
+		wp_enqueue_script( 'coinsnap-bitcoin-invoice-form-admin' );
 	}
 }

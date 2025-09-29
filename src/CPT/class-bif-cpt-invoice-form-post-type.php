@@ -24,18 +24,18 @@ class BIF_CPT_Invoice_Form_Post_Type {
 	/** Register CPT and metabox hooks. */
 	public static function register(): void {
 		$labels = array(
-			'name'               => __( 'Invoice Forms', 'bif' ),
-			'singular_name'      => __( 'Invoice Form', 'bif' ),
-			'add_new'            => __( 'Add New', 'bif' ),
-			'add_new_item'       => __( 'Add New Invoice Form', 'bif' ),
-			'edit_item'          => __( 'Edit Invoice Form', 'bif' ),
-			'new_item'           => __( 'New Invoice Form', 'bif' ),
-			'all_items'          => __( 'Invoice Forms', 'bif' ),
-			'view_item'          => __( 'View Invoice Form', 'bif' ),
-			'search_items'       => __( 'Search Invoice Forms', 'bif' ),
-			'not_found'          => __( 'No forms found', 'bif' ),
-			'not_found_in_trash' => __( 'No forms found in Trash', 'bif' ),
-			'menu_name'          => __( 'Invoice Forms', 'bif' ),
+			'name'               => __( 'Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
+			'singular_name'      => __( 'Invoice Form', 'coinsnap-bitcoin-invoice-form' ),
+			'add_new'            => __( 'Add New', 'coinsnap-bitcoin-invoice-form' ),
+			'add_new_item'       => __( 'Add New Invoice Form', 'coinsnap-bitcoin-invoice-form' ),
+			'edit_item'          => __( 'Edit Invoice Form', 'coinsnap-bitcoin-invoice-form' ),
+			'new_item'           => __( 'New Invoice Form', 'coinsnap-bitcoin-invoice-form' ),
+			'all_items'          => __( 'Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
+			'view_item'          => __( 'View Invoice Form', 'coinsnap-bitcoin-invoice-form' ),
+			'search_items'       => __( 'Search Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
+			'not_found'          => __( 'No forms found', 'coinsnap-bitcoin-invoice-form' ),
+			'not_found_in_trash' => __( 'No forms found in Trash', 'coinsnap-bitcoin-invoice-form' ),
+			'menu_name'          => __( 'Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
 		);
 
 		register_post_type(
@@ -59,11 +59,11 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 	/** Register meta boxes for the CPT. */
 	public static function register_metaboxes(): void {
-		add_meta_box( 'bif_fields', __( 'Invoice Fields', 'bif' ), array( __CLASS__, 'render_fields_metabox' ), self::POST_TYPE, 'normal' );
-		add_meta_box( 'bif_payment', __( 'Payment Configuration', 'bif' ), array( __CLASS__, 'render_payment_metabox' ), self::POST_TYPE, 'side' );
-		add_meta_box( 'bif_email', __( 'Email Settings', 'bif' ), array( __CLASS__, 'render_email_metabox' ), self::POST_TYPE, 'normal' );
-		add_meta_box( 'bif_redirect', __( 'Redirect Settings', 'bif' ), array( __CLASS__, 'render_redirect_metabox' ), self::POST_TYPE, 'side' );
-		add_meta_box( 'bif_shortcode', __( 'Shortcode', 'bif' ), array( __CLASS__, 'render_shortcode_metabox' ), self::POST_TYPE, 'side' );
+		add_meta_box( 'bif_fields', __( 'Invoice Fields', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_fields_metabox' ), self::POST_TYPE, 'normal' );
+		add_meta_box( 'bif_payment', __( 'Payment Configuration', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_payment_metabox' ), self::POST_TYPE, 'side' );
+		add_meta_box( 'bif_email', __( 'Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_email_metabox' ), self::POST_TYPE, 'normal' );
+		add_meta_box( 'bif_redirect', __( 'Redirect Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_redirect_metabox' ), self::POST_TYPE, 'side' );
+		add_meta_box( 'bif_shortcode', __( 'Shortcode', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_shortcode_metabox' ), self::POST_TYPE, 'side' );
 	}
 
 	/**
@@ -77,33 +77,33 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$defaults = array(
 			'name_enabled'        => '1',
 			'name_required'       => '1',
-			'name_label'          => __( 'Name', 'bif' ),
+			'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
 			'name_order'          => '10',
 			'email_enabled'       => '1',
 			'email_required'      => '1',
-			'email_label'         => __( 'Email', 'bif' ),
+			'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
 			'email_order'         => '20',
 			'company_enabled'     => '0',
 			'company_required'    => '0',
-			'company_label'       => __( 'Company', 'bif' ),
+			'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
 			'company_order'       => '30',
 			'invoice_number_enabled' => '1',
 			'invoice_number_required' => '1',
-			'invoice_number_label' => __( 'Invoice Number', 'bif' ),
+			'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
 			'invoice_number_order' => '40',
 			'amount_enabled'      => '1',
 			'amount_required'     => '1',
-			'amount_label'        => __( 'Amount', 'bif' ),
+			'amount_label'        => __( 'Amount', 'coinsnap-bitcoin-invoice-form' ),
 			'amount_order'        => '50',
 			'currency_enabled'    => '1',
 			'currency_required'   => '1',
-			'currency_label'      => __( 'Currency', 'bif' ),
+			'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
 			'currency_order'      => '55',
 			'description_enabled' => '1',
 			'description_required' => '1',
-			'description_label'   => __( 'Description/Notes', 'bif' ),
+			'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
 			'description_order'   => '60',
-			'button_text'         => __( 'Pay with Bitcoin', 'bif' ),
+			'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 		);
 
 		$values = get_post_meta( $post->ID, '_bif_fields', true );
@@ -134,12 +134,12 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 		// Button text
 		echo '<div class="bif-button-text-config" style="margin-bottom:20px;padding:15px;border:1px solid #ddd;border-radius:4px;background:#fafafa;">';
-		echo '<h4 style="margin:0 0 10px 0;font-weight:bold;">' . esc_html__( 'Submit Button', 'bif' ) . '</h4>';
+		echo '<h4 style="margin:0 0 10px 0;font-weight:bold;">' . esc_html__( 'Submit Button', 'coinsnap-bitcoin-invoice-form' ) . '</h4>';
 		echo '<div style="display:flex;align-items:center;gap:10px;">';
-		echo '<label for="button_text" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Button Text', 'bif' ) . ':</label>';
-		echo '<input type="text" id="button_text" name="bif_fields[button_text]" value="' . esc_attr( $values['button_text'] ) . '" style="flex:1;min-width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'Pay with Bitcoin', 'bif' ) . '" />';
+		echo '<label for="button_text" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Button Text', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
+		echo '<input type="text" id="button_text" name="bif_fields[button_text]" value="' . esc_attr( $values['button_text'] ) . '" style="flex:1;min-width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ) . '" />';
 		echo '</div>';
-		echo '<p class="description" style="margin:8px 0 0 0;color:#666;font-size:13px;">' . esc_html__( 'Customize the text displayed on the submit button.', 'bif' ) . '</p>';
+		echo '<p class="description" style="margin:8px 0 0 0;color:#666;font-size:13px;">' . esc_html__( 'Customize the text displayed on the submit button.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		echo '</div>';
 
 		echo '</div>';
@@ -174,33 +174,33 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		if ( ! in_array( $field_name, $core_required_fields, true ) ) {
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" name="bif_fields[' . esc_attr( $enabled_key ) . ']" value="1" ' . checked( '1', $enabled, false ) . ' id="' . esc_attr( $enabled_key ) . '" />';
-			echo '<label for="' . esc_attr( $enabled_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Enabled', 'bif' ) . '</label>';
+			echo '<label for="' . esc_attr( $enabled_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Enabled', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
 			echo '</div>';
 			
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" name="bif_fields[' . esc_attr( $required_key ) . ']" value="1" ' . checked( '1', $required, false ) . ' id="' . esc_attr( $required_key ) . '" />';
-			echo '<label for="' . esc_attr( $required_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Required', 'bif' ) . '</label>';
+			echo '<label for="' . esc_attr( $required_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Required', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
 			echo '</div>';
 		} else {
 			// For core fields, show disabled checkboxes to indicate they're always enabled and required
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
-			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Enabled', 'bif' ) . ' <em>(' . esc_html__( 'always', 'bif' ) . ')</em></label>';
+			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Enabled', 'coinsnap-bitcoin-invoice-form' ) . ' <em>(' . esc_html__( 'always', 'coinsnap-bitcoin-invoice-form' ) . ')</em></label>';
 			echo '</div>';
 			
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
-			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Required', 'bif' ) . ' <em>(' . esc_html__( 'always', 'bif' ) . ')</em></label>';
+			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Required', 'coinsnap-bitcoin-invoice-form' ) . ' <em>(' . esc_html__( 'always', 'coinsnap-bitcoin-invoice-form' ) . ')</em></label>';
 			echo '</div>';
 		}
 		
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
-		echo '<label for="' . esc_attr( $label_key ) . '" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Label', 'bif' ) . ':</label>';
+		echo '<label for="' . esc_attr( $label_key ) . '" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Label', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
 		echo '<input type="text" name="bif_fields[' . esc_attr( $label_key ) . ']" value="' . esc_attr( $label ) . '" id="' . esc_attr( $label_key ) . '" style="min-width:150px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;" />';
 		echo '</div>';
 		
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
-		echo '<label for="' . esc_attr( $order_key ) . '" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Order', 'bif' ) . ':</label>';
+		echo '<label for="' . esc_attr( $order_key ) . '" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Order', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
 		echo '<input type="number" name="bif_fields[' . esc_attr( $order_key ) . ']" value="' . esc_attr( $order ) . '" id="' . esc_attr( $order_key ) . '" style="width:80px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;" min="0" max="999" />';
 		echo '</div>';
 		
@@ -225,17 +225,17 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$values = wp_parse_args( $values, $defaults );
 
 		echo '<div class="bif-payment-config">';
-		echo '<p><label for="provider_override">' . esc_html__( 'Payment Gateway Override', 'bif' ) . ':</label></p>';
+		echo '<p><label for="provider_override">' . esc_html__( 'Payment Gateway Override', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<select id="provider_override" name="bif_payment[provider_override]" style="width:100%;">';
-		echo '<option value="">' . esc_html__( 'Use Default', 'bif' ) . '</option>';
-		echo '<option value="coinsnap" ' . selected( $values['provider_override'], 'coinsnap', false ) . '>' . esc_html__( 'CoinSnap', 'bif' ) . '</option>';
-		echo '<option value="btcpay" ' . selected( $values['provider_override'], 'btcpay', false ) . '>' . esc_html__( 'BTCPay Server', 'bif' ) . '</option>';
+		echo '<option value="">' . esc_html__( 'Use Default', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
+		echo '<option value="coinsnap" ' . selected( $values['provider_override'], 'coinsnap', false ) . '>' . esc_html__( 'CoinSnap', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
+		echo '<option value="btcpay" ' . selected( $values['provider_override'], 'btcpay', false ) . '>' . esc_html__( 'BTCPay Server', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
 		echo '</select>';
 
-		echo '<p><label for="amount">' . esc_html__( 'Default Amount', 'bif' ) . ':</label></p>';
+		echo '<p><label for="amount">' . esc_html__( 'Default Amount', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="number" id="amount" name="bif_payment[amount]" value="' . esc_attr( $values['amount'] ) . '" style="width:100%;" step="0.01" min="0" />';
 
-		echo '<p><label for="currency">' . esc_html__( 'Currency', 'bif' ) . ':</label></p>';
+		echo '<p><label for="currency">' . esc_html__( 'Currency', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<select id="currency" name="bif_payment[currency]" style="width:100%;">';
 		echo '<option value="USD" ' . selected( $values['currency'], 'USD', false ) . '>USD</option>';
 		echo '<option value="EUR" ' . selected( $values['currency'], 'EUR', false ) . '>EUR</option>';
@@ -244,7 +244,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		echo '<option value="SATS" ' . selected( $values['currency'], 'SATS', false ) . '>SATS</option>';
 		echo '</select>';
 
-		echo '<p><label for="description">' . esc_html__( 'Default Description', 'bif' ) . ':</label></p>';
+		echo '<p><label for="description">' . esc_html__( 'Default Description', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<textarea id="description" name="bif_payment[description]" style="width:100%;height:60px;">' . esc_textarea( $values['description'] ) . '</textarea>';
 
 		echo '</div>';
@@ -258,7 +258,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 	public static function render_email_metabox( \WP_Post $post ): void {
 		$defaults = array(
 			'admin_email'     => get_option( 'admin_email' ),
-			'email_subject'   => __( 'New Invoice Payment Received', 'bif' ),
+			'email_subject'   => __( 'New Invoice Payment Received', 'coinsnap-bitcoin-invoice-form' ),
 			'email_template'  => __( 'A new invoice payment has been received:
 
 Invoice Number: {invoice_number}
@@ -271,22 +271,22 @@ Payment Details:
 Transaction ID: {transaction_id}
 Payment Provider: {payment_provider}
 
-Description: {description}', 'bif' ),
+Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		);
 
 		$values = get_post_meta( $post->ID, '_bif_email', true );
 		$values = wp_parse_args( $values, $defaults );
 
 		echo '<div class="bif-email-config">';
-		echo '<p><label for="admin_email">' . esc_html__( 'Admin Email', 'bif' ) . ':</label></p>';
+		echo '<p><label for="admin_email">' . esc_html__( 'Admin Email', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="email" id="admin_email" name="bif_email[admin_email]" value="' . esc_attr( $values['admin_email'] ) . '" style="width:100%;" />';
 
-		echo '<p><label for="email_subject">' . esc_html__( 'Email Subject', 'bif' ) . ':</label></p>';
+		echo '<p><label for="email_subject">' . esc_html__( 'Email Subject', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="text" id="email_subject" name="bif_email[email_subject]" value="' . esc_attr( $values['email_subject'] ) . '" style="width:100%;" />';
 
-		echo '<p><label for="email_template">' . esc_html__( 'Email Template', 'bif' ) . ':</label></p>';
+		echo '<p><label for="email_template">' . esc_html__( 'Email Template', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<textarea id="email_template" name="bif_email[email_template]" style="width:100%;height:200px;">' . esc_textarea( $values['email_template'] ) . '</textarea>';
-		echo '<p class="description">' . esc_html__( 'Available placeholders: {invoice_number}, {customer_name}, {customer_email}, {amount}, {currency}, {payment_status}, {transaction_id}, {payment_provider}, {description}', 'bif' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Available placeholders: {invoice_number}, {customer_name}, {customer_email}, {amount}, {currency}, {payment_status}, {transaction_id}, {payment_provider}, {description}', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 
 		echo '</div>';
 	}
@@ -300,20 +300,20 @@ Description: {description}', 'bif' ),
 		$defaults = array(
 			'success_page' => '',
 			'error_page'   => '',
-			'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'bif' ),
+			'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
 		);
 
 		$values = get_post_meta( $post->ID, '_bif_redirect', true );
 		$values = wp_parse_args( $values, $defaults );
 
 		echo '<div class="bif-redirect-config">';
-		echo '<p><label for="success_page">' . esc_html__( 'Success Page URL', 'bif' ) . ':</label></p>';
+		echo '<p><label for="success_page">' . esc_html__( 'Success Page URL', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="url" id="success_page" name="bif_redirect[success_page]" value="' . esc_attr( $values['success_page'] ) . '" style="width:100%;" placeholder="https://example.com/thank-you" />';
 
-		echo '<p><label for="error_page">' . esc_html__( 'Error Page URL', 'bif' ) . ':</label></p>';
+		echo '<p><label for="error_page">' . esc_html__( 'Error Page URL', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="url" id="error_page" name="bif_redirect[error_page]" value="' . esc_attr( $values['error_page'] ) . '" style="width:100%;" placeholder="https://example.com/payment-error" />';
 
-		echo '<p><label for="thank_you_message">' . esc_html__( 'Thank You Message', 'bif' ) . ':</label></p>';
+		echo '<p><label for="thank_you_message">' . esc_html__( 'Thank You Message', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<textarea id="thank_you_message" name="bif_redirect[thank_you_message]" style="width:100%;height:80px;">' . esc_textarea( $values['thank_you_message'] ) . '</textarea>';
 
 		echo '</div>';
@@ -327,9 +327,9 @@ Description: {description}', 'bif' ),
 	public static function render_shortcode_metabox( \WP_Post $post ): void {
 		$shortcode = '[' . BIF_Constants::SHORTCODE_INVOICE_FORM . ' id="' . $post->ID . '"]';
 		echo '<div class="bif-shortcode-config">';
-		echo '<p><strong>' . esc_html__( 'Shortcode:', 'bif' ) . '</strong></p>';
+		echo '<p><strong>' . esc_html__( 'Shortcode:', 'coinsnap-bitcoin-invoice-form' ) . '</strong></p>';
 		echo '<input type="text" value="' . esc_attr( $shortcode ) . '" readonly style="width:100%;font-family:monospace;background:#f1f1f1;" onclick="this.select();" />';
-		echo '<p class="description">' . esc_html__( 'Copy this shortcode and paste it into any page or post to display this invoice form.', 'bif' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Copy this shortcode and paste it into any page or post to display this invoice form.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		echo '</div>';
 	}
 
