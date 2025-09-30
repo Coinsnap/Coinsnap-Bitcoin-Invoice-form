@@ -46,13 +46,13 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 
 		$form_id = intval( $atts['id'] );
 		if ( ! $form_id ) {
-			return '<p>' . esc_html__( 'Invalid form ID.', 'bif' ) . '</p>';
+			return '<p>' . esc_html__( 'Invalid form ID.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		}
 
 		$form = get_post( $form_id );
 		$valid_post_types = array( BIF_Constants::CPT_INVOICE_FORM, 'coinsnap_invoice_form' );
 		if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
-			return '<p>' . esc_html__( 'Form not found.', 'bif' ) . '</p>';
+			return '<p>' . esc_html__( 'Form not found.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		}
 
 		// Get form configuration
@@ -65,66 +65,66 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			$fields = array(
 				'name_enabled'        => '1',
 				'name_required'       => '1',
-				'name_label'          => __( 'Name', 'bif' ),
+				'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
 				'name_order'          => '10',
 				'email_enabled'       => '1',
 				'email_required'      => '1',
-				'email_label'         => __( 'Email', 'bif' ),
+				'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
 				'email_order'         => '20',
 				'company_enabled'     => '0',
 				'company_required'    => '0',
-				'company_label'       => __( 'Company', 'bif' ),
+				'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
 				'company_order'       => '30',
 				'invoice_number_enabled' => '1',
 				'invoice_number_required' => '1',
-				'invoice_number_label' => __( 'Invoice Number', 'bif' ),
+				'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
 				'invoice_number_order' => '40',
 				'amount_enabled'      => '1',
 				'amount_required'     => '1',
-				'amount_label'        => __( 'Amount', 'bif' ),
+				'amount_label'        => __( 'Amount', 'coinsnap-bitcoin-invoice-form' ),
 				'amount_order'        => '50',
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
-				'currency_label'      => __( 'Currency', 'bif' ),
+				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
 				'currency_order'      => '55',
 				'description_enabled' => '1',
 				'description_required' => '1',
-				'description_label'   => __( 'Description/Notes', 'bif' ),
+				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
 				'description_order'   => '60',
-				'button_text'         => __( 'Pay with Bitcoin', 'bif' ),
+				'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 			);
 		} else {
 			// Merge with defaults to ensure all keys exist
 			$defaults = array(
 				'name_enabled'        => '1',
 				'name_required'       => '1',
-				'name_label'          => __( 'Name', 'bif' ),
+				'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
 				'name_order'          => '10',
 				'email_enabled'       => '1',
 				'email_required'      => '1',
-				'email_label'         => __( 'Email', 'bif' ),
+				'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
 				'email_order'         => '20',
 				'company_enabled'     => '0',
 				'company_required'    => '0',
-				'company_label'       => __( 'Company', 'bif' ),
+				'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
 				'company_order'       => '30',
 				'invoice_number_enabled' => '1',
 				'invoice_number_required' => '1',
-				'invoice_number_label' => __( 'Invoice Number', 'bif' ),
+				'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
 				'invoice_number_order' => '40',
 				'amount_enabled'      => '1',
 				'amount_required'     => '1',
-				'amount_label'        => __( 'Amount', 'bif' ),
+				'amount_label'        => __( 'Amount', 'coinsnap-bitcoin-invoice-form' ),
 				'amount_order'        => '50',
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
-				'currency_label'      => __( 'Currency', 'bif' ),
+				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
 				'currency_order'      => '55',
 				'description_enabled' => '1',
 				'description_required' => '1',
-				'description_label'   => __( 'Description/Notes', 'bif' ),
+				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
 				'description_order'   => '60',
-				'button_text'         => __( 'Pay with Bitcoin', 'bif' ),
+				'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 			);
 			$fields = wp_parse_args( $fields, $defaults );
 		}	
@@ -138,7 +138,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 		$redirect = wp_parse_args( $redirect, array(
 			'success_page' => '',
 			'error_page'   => '',
-			'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'bif' ),
+			'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
 		) );
 
 		// Build form HTML

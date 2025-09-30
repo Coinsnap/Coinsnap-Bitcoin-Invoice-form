@@ -95,7 +95,7 @@ class BIF_Rest_Routes {
 		if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new \WP_REST_Response( array(
 				'success' => false,
-				'message' => __( 'Invalid nonce.', 'bif' ),
+				'message' => __( 'Invalid nonce.', 'coinsnap-bitcoin-invoice-form' ),
 			), 403 );
 		}
 
