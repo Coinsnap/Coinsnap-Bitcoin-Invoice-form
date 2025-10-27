@@ -24,6 +24,8 @@ Coinsnap Bitcoin Invoice Form works with Coinsnap or your own BTCPay Server.
 
 = Features & functions: =
 
+- Discounts: Enable fixed amount or percentage discounts per form. The discount is applied automatically to the invoice amount before the payment is created. You can also display a customizable customer-facing discount notice on the form; if left empty, a friendly default message is shown.
+
 = Quick setup: =
 
 = More information: =
@@ -37,7 +39,7 @@ Coinsnap Bitcoin Invoice Form works with Coinsnap or your own BTCPay Server.
 = Documentation: =
 
 * [Coinsnap API (1.0) documentation](https://docs.coinsnap.io/)
-* [Frequently Asked Questions](https://coinsnap.io/en/faq/) 
+* [Frequently Asked Questions](https://coinsnap.io/en/faq/)
 * [Terms and Conditions](https://coinsnap.io/en/general-terms-and-conditions/)
 * [Privacy Policy](https://coinsnap.io/en/privacy/)
 
@@ -56,7 +58,7 @@ Plugin's page on Coinsnap website: [https://coinsnap.io/coinsnap-bitcoin-invoice
 
 === Screenshots ===
 
- 
+
 === Changelog ===
 
 = 1.0.0 :: 2025-09-26 =

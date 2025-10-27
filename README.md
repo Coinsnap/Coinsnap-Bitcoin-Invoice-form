@@ -95,6 +95,30 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
    - **Label**: Customize field label
    - **Order**: Set field display order
 
+### Discounts
+
+1. Enable Discounts
+   - Go to Bitcoin Invoice Forms → Invoice Forms → Add New (or edit an existing form)
+   - In the Fields metabox, open the “Discount” section
+   - Check “Enable Discount”
+
+2. Choose Discount Type
+   - Fixed amount: subtracts an absolute value (e.g., 5.00) from the total
+   - Percentage: subtracts a percentage of the amount (e.g., 10%)
+
+3. Set Discount Amount
+   - Enter a positive value for the selected type
+   - The plugin guarantees the total never goes below zero
+
+4. Customer-facing Notice (Optional)
+   - Add your own message to be shown on the form when a discount is active
+   - If left empty, a friendly default message is auto-generated based on your type and amount
+   - The notice is sanitized and shown above the submit button
+
+5. How It’s Applied
+   - The discount is applied server-side before creating the invoice with your payment provider (CoinSnap/BTCPay)
+   - Currency handling follows the form/default settings; fixed discounts are in the selected currency
+
 ### Payment Settings
 
 1. **Payment Configuration**
