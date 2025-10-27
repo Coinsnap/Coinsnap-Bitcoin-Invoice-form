@@ -23,24 +23,24 @@
      */
     function handleFormSubmit(e) {
         e.preventDefault();
-        
+
         var form = $(this);
         var formId = form.data('form-id');
         var submitButton = form.find('.bif-button');
         var messagesContainer = form.find('.bif-form-messages');
-        
+
         // Validate form
         if (!validateForm(form)) {
             return;
         }
-        
+
         // Disable submit button and show loading state
         submitButton.prop('disabled', true).text('Processing...');
         messagesContainer.hide();
-        
+
         // Prepare form data
         var formData = new FormData(this);
-        
+
         // Submit form
         $.ajax({
             url: BIF.restUrl + 'payment/create',
@@ -78,11 +78,11 @@
     function validateForm(form) {
         var isValid = true;
         var requiredFields = form.find('[required]');
-        
+
         requiredFields.each(function() {
             var field = $(this);
             var value = field.val().trim();
-            
+
             if (!value) {
                 field.addClass('error');
                 isValid = false;
@@ -90,7 +90,7 @@
                 field.removeClass('error');
             }
         });
-        
+
         // Validate email field
         var emailField = form.find('input[type="email"]');
         if (emailField.length && emailField.val()) {
@@ -101,7 +101,7 @@
                 isValid = false;
             }
         }
-        
+
         return isValid;
     }
 
@@ -111,10 +111,10 @@
     function showFormError(form, message) {
         var messagesContainer = form.find('.bif-form-messages');
         var errorMessage = messagesContainer.find('.bif-message-error');
-        
+
         errorMessage.text(message).show();
         messagesContainer.show();
-        
+
         // Scroll to error message
         $('html, body').animate({
             scrollTop: messagesContainer.offset().top - 100
@@ -135,8 +135,8 @@
         modal.appendChild(iframe);
         backdrop.appendChild(modal);
         document.body.appendChild(backdrop);
-        backdrop.addEventListener('click', function(e) { 
-            if (e.target === backdrop) backdrop.style.display = 'none'; 
+        backdrop.addEventListener('click', function(e) {
+            if (e.target === backdrop) backdrop.style.display = 'none';
         });
         return { backdrop: backdrop, frame: iframe };
     }
@@ -147,12 +147,12 @@
     function showPaymentModal(formId, paymentData) {
         console.log('Invoice created:', paymentData.invoice_id);
         console.log('Payment URL:', paymentData.payment_url);
-        
+
         // Try inline modal for Coinsnap-compatible checkout link; otherwise redirect
         try {
             var modal = createModal();
             modal.frame.src = paymentData.payment_url;
-            
+
             // Set redirect data on the backdrop
             if (paymentData.success_page) {
                 modal.backdrop.dataset.successPage = paymentData.success_page;
@@ -160,7 +160,7 @@
             if (paymentData.thank_you_message) {
                 modal.backdrop.dataset.thankYouMessage = paymentData.thank_you_message;
             }
-            
+
             modal.backdrop.style.display = 'flex';
             console.log('Modal created, starting status polling...');
             startPaymentPolling(paymentData.invoice_id, modal);
@@ -178,19 +178,19 @@
         var maxTries = 60; // ~60s
         var verifyTries = 0;
         var maxVerifyTries = 3; // Try manual verification 3 times
-        
+
         function step() {
             // Check if modal is still open and polling should continue
             if (!modal.backdrop.pollingActive) {
                 console.log('Polling stopped - modal closed');
                 return;
             }
-            
+
             tries++;
             var statusUrl = BIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
-            
+
             console.log('Polling status for invoice:', invoiceId, 'attempt:', tries);
-            
+
             $.ajax({
                 url: statusUrl,
                 method: 'GET',
@@ -200,20 +200,20 @@
             })
             .done(function(response) {
                 console.log('Status response:', response);
-                
+
                 if (response && response.success && response.data && response.data.paid) {
                     console.log('Payment confirmed');
                     showPaymentSuccess(modal);
                     return;
                 }
-                
+
                 // If we've been polling for a while and still not paid, try manual verification
                 if (tries > 30 && verifyTries < maxVerifyTries) {
                     verifyTries++;
                     console.log('Trying manual payment verification, attempt:', verifyTries);
                     return verifyPayment();
                 }
-                
+
                 if (tries < maxTries) {
                     console.log('Payment not yet confirmed, retrying in 1s...');
                     setTimeout(step, 1000);
@@ -233,18 +233,18 @@
                 }
             });
         }
-        
+
         function verifyPayment() {
             // Check if modal is still open and polling should continue
             if (!modal.backdrop.pollingActive) {
                 console.log('Verification stopped - modal closed');
                 return;
             }
-            
+
             var verifyUrl = BIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
-            
+
             console.log('Attempting manual payment verification...');
-            
+
             $.ajax({
                 url: verifyUrl,
                 method: 'POST',
@@ -254,7 +254,7 @@
             })
             .done(function(response) {
                 console.log('Verification response:', response);
-                
+
                 if (response && response.success && response.data && response.data.paid) {
                     console.log('Payment verified manually');
                     showPaymentSuccess(modal);
@@ -273,10 +273,10 @@
                 }
             });
         }
-        
+
         // Start polling
         step();
-        
+
         // Store polling state for cleanup
         modal.backdrop.pollingActive = true;
     }
@@ -287,7 +287,7 @@
     function showPaymentSuccess(modal) {
         console.log('Payment successful, closing modal');
         modal.backdrop.style.display = 'none';
-        
+
         // Redirect after 2 seconds
         setTimeout(function() {
             var successPage = modal.backdrop.dataset.successPage;

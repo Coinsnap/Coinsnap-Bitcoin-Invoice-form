@@ -22,7 +22,7 @@ class BIF_Constants {
 	public const REST_ROUTE_WEBHOOK_BTCPAY   = '/webhook/btcpay';
 
 	/** CoinSnap endpoints (relative to API base). */
-	public const COINSNAP_DEFAULT_API_BASE      = 'https://api.coinsnap.io';
+	public const COINSNAP_DEFAULT_API_BASE      = 'https://app.coinsnap.io';
 	public const COINSNAP_INVOICES_ENDPOINT_V1  = '/api/v1/stores/%s/invoices';
 	public const COINSNAP_INVOICES_ENDPOINT_ALT = '/api/stores/%s/invoices';
 

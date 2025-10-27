@@ -25,7 +25,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 	public static function register(): void {
 		// Register the main shortcode name
 		add_shortcode( BIF_Constants::SHORTCODE_INVOICE_FORM, array( __CLASS__, 'render' ) );
-		
+
 		// Register the old shortcode name for backward compatibility
 		add_shortcode( 'bif_invoice_form', array( __CLASS__, 'render' ) );
 	}
@@ -127,7 +127,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 			);
 			$fields = wp_parse_args( $fields, $defaults );
-		}	
+		}
 
 		$payment = wp_parse_args( $payment, array(
 			'amount'     => '',
@@ -147,17 +147,12 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			$form_classes[] = $atts['class'];
 		}
 
-		$form_style = '';
-		if ( ! empty( $atts['style'] ) ) {
-			$form_style = ' style="' . esc_attr( $atts['style'] ) . '"';
-		}
-
 		ob_start();
 		?>
-		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php echo $form_style; ?> data-form-id="<?php echo esc_attr( $form_id ); ?>">
+		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php if ( ! empty( $atts['style'] ) ) { echo ' style="' . esc_attr( $atts['style'] ) . '"'; } ?> data-form-id="<?php echo esc_attr( $form_id ); ?>">
 			<?php wp_nonce_field( 'bif_invoice_form_' . $form_id, 'bif_form_nonce' ); ?>
 			<input type="hidden" name="form_id" value="<?php echo esc_attr( $form_id ); ?>" />
-			
+
 			<div class="bif-form-fields">
 				<?php
 				// Render enabled fields in order
@@ -213,7 +208,6 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 
 		$field_id = 'bif_' . $field;
 		$field_name = 'bif_' . $field;
-		$required_attr = $required ? ' required' : '';
 
 		echo '<div class="bif-field bif-field-' . esc_attr( $field ) . '">';
 		echo '<label for="' . esc_attr( $field_id ) . '">' . esc_html( $label );
@@ -222,28 +216,28 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 		}
 		echo '</label>';
 
-		switch ( $field ) {
-			case 'description':
-				echo '<textarea id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . $required_attr . ' rows="4"></textarea>';
-				break;
-			case 'amount':
-				echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . $required_attr . ' step="0.01" min="0" />';
-				break;
-			case 'currency':
-				echo '<select id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . $required_attr . '>';
-				$currencies = array( 'USD', 'EUR', 'CHF', 'JPY', 'SATS' );
-				foreach ( $currencies as $currency ) {
-					echo '<option value="' . esc_attr( $currency ) . '">' . esc_html( $currency ) . '</option>';
-				}
-				echo '</select>';
-				break;
-			case 'email':
-				echo '<input type="email" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . $required_attr . ' />';
-				break;
-			default:
-				echo '<input type="text" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . $required_attr . ' />';
-				break;
-		}
+			switch ( $field ) {
+				case 'description':
+					echo '<textarea id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' rows="4"></textarea>';
+					break;
+				case 'amount':
+					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' step="0.01" min="0" />';
+					break;
+				case 'currency':
+					echo '<select id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . '>';
+					$currencies = array( 'USD', 'EUR', 'CHF', 'JPY', 'SATS' );
+					foreach ( $currencies as $currency ) {
+						echo '<option value="' . esc_attr( $currency ) . '">' . esc_html( $currency ) . '</option>';
+					}
+					echo '</select>';
+					break;
+				case 'email':
+					echo '<input type="email" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' />';
+					break;
+				default:
+					echo '<input type="text" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' />';
+					break;
+			}
 
 		echo '</div>';
 	}

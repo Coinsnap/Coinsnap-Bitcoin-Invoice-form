@@ -93,10 +93,6 @@ class BIF_Logger {
 		// Write to file.
 		$result = self::write_to_file( $log_entry );
 
-		// Also log to WordPress error log if level is error or higher.
-		if ( in_array( $level, array( BIF_Log_Levels::ERROR, BIF_Log_Levels::CRITICAL, BIF_Log_Levels::ALERT, BIF_Log_Levels::EMERGENCY ), true ) ) {
-			error_log( "[BIF {$level}] {$message}" );
-		}
 
 		return $result;
 	}
@@ -215,6 +211,9 @@ class BIF_Logger {
 	 * Fallback log rotation using direct file operations.
 	 */
 	private static function maybe_rotate_log_fallback(): void {
+		// Ensure WordPress file helpers are available for wp_delete_file.
+		require_once ABSPATH . '/wp-admin/includes/file.php';
+
 		if ( ! file_exists( self::$log_file ) ) {
 			return;
 		}
@@ -231,16 +230,21 @@ class BIF_Logger {
 
 			if ( file_exists( $old_file ) ) {
 				if ( self::MAX_LOG_FILES - 1 === $i ) {
-					// Delete the oldest log file.
-					unlink( $old_file );
+					// Delete the oldest log file using WordPress helper.
+					wp_delete_file( $old_file );
 				} else {
-					rename( $old_file, $new_file );
+					// Fallback move: copy then delete to avoid rename().
+					if ( @copy( $old_file, $new_file ) ) {
+						wp_delete_file( $old_file );
+					}
 				}
 			}
 		}
 
-		// Move current log to .1.
-		rename( self::$log_file, self::$log_file . '.1' );
+		// Move current log to .1 using copy + delete.
+		if ( @copy( self::$log_file, self::$log_file . '.1' ) ) {
+			wp_delete_file( self::$log_file );
+		}
 	}
 
 	/**
@@ -367,7 +371,8 @@ class BIF_Logger {
 			if ( ! file_exists( self::$log_file ) ) {
 				return true;
 			}
-			return unlink( self::$log_file );
+			wp_delete_file( self::$log_file );
+			return ! file_exists( self::$log_file );
 		}
 
 		if ( ! $wp_filesystem->exists( self::$log_file ) ) {

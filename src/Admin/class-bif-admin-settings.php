@@ -36,7 +36,7 @@ class BIF_Admin_Settings {
 			'default_currency'        => 'USD',
 			'coinsnap_api_key'        => '',
 			'coinsnap_store_id'       => '',
-			'coinsnap_api_base'       => 'https://api.coinsnap.io',
+			'coinsnap_api_base'       => 'https://app.coinsnap.io',
 			'coinsnap_webhook_secret' => '',
 			'btcpay_host'             => '',
 			'btcpay_api_key'          => '',
@@ -288,28 +288,28 @@ class BIF_Admin_Settings {
 		echo '<h1>' . esc_html__( 'Bitcoin Invoice Form Settings', 'coinsnap-bitcoin-invoice-form' ) . '</h1>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'bif_settings_group' );
-		
+
 		// Render general settings section
 		echo '<div id="bif-general-settings">';
 		self::render_section( 'bif_general' );
 		echo '</div>';
-		
+
 		// Wrap payment provider settings in containers
 		echo '<div id="bif-payment-provider-settings">';
 		echo '<div id="bif-coinsnap-settings-wrapper" class="provider-settings">';
 		self::render_section( 'bif_coinsnap' );
 		echo '</div>';
-		
+
 		echo '<div id="bif-btcpay-settings-wrapper" class="provider-settings">';
 		self::render_section( 'bif_btcpay' );
 		echo '</div>';
 		echo '</div>';
-		
+
 		// Advanced Settings section
 		echo '<div id="bif-advanced-settings">';
 		self::render_section( 'bif_advanced' );
 		echo '</div>';
-		
+
 		submit_button();
 		echo '</form>';
 		echo '</div>';
@@ -322,7 +322,7 @@ class BIF_Admin_Settings {
 	 */
 	private static function render_section( string $section_id ): void {
 		global $wp_settings_sections, $wp_settings_fields;
-		
+
 		if ( ! isset( $wp_settings_sections['bif-settings'][ $section_id ] ) ) {
 			return;
 		}

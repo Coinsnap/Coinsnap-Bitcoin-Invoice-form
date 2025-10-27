@@ -36,7 +36,7 @@ class BIF_Services_Payment_Service {
 			// Validate form exists
 			$form = get_post( $form_id );
 			$valid_post_types = array( 'bif_invoice_form', 'coinsnap_invoice_form' );
-		if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
+			if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
 				return array(
 					'success' => false,
 					'message' => __( 'Invalid form ID.', 'coinsnap-bitcoin-invoice-form' ),
@@ -79,7 +79,7 @@ class BIF_Services_Payment_Service {
 
 			// Get currency - prioritize user selection over form default
 			$currency = 'USD'; // Default fallback
-			
+
 			// First check if user selected a currency
 			if ( ! empty( $data['bif_currency'] ) ) {
 				$currency = sanitize_text_field( $data['bif_currency'] );
@@ -106,7 +106,7 @@ class BIF_Services_Payment_Service {
 
 			// Create payment provider
 			$payment_provider = BIF_Util_Provider_Factory::payment_for_form( $form_id );
-			
+
 
 			// Create invoice with payment provider
 			$payment_result = $payment_provider->create_invoice( $form_id, $amount_cents, $currency, $invoice_data );
@@ -125,6 +125,14 @@ class BIF_Services_Payment_Service {
 
 			// Save transaction to database
 			$table_name = Installer::table_name();
+
+			// Get and sanitize user agent
+			$user_agent = '';
+			if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+				$user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+			}
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Insert via $wpdb is appropriate here to persist transaction data.
 			$insert_result = $wpdb->insert(
 				$table_name,
 				array(
@@ -142,7 +150,7 @@ class BIF_Services_Payment_Service {
 					'payment_url'        => $payment_result['payment_url'] ?? '',
 					'payment_status'     => 'unpaid',
 					'ip'                 => self::get_client_ip(),
-					'user_agent'         => sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ?? '' ),
+					'user_agent'         => $user_agent,
 					'created_at'         => current_time( 'mysql' ),
 					'updated_at'         => current_time( 'mysql' ),
 				),
@@ -240,6 +248,7 @@ class BIF_Services_Payment_Service {
 
 			// Update transaction status
 			$table_name = Installer::table_name();
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Update via $wpdb is appropriate here to set status.
 			$update_result = $wpdb->update(
 				$table_name,
 				array(
@@ -302,10 +311,15 @@ class BIF_Services_Payment_Service {
 		try {
 			// Get transaction from database
 			$table_name = Installer::table_name();
-			$transaction = $wpdb->get_row( $wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
-				$invoice_id
-			) );
+
+			// Properly prepare query inline
+			$transaction = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
+					$invoice_id
+				)
+			);
+
 
 			if ( ! $transaction ) {
 				return array(
@@ -332,6 +346,7 @@ class BIF_Services_Payment_Service {
 
 			if ( ! empty( $status_result ) && $status_result['paid'] ) {
 				// Update status in database
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Update via $wpdb is appropriate here after status check.
 				$wpdb->update(
 					$table_name,
 					array(
@@ -381,10 +396,15 @@ class BIF_Services_Payment_Service {
 
 		// Get transaction details
 		$table_name = Installer::table_name();
-		$transaction = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
-			$invoice_id
-		) );
+
+		// Properly prepare query inline
+		$transaction = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
+				$invoice_id
+			)
+		);
+
 
 		if ( ! $transaction ) {
 			return;
@@ -443,9 +463,13 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 	 */
 	private static function get_client_ip(): string {
 		$ip_keys = array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' );
+
 		foreach ( $ip_keys as $key ) {
-			if ( array_key_exists( $key, $_SERVER ) === true ) {
-				foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
+			if ( isset( $_SERVER[ $key ] ) ) {
+				// Unslash and sanitize the server variable
+				$ip_string = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
+
+				foreach ( explode( ',', $ip_string ) as $ip ) {
 					$ip = trim( $ip );
 					if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) !== false ) {
 						return $ip;
@@ -453,6 +477,12 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 				}
 			}
 		}
-		return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+		// Return sanitized REMOTE_ADDR or fallback
+		if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		}
+
+		return '0.0.0.0';
 	}
 }
