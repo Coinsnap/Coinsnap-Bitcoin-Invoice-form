@@ -92,6 +92,10 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
 				'description_order'   => '60',
 				'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
+				'discount_enabled'    => '0',
+				'discount_type'       => 'fixed',
+				'discount_value'      => '0',
+				'discount_notice'     => '',
 			);
 		} else {
 			// Merge with defaults to ensure all keys exist
@@ -125,6 +129,10 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
 				'description_order'   => '60',
 				'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
+				'discount_enabled'    => '0',
+				'discount_type'       => 'fixed',
+				'discount_value'      => '0',
+				'discount_notice'     => '',
 			);
 			$fields = wp_parse_args( $fields, $defaults );
 		}
@@ -171,6 +179,29 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				}
 				?>
 			</div>
+
+			<?php
+			$disc_enabled_val = $fields['discount_enabled'] ?? '0';
+			$disc_enabled = ( '1' === $disc_enabled_val || 'on' === $disc_enabled_val || true === $disc_enabled_val );
+			$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
+			if ( $disc_enabled && $disc_value > 0 ) {
+				$custom_notice = trim( (string) ( $fields['discount_notice'] ?? '' ) );
+				if ( '' !== $custom_notice ) {
+					$msg = $custom_notice;
+				} else {
+					$disc_type = $fields['discount_type'] ?? 'fixed';
+					$val_str = rtrim( rtrim( number_format( $disc_value, 2, '.', '' ), '0' ), '.' );
+					if ( 'percent' === $disc_type ) {
+						/* translators: %s is the discount percentage value (without the percent sign). */
+						$msg = sprintf( __( 'Good news! A discount of %s%% will be applied to the amount at checkout.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
+					} else {
+						/* translators: %s is the fixed discount amount in the selected currency. */
+						$msg = sprintf( __( 'Good news! A fixed discount of %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
+					}
+				}
+				echo '<div class="bif-discount-notice" style="margin:10px 0 0;padding:10px;border:1px dashed #39a; background:#f3fbff; color:#124; border-radius:4px; font-size:14px;">' . esc_html( $msg ) . '</div>';
+			}
+			?>
 
 			<div class="bif-form-actions">
 				<button type="submit" class="bif-button">

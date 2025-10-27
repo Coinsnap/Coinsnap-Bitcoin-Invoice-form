@@ -74,6 +74,24 @@ class BIF_Services_Payment_Service {
 				);
 			}
 
+			// Apply discount if configured on the form
+			$discount_enabled = $fields['discount_enabled'] ?? '0';
+			if ( '1' === $discount_enabled || 'on' === $discount_enabled ) {
+				$discount_type  = $fields['discount_type'] ?? 'fixed';
+				$discount_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
+				if ( $discount_value > 0 ) {
+					if ( 'percent' === $discount_type ) {
+						$amount = $amount - ( $amount * ( $discount_value / 100 ) );
+					} else { // fixed
+						$amount = $amount - $discount_value;
+					}
+					// Ensure amount doesn't go below zero
+					if ( $amount < 0 ) {
+						$amount = 0;
+					}
+				}
+			}
+
 			// Convert amount to smallest currency unit (e.g., cents for USD)
 			$amount_cents = intval( round( $amount * 100 ) );
 

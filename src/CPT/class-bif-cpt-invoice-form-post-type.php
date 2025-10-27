@@ -104,6 +104,10 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
 			'description_order'   => '60',
 			'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
+			'discount_enabled'    => '0',
+			'discount_type'       => 'fixed',
+			'discount_value'      => '0',
+			'discount_notice'     => '',
 		);
 
 		$values = get_post_meta( $post->ID, '_bif_fields', true );
@@ -142,6 +146,34 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		echo '<p class="description" style="margin:8px 0 0 0;color:#666;font-size:13px;">' . esc_html__( 'Customize the text displayed on the submit button.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		echo '</div>';
 
+		// Discount settings
+		echo '<fieldset class="bif-discount-config" style="border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:4px;background:#fafafa;">';
+		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html__( 'Discount', 'coinsnap-bitcoin-invoice-form' ) . '</legend>';
+		echo '<div class="bif-field-options" style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;margin-top:10px;">';
+		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
+		echo '<input type="checkbox" name="bif_fields[discount_enabled]" value="1" ' . checked( '1', $values['discount_enabled'] ?? '0', false ) . ' id="discount_enabled" />';
+		echo '<label for="discount_enabled" style="margin:0;font-weight:500;">' . esc_html__( 'Enable Discount', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
+		echo '</div>';
+		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
+		echo '<label for="discount_type" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Type', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
+		echo '<select name="bif_fields[discount_type]" id="discount_type" style="min-width:120px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;">';
+		echo '<option value="fixed" ' . selected( 'fixed', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Fixed amount', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
+		echo '<option value="percent" ' . selected( 'percent', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Percentage', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
+		echo '</select>';
+		echo '</div>';
+		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
+		echo '<label for="discount_value" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Amount', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
+		echo '<input type="number" step="0.01" min="0" name="bif_fields[discount_value]" value="' . esc_attr( $values['discount_value'] ?? '0' ) . '" id="discount_value" style="width:120px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;" />';
+		echo '</div>';
+		echo '</div>';
+		echo '<div class="bif-option-group" style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">';
+		echo '<label for="discount_notice" style="margin:0;font-weight:500;">' . esc_html__( 'Customer-facing discount notice (optional)', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
+		echo '<textarea id="discount_notice" name="bif_fields[discount_notice]" style="width:100%;min-height:60px;padding:6px 8px;border:1px solid #ccc;border-radius:3px;">' . esc_textarea( $values['discount_notice'] ?? '' ) . '</textarea>';
+		echo '<p class="description" style="margin:0;color:#666;font-size:13px;">' . esc_html__( 'Shown on the form when discount is enabled. Leave empty to use the automatic default message.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
+		echo '</div>';
+		echo '<p class="description" style="margin:8px 0 0 0;color:#666;font-size:13px;">' . esc_html__( 'If enabled, the discount will be applied to the invoice amount before creating the payment. Use percentage for relative discounts (e.g., 10%) or fixed amount for absolute discounts (e.g., 5.00).', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
+		echo '</fieldset>';
+
 		echo '</div>';
 	}
 
@@ -167,16 +199,16 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 		echo '<fieldset class="bif-field-config" style="border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:4px;background:#fafafa;">';
 		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html( ucwords( str_replace( '_', ' ', $field_name ) ) ) . '</legend>';
-		
+
 		echo '<div class="bif-field-options" style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;margin-top:10px;">';
-		
+
 		// Only show enabled checkbox for non-core fields
 		if ( ! in_array( $field_name, $core_required_fields, true ) ) {
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" name="bif_fields[' . esc_attr( $enabled_key ) . ']" value="1" ' . checked( '1', $enabled, false ) . ' id="' . esc_attr( $enabled_key ) . '" />';
 			echo '<label for="' . esc_attr( $enabled_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Enabled', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
 			echo '</div>';
-			
+
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" name="bif_fields[' . esc_attr( $required_key ) . ']" value="1" ' . checked( '1', $required, false ) . ' id="' . esc_attr( $required_key ) . '" />';
 			echo '<label for="' . esc_attr( $required_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Required', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
@@ -187,23 +219,23 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
 			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Enabled', 'coinsnap-bitcoin-invoice-form' ) . ' <em>(' . esc_html__( 'always', 'coinsnap-bitcoin-invoice-form' ) . ')</em></label>';
 			echo '</div>';
-			
+
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
 			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Required', 'coinsnap-bitcoin-invoice-form' ) . ' <em>(' . esc_html__( 'always', 'coinsnap-bitcoin-invoice-form' ) . ')</em></label>';
 			echo '</div>';
 		}
-		
+
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
 		echo '<label for="' . esc_attr( $label_key ) . '" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Label', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
 		echo '<input type="text" name="bif_fields[' . esc_attr( $label_key ) . ']" value="' . esc_attr( $label ) . '" id="' . esc_attr( $label_key ) . '" style="min-width:150px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;" />';
 		echo '</div>';
-		
+
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
 		echo '<label for="' . esc_attr( $order_key ) . '" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Order', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
 		echo '<input type="number" name="bif_fields[' . esc_attr( $order_key ) . ']" value="' . esc_attr( $order ) . '" id="' . esc_attr( $order_key ) . '" style="width:80px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;" min="0" max="999" />';
 		echo '</div>';
-		
+
 		echo '</div>';
 		echo '</fieldset>';
 	}
@@ -355,16 +387,16 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		// Save fields
 		if ( isset( $_POST['bif_fields'] ) ) {
 			$fields = array_map( 'sanitize_text_field', wp_unslash( $_POST['bif_fields'] ) );
-			
+
 			// Core fields that are always required
 			$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'description', 'email' );
-			
+
 			// Ensure checkbox values are properly set (unchecked checkboxes don't send values)
 			$field_names = array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' );
 			foreach ( $field_names as $field_name ) {
 				$enabled_key = $field_name . '_enabled';
 				$required_key = $field_name . '_required';
-				
+
 				// Set to '0' if not present (unchecked checkbox)
 				if ( ! isset( $fields[ $enabled_key ] ) ) {
 					$fields[ $enabled_key ] = '0';
@@ -372,14 +404,21 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 				if ( ! isset( $fields[ $required_key ] ) ) {
 					$fields[ $required_key ] = '0';
 				}
-				
+
 				// Force core fields to always be enabled and required
 				if ( in_array( $field_name, $core_required_fields, true ) ) {
 					$fields[ $enabled_key ] = '1';
 					$fields[ $required_key ] = '1';
 				}
 			}
-			
+
+			// Handle discount settings
+			if ( ! isset( $fields['discount_enabled'] ) ) {
+				$fields['discount_enabled'] = '0';
+			}
+			$fields['discount_type'] = in_array( $fields['discount_type'] ?? 'fixed', array( 'fixed', 'percent' ), true ) ? $fields['discount_type'] : 'fixed';
+			$fields['discount_value'] = isset( $fields['discount_value'] ) ? (string) max( 0, floatval( $fields['discount_value'] ) ) : '0';
+
 			update_post_meta( $post_id, '_bif_fields', $fields );
 		}
 
