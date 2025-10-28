@@ -38,8 +38,10 @@ class BTCPayProvider implements PaymentProviderInterface {
 			return array();
 		}
 		$url     = $host . sprintf( BIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
+		// Adjust amount for SATS currency: service passes minor units (x100); BTCPay expects whole sats.
+		$api_amount = $currency === 'SATS' ? $amount / 100 : $amount;
 		$payload = array(
-			'amount'   => (string) $amount,
+			'amount'   => (string) $api_amount,
 			'currency' => $currency,
 			'metadata' => array(
 				'form_id' => $form_id,
@@ -103,7 +105,7 @@ class BTCPayProvider implements PaymentProviderInterface {
 		$host    = rtrim( (string) $s['btcpay_host'], '/' );
 		$api_key = (string) $s['btcpay_api_key'];
 		$store   = (string) $s['btcpay_store_id'];
-		
+
 		if ( ! $host || ! $api_key || ! $store ) {
 			return array(
 				'invoice_id' => $invoice_id,
@@ -112,7 +114,7 @@ class BTCPayProvider implements PaymentProviderInterface {
 				'metadata'   => array( 'error' => 'Missing API credentials' ),
 			);
 		}
-		
+
 		$url = $host . sprintf( '/api/v1/stores/%s/invoices/%s', rawurlencode( $store ), rawurlencode( $invoice_id ) );
 		$args = array(
 			'method'  => 'GET',
@@ -122,10 +124,10 @@ class BTCPayProvider implements PaymentProviderInterface {
 			),
 			'timeout' => 20,
 		);
-		
+
 		$res = wp_remote_request( $url, $args );
 		do_action( 'wpbn_btcpay_response', $res, 0 );
-		
+
 		if ( is_wp_error( $res ) ) {
 			return array(
 				'invoice_id' => $invoice_id,
@@ -134,14 +136,14 @@ class BTCPayProvider implements PaymentProviderInterface {
 				'metadata'   => array( 'error' => $res->get_error_message() ),
 			);
 		}
-		
+
 		$code = wp_remote_retrieve_response_code( $res );
 		$body = json_decode( wp_remote_retrieve_body( $res ), true );
-		
+
 		if ( $code >= 200 && $code < 300 && is_array( $body ) ) {
 			$status = isset( $body['status'] ) ? (string) $body['status'] : 'unknown';
 			$paid   = in_array( $status, array( 'Settled', 'Paid', 'Complete' ), true );
-			
+
 			return array(
 				'invoice_id' => $invoice_id,
 				'paid'       => $paid,
@@ -149,7 +151,7 @@ class BTCPayProvider implements PaymentProviderInterface {
 				'metadata'   => $body,
 			);
 		}
-		
+
 		return array(
 			'invoice_id' => $invoice_id,
 			'paid'       => false,

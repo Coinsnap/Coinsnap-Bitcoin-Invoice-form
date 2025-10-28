@@ -140,26 +140,26 @@ class BIF_Admin_Settings {
 			'bif-settings',
 			'bif_coinsnap'
 		);
-		add_settings_field(
-			'coinsnap_api_base',
-			__( 'Coinsnap API Base URL', 'coinsnap-bitcoin-invoice-form' ),
-			function () {
-				$s = self::get_settings();
-				echo '<input type="url" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_api_base]" value="' . esc_attr( $s['coinsnap_api_base'] ) . '" />';
-			},
-			'bif-settings',
-			'bif_coinsnap'
-		);
-		add_settings_field(
-			'coinsnap_webhook_secret',
-			__( 'Coinsnap Webhook Secret', 'coinsnap-bitcoin-invoice-form' ),
-			function () {
-				$s = self::get_settings();
-				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_webhook_secret]" value="' . esc_attr( $s['coinsnap_webhook_secret'] ) . '" />';
-			},
-			'bif-settings',
-			'bif_coinsnap'
-		);
+//		add_settings_field(
+//			'coinsnap_api_base',
+//			__( 'Coinsnap API Base URL', 'coinsnap-bitcoin-invoice-form' ),
+//			function () {
+//				$s = self::get_settings();
+//				echo '<input type="url" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_api_base]" value="' . esc_attr( $s['coinsnap_api_base'] ) . '" />';
+//			},
+//			'bif-settings',
+//			'bif_coinsnap'
+//		);
+//		add_settings_field(
+//			'coinsnap_webhook_secret',
+//			__( 'Coinsnap Webhook Secret', 'coinsnap-bitcoin-invoice-form' ),
+//			function () {
+//				$s = self::get_settings();
+//				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_webhook_secret]" value="' . esc_attr( $s['coinsnap_webhook_secret'] ) . '" />';
+//			},
+//			'bif-settings',
+//			'bif_coinsnap'
+//		);
 
 		add_settings_section( 'bif_btcpay', __( 'BTCPay Server', 'coinsnap-bitcoin-invoice-form' ), function () {
 			echo '<p class="description">' . esc_html__( 'Configure BTCPay Server settings. These fields are only relevant when BTCPay Server is selected as the payment provider.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
@@ -194,16 +194,16 @@ class BIF_Admin_Settings {
 			'bif-settings',
 			'bif_btcpay'
 		);
-		add_settings_field(
-			'btcpay_webhook_secret',
-			__( 'BTCPay Webhook Secret', 'coinsnap-bitcoin-invoice-form' ),
-			function () {
-				$s = self::get_settings();
-				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[btcpay_webhook_secret]" value="' . esc_attr( $s['btcpay_webhook_secret'] ) . '" />';
-			},
-			'bif-settings',
-			'bif_btcpay'
-		);
+//		add_settings_field(
+//			'btcpay_webhook_secret',
+//			__( 'BTCPay Webhook Secret', 'coinsnap-bitcoin-invoice-form' ),
+//			function () {
+//				$s = self::get_settings();
+//				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[btcpay_webhook_secret]" value="' . esc_attr( $s['btcpay_webhook_secret'] ) . '" />';
+//			},
+//			'bif-settings',
+//			'bif_btcpay'
+//		);
 
 		add_settings_section( 'bif_advanced', __( 'Advanced', 'coinsnap-bitcoin-invoice-form' ), function () {
 			echo '<p class="description">' . esc_html__( 'Advanced configuration options.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
