@@ -38,8 +38,10 @@ class BTCPayProvider implements PaymentProviderInterface {
 			return array();
 		}
 		$url     = $host . sprintf( BIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
-		// Adjust amount for SATS currency: service passes minor units (x100); BTCPay expects whole sats.
-		$api_amount = $currency === 'SATS' ? $amount / 100 : $amount;
+		// Convert from minor units to BTCPay expected units.
+		// Our service stores amounts in minor units (e.g., cents for fiat, centisats for SATS).
+		// BTCPay expects major units for fiat (e.g., USD) and whole sats for SATS.
+		$api_amount = $amount / 100;
 		$payload = array(
 			'amount'   => (string) $api_amount,
 			'currency' => $currency,
