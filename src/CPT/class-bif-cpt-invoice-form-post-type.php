@@ -98,7 +98,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'currency_enabled'    => '1',
 			'currency_required'   => '1',
 			'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
-			'currency_order'      => '45',
+			'currency_order'      => '55',
 			'description_enabled' => '1',
 			'description_required' => '1',
 			'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
@@ -195,7 +195,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$order    = $values[ $order_key ] ?? '10';
 
 		// Core fields that are always required and don't need enabled/required checkboxes
-		$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'description', 'email' );
+		$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
 
 		echo '<fieldset class="bif-field-config" style="border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:4px;background:#fafafa;">';
 		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html( ucwords( str_replace( '_', ' ', $field_name ) ) ) . '</legend>';
@@ -389,7 +389,7 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			$fields = array_map( 'sanitize_text_field', wp_unslash( $_POST['bif_fields'] ) );
 
 			// Core fields that are always required
-			$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'description', 'email' );
+			$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
 
 			// Ensure checkbox values are properly set (unchecked checkboxes don't send values)
 			$field_names = array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' );
