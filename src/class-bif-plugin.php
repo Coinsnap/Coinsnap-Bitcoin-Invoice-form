@@ -89,13 +89,6 @@ class BIF_Plugin {
 			array( TransactionsPage::class, 'render_page' )
 		);
 
-		add_submenu_page(
-			'bif-transactions',
-			__( 'Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
-			__( 'Invoice Forms', 'coinsnap-bitcoin-invoice-form' ),
-			'manage_options',
-			'edit.php?post_type=' . BIF_Constants::CPT_INVOICE_FORM
-		);
 
 		add_submenu_page(
 			'bif-transactions',
