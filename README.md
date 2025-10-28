@@ -47,7 +47,7 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 2. **General Settings**
    - **Default Payment Gateway**: Choose between CoinSnap or BTCPay Server
    - **Default Amount**: Set default invoice amount
-   - **Default Currency**: Choose default currency (USD, EUR, CHF, JPY, SATS)
+   - [Removed] Default Currency: Currency is now configured per form in each Invoice Form’s Payment settings.
 
 ### Payment Gateway Setup
 

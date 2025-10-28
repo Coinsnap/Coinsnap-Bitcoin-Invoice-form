@@ -16,6 +16,11 @@
     function initInvoiceForms() {
         // Handle form submissions
         $('.bif-form').on('submit', handleFormSubmit);
+
+        // Setup live discount calculation if applicable
+        $('.bif-form').each(function() {
+            setupLiveDiscount($(this));
+        });
     }
 
     /**
@@ -274,11 +279,9 @@
             });
         }
 
-        // Start polling
-        step();
-
-        // Store polling state for cleanup
+        // Store polling state for cleanup and start polling
         modal.backdrop.pollingActive = true;
+        step();
     }
 
     /**
@@ -337,6 +340,78 @@
      */
     function hideLoading(element) {
         element.removeClass('bif-loading');
+    }
+
+    /**
+     * Setup live discount calculation
+     */
+    function setupLiveDiscount(form) {
+        var amountInput = form.find('#bif_amount');
+        if (!amountInput.length) return;
+        var hasDiscount = amountInput.data('discount-enabled') === 1 || amountInput.data('discount-enabled') === '1';
+        if (!hasDiscount) return;
+
+        var finalField = form.find('.bif-amount-final');
+        var currencySelect = form.find('#bif_currency');
+        var formCurrency = form.data('currency') || 'USD';
+        var discType = amountInput.data('discount-type') || 'fixed';
+        var discValue = parseFloat(amountInput.data('discount-value')) || 0;
+
+        function parseLocaleAmount(val) {
+            if (val == null) return 0;
+            var s = String(val).trim();
+            if (s === '') return 0;
+            var hasComma = s.indexOf(',') !== -1;
+            var hasDot = s.indexOf('.') !== -1;
+            if (hasComma && hasDot) {
+                var lastComma = s.lastIndexOf(',');
+                var lastDot = s.lastIndexOf('.');
+                if (lastComma > lastDot) {
+                    s = s.replace(/\./g, '');
+                    s = s.replace(',', '.');
+                } else {
+                    s = s.replace(/,/g, '');
+                }
+            } else if (hasComma && !hasDot) {
+                s = s.replace(/,/g, '.');
+            } else {
+                s = s.replace(/,/g, '');
+            }
+            var n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function computeFinal(base, type, value) {
+            var amt = base;
+            if (value > 0) {
+                if (type === 'percent') {
+                    amt = amt - (amt * (value / 100));
+                } else {
+                    amt = amt - value;
+                }
+            }
+            if (amt < 0) amt = 0;
+            return amt;
+        }
+
+        function decimalsFor(currency) {
+            return currency === 'SATS' ? 0 : 2;
+        }
+
+        function updateFinal() {
+            if (!finalField.length) return;
+            var currency = currencySelect.length ? currencySelect.val() : formCurrency;
+            var base = parseLocaleAmount(amountInput.val());
+            var finalAmt = computeFinal(base, discType, discValue);
+            var dec = decimalsFor(currency);
+            // Format value with fixed decimals (no currency symbol to keep it simple)
+            finalField.val(finalAmt.toFixed(dec));
+        }
+
+        amountInput.on('input change', updateFinal);
+        currencySelect.on('change', updateFinal);
+        // Initial calc
+        updateFinal();
     }
 
     // Expose functions globally for external use

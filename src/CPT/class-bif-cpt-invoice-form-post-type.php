@@ -98,7 +98,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'currency_enabled'    => '1',
 			'currency_required'   => '1',
 			'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
-			'currency_order'      => '55',
+			'currency_order'      => '45',
 			'description_enabled' => '1',
 			'description_required' => '1',
 			'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
@@ -267,7 +267,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		echo '<p><label for="amount">' . esc_html__( 'Default Amount', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="number" id="amount" name="bif_payment[amount]" value="' . esc_attr( $values['amount'] ) . '" style="width:100%;" step="0.01" min="0" />';
 
-		echo '<p><label for="currency">' . esc_html__( 'Currency', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
+		echo '<p><label for="currency">' . esc_html__( 'Currency (per form)', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<select id="currency" name="bif_payment[currency]" style="width:100%;">';
 		echo '<option value="USD" ' . selected( $values['currency'], 'USD', false ) . '>USD</option>';
 		echo '<option value="EUR" ' . selected( $values['currency'], 'EUR', false ) . '>EUR</option>';

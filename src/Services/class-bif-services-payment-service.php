@@ -56,15 +56,43 @@ class BIF_Services_Payment_Service {
 				'description' => '',
 			) );
 
-			// Calculate amount
-			$amount = 0;
-			if ( ! empty( $data['bif_amount'] ) ) {
-				$amount = floatval( $data['bif_amount'] );
+			// Calculate amount with locale-aware normalization (supports comma or dot decimals)
+			$amount = 0.0;
+			$raw_amount = '';
+			if ( isset( $data['bif_amount'] ) && $data['bif_amount'] !== '' ) {
+				$raw_amount = (string) $data['bif_amount'];
 			} elseif ( ! empty( $payment_config['amount'] ) ) {
-				$amount = floatval( $payment_config['amount'] );
+				$raw_amount = (string) $payment_config['amount'];
 			} else {
 				$settings = BIF_Admin_Settings::get_settings();
-				$amount = floatval( $settings['default_amount'] );
+				$raw_amount = (string) ( $settings['default_amount'] ?? '' );
+			}
+
+			$raw_amount = trim( (string) $raw_amount );
+			if ( $raw_amount !== '' ) {
+				// Detect decimal separator and remove thousands separators safely
+				$has_comma = strpos( $raw_amount, ',' ) !== false;
+				$has_dot   = strpos( $raw_amount, '.' ) !== false;
+				if ( $has_comma && $has_dot ) {
+					// Determine which appears last; treat that as decimal
+					$last_comma = strrpos( $raw_amount, ',' );
+					$last_dot   = strrpos( $raw_amount, '.' );
+					if ( $last_comma > $last_dot ) {
+						// European style: 1.234,56 → remove dots, replace comma with dot
+						$normalized = str_replace( '.', '', $raw_amount );
+						$normalized = str_replace( ',', '.', $normalized );
+					} else {
+						// US style: 1,234.56 → remove commas
+						$normalized = str_replace( ',', '', $raw_amount );
+					}
+				} elseif ( $has_comma && ! $has_dot ) {
+					// Only comma present: treat as decimal separator
+					$normalized = str_replace( ',', '.', $raw_amount );
+				} else {
+					// Only dot or neither: remove any stray spaces and commas
+					$normalized = str_replace( ',', '', $raw_amount );
+				}
+				$amount = (float) $normalized;
 			}
 
 			if ( $amount <= 0 ) {
@@ -95,19 +123,11 @@ class BIF_Services_Payment_Service {
 			// Convert amount to smallest currency unit (e.g., cents for USD)
 			$amount_cents = intval( round( $amount * 100 ) );
 
-			// Get currency - prioritize user selection over form default
-			$currency = 'USD'; // Default fallback
-
-			// First check if user selected a currency
-			if ( ! empty( $data['bif_currency'] ) ) {
-				$currency = sanitize_text_field( $data['bif_currency'] );
-			} elseif ( ! empty( $payment_config['currency'] ) ) {
-				// Fall back to form's default currency
+			// Get currency strictly from form configuration (end user cannot change it)
+			if ( ! empty( $payment_config['currency'] ) ) {
 				$currency = $payment_config['currency'];
 			} else {
-				// Fall back to global settings
-				$settings = BIF_Admin_Settings::get_settings();
-				$currency = $settings['default_currency'] ?? 'USD';
+				$currency = 'USD'; // Fallback if not configured on form
 			}
 
 			// Generate transaction ID

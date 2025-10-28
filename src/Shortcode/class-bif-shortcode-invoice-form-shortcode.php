@@ -86,7 +86,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
 				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
-				'currency_order'      => '55',
+				'currency_order'      => '45',
 				'description_enabled' => '1',
 				'description_required' => '1',
 				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
@@ -123,7 +123,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
 				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
-				'currency_order'      => '55',
+				'currency_order'      => '45',
 				'description_enabled' => '1',
 				'description_required' => '1',
 				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
@@ -139,7 +139,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 
 		$payment = wp_parse_args( $payment, array(
 			'amount'     => '',
-			'currency'   => 'USD',
+			'currency'   => '',
 			'description' => '',
 		) );
 
@@ -149,6 +149,11 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
 		) );
 
+		// Determine default currency for the form UI: use per-form payment setting, fallback to USD
+		$current_currency = ! empty( $payment['currency'] ) ? (string) $payment['currency'] : 'USD';
+		// Pass to renderer via internal key
+		$fields['_currency_default'] = $current_currency;
+
 		// Build form HTML
 		$form_classes = array( 'bif-form', 'bif-form-' . $form_id );
 		if ( ! empty( $atts['class'] ) ) {
@@ -157,7 +162,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 
 		ob_start();
 		?>
-		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php if ( ! empty( $atts['style'] ) ) { echo ' style="' . esc_attr( $atts['style'] ) . '"'; } ?> data-form-id="<?php echo esc_attr( $form_id ); ?>">
+		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php if ( ! empty( $atts['style'] ) ) { echo ' style="' . esc_attr( $atts['style'] ) . '"'; } ?> data-form-id="<?php echo esc_attr( $form_id ); ?>" data-currency="<?php echo esc_attr( $current_currency ); ?>">
 			<?php wp_nonce_field( 'bif_invoice_form_' . $form_id, 'bif_form_nonce' ); ?>
 			<input type="hidden" name="form_id" value="<?php echo esc_attr( $form_id ); ?>" />
 
@@ -165,7 +170,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				<?php
 				// Render enabled fields in order
 				$field_order = array();
-				foreach ( array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' ) as $field ) {
+				foreach ( array( 'name', 'email', 'company', 'invoice_number', 'currency', 'amount', 'description' ) as $field ) {
 					$enabled = $fields[ $field . '_enabled' ] ?? '0';
 					if ( '1' === $enabled || 'on' === $enabled || true === $enabled ) {
 						$order = intval( $fields[ $field . '_order' ] ?? '10' );
@@ -252,15 +257,27 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 					echo '<textarea id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' rows="4"></textarea>';
 					break;
 				case 'amount':
-					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' step="0.01" min="0" />';
+					$disc_enabled_val = $fields['discount_enabled'] ?? '0';
+					$disc_enabled = ( '1' === $disc_enabled_val || 'on' === $disc_enabled_val || true === $disc_enabled_val );
+					$disc_type = $fields['discount_type'] ?? 'fixed';
+					$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
+					$step_attr = ' step="0.01"';
+					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . $step_attr . ' min="0"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
+					if ( $disc_enabled && $disc_value > 0 ) {
+						// Render a readonly final amount field next to the amount
+						$final_id = $field_id . '_final';
+						echo '<div class="bif-final-amount" style="margin-top:6px; display:flex; gap:8px; align-items:center;">';
+						echo '<label for="' . esc_attr( $final_id ) . '" style="margin:0; font-size:12px; color:#555;">' . esc_html__( 'Final amount (after discount)', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
+						echo '<input type="text" id="' . esc_attr( $final_id ) . '" class="bif-amount-final" value="" readonly style="max-width:160px; background:#f8f8f8;" aria-readonly="true" />';
+						echo '</div>';
+					}
 					break;
 				case 'currency':
-					echo '<select id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . '>';
-					$currencies = array( 'USD', 'EUR', 'CHF', 'JPY', 'SATS' );
-					foreach ( $currencies as $currency ) {
-						echo '<option value="' . esc_attr( $currency ) . '">' . esc_html( $currency ) . '</option>';
-					}
-					echo '</select>';
+					$selected_currency = $fields['_currency_default'] ?? 'USD';
+					// Display the currency as read-only to the user; do not allow changing it on the frontend.
+					// Include a hidden input for compatibility, but backend enforces form-configured currency regardless.
+					echo '<input type="hidden" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $selected_currency ) . '" />';
+					echo '<input type="text" id="' . esc_attr( $field_id ) . '_display" value="' . esc_attr( $selected_currency ) . '" readonly disabled style="background:#f8f8f8; color:#333; max-width:120px;" aria-readonly="true" />';
 					break;
 				case 'email':
 					echo '<input type="email" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' />';

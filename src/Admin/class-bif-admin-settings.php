@@ -33,7 +33,6 @@ class BIF_Admin_Settings {
 		$defaults = array(
 			'payment_provider'        => 'coinsnap',
 			'default_amount'          => 0,
-			'default_currency'        => 'USD',
 			'coinsnap_api_key'        => '',
 			'coinsnap_store_id'       => '',
 			'coinsnap_api_base'       => 'https://app.coinsnap.io',
@@ -102,20 +101,6 @@ class BIF_Admin_Settings {
 			'bif_general'
 		);
 
-		add_settings_field(
-			'default_currency',
-			__( 'Default Currency', 'coinsnap-bitcoin-invoice-form' ),
-			function () {
-				$s = self::get_settings();
-				echo '<select name="' . esc_attr( self::OPTION_KEY ) . '[default_currency]">';
-				foreach ( array( 'USD', 'EUR', 'CHF', 'JPY', 'SATS' ) as $cur ) {
-					echo '<option value="' . esc_attr( $cur ) . '" ' . selected( $cur, $s['default_currency'], false ) . '>' . esc_html( $cur ) . '</option>';
-				}
-				echo '</select>';
-			},
-			'bif-settings',
-			'bif_general'
-		);
 
 		add_settings_section( 'bif_coinsnap', __( 'Coinsnap', 'coinsnap-bitcoin-invoice-form' ), function () {
 			echo '<p class="description">' . esc_html__( 'Configure Coinsnap settings. These fields are only relevant when Coinsnap is selected as the payment provider.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
@@ -251,7 +236,6 @@ class BIF_Admin_Settings {
 		// Sanitize text fields
 		$text_fields = array(
 			'payment_provider',
-			'default_currency',
 			'coinsnap_api_key',
 			'coinsnap_store_id',
 			'coinsnap_api_base',

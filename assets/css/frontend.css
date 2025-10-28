@@ -93,15 +93,20 @@
 .bif-field-amount,
 .bif-field-currency {
   display: inline-block;
-  width: calc(50% - 10px);
   vertical-align: top;
 }
 
 .bif-field-amount {
-  margin-right: 20px;
+  width: calc(80% - 10px);
+}
+
+.bif-final-amount {
+  justify-content: flex-end;
 }
 
 .bif-field-currency {
+  margin-right: 20px;
+  width: calc(20% - 10px);
   margin-left: 0;
 }
 
@@ -135,14 +140,14 @@
 }
 
 /* Modal - matching wp-bitcoin-newsletter */
-.bif-modal-backdrop { 
-  position: fixed; 
-  inset: 0; 
-  background: rgba(0,0,0,0.6); 
-  display: none; 
-  align-items: center; 
-  justify-content: center; 
-  z-index: 10000; 
+.bif-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
 }
 .bif-modal {
   background: #fff;
@@ -238,7 +243,7 @@
   .bif-form {
     margin: 1em 0;
   }
-  
+
   /* Stack amount and currency fields on mobile */
   .bif-field-amount,
   .bif-field-currency {
@@ -247,7 +252,7 @@
     margin-right: 0;
     margin-left: 0;
   }
-  
+
   /* Mobile modal adjustments */
   .bif-modal {
     width: 100%;
@@ -256,7 +261,7 @@
     border-radius: 0;
     margin: 0;
   }
-  
+
   .bif-modal-backdrop {
     padding: 0;
   }
