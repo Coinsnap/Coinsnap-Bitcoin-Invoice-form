@@ -100,14 +100,63 @@
   width: calc(80% - 10px);
 }
 
-.bif-final-amount {
-  justify-content: flex-end;
-}
 
 .bif-field-currency {
   margin-right: 20px;
   width: calc(20% - 10px);
   margin-left: 0;
+}
+
+/* Discount badge and totals */
+.bif-discount-badge {
+  display: block;
+  background: linear-gradient(135deg, #ff6a00, #ff3d00);
+  color: #fff;
+  padding: 10px 14px;
+  font-weight: 700;
+  border-radius: 6px;
+  margin: 6px 0 12px auto;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(255,61,0,0.25);
+  width: fit-content;
+}
+
+.bif-discount-totals {
+  margin: 10px 0 16px;
+  padding: 12px;
+  border: 1px solid #ffd9cc;
+  background: #fff4ef;
+  border-radius: 6px;
+}
+
+.bif-discount-totals .bif-totals-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0;
+}
+
+.bif-discount-totals .bif-totals-label {
+  color: #333;
+  font-weight: 600;
+}
+
+.bif-discount-totals .bif-totals-original {
+  color: #7a7a7a;
+  text-decoration: line-through;
+}
+
+.bif-discount-totals .bif-totals-discount {
+  color: #d14;
+}
+
+.bif-discount-totals .bif-totals-final-row .bif-totals-label {
+  font-size: 18px;
+}
+.bif-discount-totals .bif-totals-final-row .bif-totals-final {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0a7;
 }
 
 /* Submit field - matching wp-bitcoin-newsletter */

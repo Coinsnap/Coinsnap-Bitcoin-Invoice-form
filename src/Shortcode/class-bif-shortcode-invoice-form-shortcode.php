@@ -162,9 +162,27 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 
 		ob_start();
 		?>
-		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php if ( ! empty( $atts['style'] ) ) { echo ' style="' . esc_attr( $atts['style'] ) . '"'; } ?> data-form-id="<?php echo esc_attr( $form_id ); ?>" data-currency="<?php echo esc_attr( $current_currency ); ?>">
+		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php if ( ! empty( $atts['style'] ) ) { echo ' style="' . esc_attr( $atts['style'] ) . '"'; } ?> data-form-id="<?php echo esc_attr( $form_id ); ?>" data-currency="<?php echo esc_attr( $current_currency ); ?>"<?php
+			$disc_enabled_val = $fields['discount_enabled'] ?? '0';
+			$disc_enabled = ( '1' === $disc_enabled_val || 'on' === $disc_enabled_val || true === $disc_enabled_val );
+			$disc_type = $fields['discount_type'] ?? 'fixed';
+			$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
+			if ( $disc_enabled && $disc_value > 0 ) {
+				echo ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"';
+			}
+		?>>
 			<?php wp_nonce_field( 'bif_invoice_form_' . $form_id, 'bif_form_nonce' ); ?>
 			<input type="hidden" name="form_id" value="<?php echo esc_attr( $form_id ); ?>" />
+
+			<?php if ( $disc_enabled && $disc_value > 0 ) : ?>
+				<?php
+					$val_str = rtrim( rtrim( number_format( $disc_value, 2, '.', '' ), '0' ), '.' );
+					$badge = ( 'percent' === $disc_type )
+						? sprintf( __( 'Bitcoin Discount: %s%%', 'coinsnap-bitcoin-invoice-form' ), $val_str )
+						: sprintf( __( 'Bitcoin Discount: %s %s', 'coinsnap-bitcoin-invoice-form' ), $val_str, esc_html( $current_currency ));
+				?>
+				<div class="bif-discount-badge" aria-live="polite"><?php echo esc_html( $badge ); ?></div>
+			<?php endif; ?>
 
 			<div class="bif-form-fields">
 				<?php
@@ -185,26 +203,39 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				?>
 			</div>
 
+			<?php if ( $disc_enabled && $disc_value > 0 ) : ?>
+				<div class="bif-discount-totals" role="status" aria-live="polite">
+					<div class="bif-totals-row">
+						<span class="bif-totals-label"><?php esc_html_e( 'Original', 'coinsnap-bitcoin-invoice-form' ); ?></span>
+						<span class="bif-totals-original" data-value="0">—</span>
+					</div>
+					<div class="bif-totals-row">
+						<span class="bif-totals-label"><?php esc_html_e( 'Discount', 'coinsnap-bitcoin-invoice-form' ); ?></span>
+						<span class="bif-totals-discount" data-value="0">—</span>
+					</div>
+					<div class="bif-totals-row bif-totals-final-row">
+						<span class="bif-totals-label"><?php esc_html_e( 'You pay', 'coinsnap-bitcoin-invoice-form' ); ?></span>
+						<span class="bif-totals-final" data-value="0">—</span>
+					</div>
+				</div>
+			<?php endif; ?>
+
 			<?php
-			$disc_enabled_val = $fields['discount_enabled'] ?? '0';
-			$disc_enabled = ( '1' === $disc_enabled_val || 'on' === $disc_enabled_val || true === $disc_enabled_val );
-			$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
+			$custom_notice = trim( (string) ( $fields['discount_notice'] ?? '' ) );
 			if ( $disc_enabled && $disc_value > 0 ) {
-				$custom_notice = trim( (string) ( $fields['discount_notice'] ?? '' ) );
 				if ( '' !== $custom_notice ) {
 					$msg = $custom_notice;
 				} else {
-					$disc_type = $fields['discount_type'] ?? 'fixed';
 					$val_str = rtrim( rtrim( number_format( $disc_value, 2, '.', '' ), '0' ), '.' );
 					if ( 'percent' === $disc_type ) {
 						/* translators: %s is the discount percentage value (without the percent sign). */
 						$msg = sprintf( __( 'Good news! A discount of %s%% will be applied to the amount at checkout.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
 					} else {
-						/* translators: %s is the fixed discount amount in the selected currency. */
-						$msg = sprintf( __( 'Good news! A fixed discount of %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
+						/* translators: 1: fixed discount amount; 2: currency code. */
+						$msg = sprintf( __( 'Good news! A fixed discount of %s %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
 					}
 				}
-				echo '<div class="bif-discount-notice" style="margin:10px 0 0;padding:10px;border:1px dashed #39a; background:#f3fbff; color:#124; border-radius:4px; font-size:14px;">' . esc_html( $msg ) . '</div>';
+				echo '<div class="bif-discount-notice">' . esc_html( $msg ) . '</div>';
 			}
 			?>
 
@@ -219,6 +250,42 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				<div class="bif-message bif-message-error"></div>
 			</div>
 		</form>
+
+		<?php if ( $disc_enabled && $disc_value > 0 ) : ?>
+			<script>
+			(function(){
+				var form = document.querySelector('.bif-form-<?php echo esc_js( $form_id ); ?>');
+				if(!form) return;
+				var amountInput = form.querySelector('#bif_amount');
+				var originalEl = form.querySelector('.bif-totals-original');
+				var discountEl = form.querySelector('.bif-totals-discount');
+				var finalEl = form.querySelector('.bif-totals-final');
+				var currency = form.getAttribute('data-currency') || '';
+				var type = form.getAttribute('data-discount-type') || 'fixed';
+				var value = parseFloat(form.getAttribute('data-discount-value') || '0') || 0;
+				function fmt(n){
+					if(isNaN(n)) return '—';
+					return currency + ' ' + (Math.round(n * 100) / 100).toFixed(2);
+				}
+				function update(){
+					var amt = parseFloat(amountInput && amountInput.value ? amountInput.value : '0');
+					if(isNaN(amt)) amt = 0;
+					var disc = 0;
+					if(type === 'percent'){
+						disc = amt * (value/100);
+					}else{
+						disc = Math.min(value, amt);
+					}
+					var finalVal = Math.max(0, amt - disc);
+					if(originalEl) originalEl.textContent = fmt(amt);
+					if(discountEl) discountEl.textContent = '-' + fmt(disc);
+					if(finalEl) finalEl.textContent = fmt(finalVal);
+				}
+				if(amountInput){ amountInput.addEventListener('input', update); }
+				update();
+			})();
+			</script>
+		<?php endif; ?>
 
 
 		<?php
@@ -263,14 +330,6 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 					$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
 					$step_attr = ' step="0.01"';
 					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . $step_attr . ' min="0"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
-					if ( $disc_enabled && $disc_value > 0 ) {
-						// Render a readonly final amount field next to the amount
-						$final_id = $field_id . '_final';
-						echo '<div class="bif-final-amount" style="margin-top:6px; display:flex; gap:8px; align-items:center;">';
-						echo '<label for="' . esc_attr( $final_id ) . '" style="margin:0; font-size:12px; color:#555;">' . esc_html__( 'Final amount (after discount)', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
-						echo '<input type="text" id="' . esc_attr( $final_id ) . '" class="bif-amount-final" value="" readonly style="max-width:160px; background:#f8f8f8;" aria-readonly="true" />';
-						echo '</div>';
-					}
 					break;
 				case 'currency':
 					$selected_currency = $fields['_currency_default'] ?? 'USD';

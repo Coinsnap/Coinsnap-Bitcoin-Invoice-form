@@ -61,7 +61,8 @@ class BIF_CPT_Invoice_Form_Post_Type {
 	public static function register_metaboxes(): void {
 		add_meta_box( 'bif_fields', __( 'Invoice Fields', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_fields_metabox' ), self::POST_TYPE, 'normal' );
 		add_meta_box( 'bif_payment', __( 'Payment Configuration', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_payment_metabox' ), self::POST_TYPE, 'side' );
-		add_meta_box( 'bif_email', __( 'Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_email_metabox' ), self::POST_TYPE, 'normal' );
+		add_meta_box( 'bif_email', __( 'Admin Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_email_metabox' ), self::POST_TYPE, 'normal' );
+		add_meta_box( 'bif_email_customer', __( 'Customer Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_customer_email_metabox' ), self::POST_TYPE, 'normal' );
 		add_meta_box( 'bif_redirect', __( 'Redirect Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_redirect_metabox' ), self::POST_TYPE, 'side' );
 		add_meta_box( 'bif_shortcode', __( 'Shortcode', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_shortcode_metabox' ), self::POST_TYPE, 'side' );
 	}
@@ -313,12 +314,43 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		echo '<p><label for="admin_email">' . esc_html__( 'Admin Email', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="email" id="admin_email" name="bif_email[admin_email]" value="' . esc_attr( $values['admin_email'] ) . '" style="width:100%;" />';
 
-		echo '<p><label for="email_subject">' . esc_html__( 'Email Subject', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
+		echo '<p><label for="email_subject">' . esc_html__( 'Email Subject (to Admin)', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<input type="text" id="email_subject" name="bif_email[email_subject]" value="' . esc_attr( $values['email_subject'] ) . '" style="width:100%;" />';
 
-		echo '<p><label for="email_template">' . esc_html__( 'Email Template', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
+		echo '<p><label for="email_template">' . esc_html__( 'Email Template (to Admin)', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
 		echo '<textarea id="email_template" name="bif_email[email_template]" style="width:100%;height:200px;">' . esc_textarea( $values['email_template'] ) . '</textarea>';
 		echo '<p class="description">' . esc_html__( 'Available placeholders: {invoice_number}, {customer_name}, {customer_email}, {amount}, {currency}, {payment_status}, {transaction_id}, {payment_provider}, {description}', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
+
+		echo '</div>';
+	}
+
+	/**
+	 * Render the customer email metabox.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public static function render_customer_email_metabox( \WP_Post $post ): void {
+		$defaults = array(
+			'customer_email_enabled' => '1',
+			'customer_email_subject' => __( 'Your payment receipt for invoice {invoice_number}', 'coinsnap-bitcoin-invoice-form' ),
+			'customer_email_template' => __( "Hello {customer_name},\n\nThank you for your payment. Here are the details of your receipt:\n\nInvoice Number: {invoice_number}\nAmount Paid: {amount} {currency}\nPayment Status: {payment_status}\n\nDescription: {description}\n\nTransaction ID: {transaction_id}\nPayment Provider: {payment_provider}\n\nIf you have any questions, reply to this email.\n\nBest regards,\n{site_name}", 'coinsnap-bitcoin-invoice-form' ),
+		);
+
+		$values = get_post_meta( $post->ID, '_bif_email_customer', true );
+		$values = wp_parse_args( $values, $defaults );
+
+		echo '<div class="bif-email-config">';
+		echo '<p><label for="customer_email_enabled">' . esc_html__( 'Send email to customer', 'coinsnap-bitcoin-invoice-form' ) . ':</label> ';
+		$checked = ( '1' === (string) ( $values['customer_email_enabled'] ?? '0' ) || 'on' === (string) ( $values['customer_email_enabled'] ?? '' ) ) ? 'checked' : '';
+		echo '<input type="checkbox" id="customer_email_enabled" name="bif_email_customer[customer_email_enabled]" value="1" ' . $checked . ' />';
+		echo '</p>';
+
+		echo '<p><label for="customer_email_subject">' . esc_html__( 'Customer Email Subject', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
+		echo '<input type="text" id="customer_email_subject" name="bif_email_customer[customer_email_subject]" value="' . esc_attr( $values['customer_email_subject'] ) . '" style="width:100%;" />';
+
+		echo '<p><label for="customer_email_template">' . esc_html__( 'Customer Email Template', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
+		echo '<textarea id="customer_email_template" name="bif_email_customer[customer_email_template]" style="width:100%;height:200px;">' . esc_textarea( $values['customer_email_template'] ) . '</textarea>';
+		echo '<p class="description">' . esc_html__( 'Available placeholders: {invoice_number}, {customer_name}, {customer_email}, {amount}, {currency}, {payment_status}, {transaction_id}, {payment_provider}, {description}, {site_name}', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 
 		echo '</div>';
 	}
@@ -428,10 +460,19 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			update_post_meta( $post_id, '_bif_payment', $payment );
 		}
 
-		// Save email settings
+		// Save admin email settings
 		if ( isset( $_POST['bif_email'] ) ) {
 			$email = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['bif_email'] ) );
 			update_post_meta( $post_id, '_bif_email', $email );
+		}
+
+		// Save customer email settings
+		if ( isset( $_POST['bif_email_customer'] ) ) {
+			$customer_email = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['bif_email_customer'] ) );
+			if ( ! isset( $customer_email['customer_email_enabled'] ) ) {
+				$customer_email['customer_email_enabled'] = '0';
+			}
+			update_post_meta( $post_id, '_bif_email_customer', $customer_email );
 		}
 
 		// Save redirect settings

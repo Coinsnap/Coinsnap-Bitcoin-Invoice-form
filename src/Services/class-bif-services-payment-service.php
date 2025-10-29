@@ -63,9 +63,6 @@ class BIF_Services_Payment_Service {
 				$raw_amount = (string) $data['bif_amount'];
 			} elseif ( ! empty( $payment_config['amount'] ) ) {
 				$raw_amount = (string) $payment_config['amount'];
-			} else {
-				$settings = BIF_Admin_Settings::get_settings();
-				$raw_amount = (string) ( $settings['default_amount'] ?? '' );
 			}
 
 			$raw_amount = trim( (string) $raw_amount );
@@ -183,7 +180,7 @@ class BIF_Services_Payment_Service {
 					'amount'             => $amount,
 					'currency'           => $currency,
 					'description'        => $invoice_data['description'],
-					'payment_provider'   => $payment_config['provider_override'] ?? $settings['payment_provider'],
+					'payment_provider'   => $payment_config['provider_override'] ?? BIF_Admin_Settings::get_settings()['payment_provider'],
 					'payment_invoice_id' => $payment_result['invoice_id'],
 					'payment_url'        => $payment_result['payment_url'] ?? '',
 					'payment_status'     => 'unpaid',
@@ -448,9 +445,8 @@ class BIF_Services_Payment_Service {
 			return;
 		}
 
-		// Get form email configuration
-		$email_config = get_post_meta( $transaction->form_id, '_bif_email', true );
-		$email_config = wp_parse_args( $email_config, array(
+		// Get form email configuration (admin and customer in separate metaboxes; support legacy combined storage)
+		$admin_defaults = array(
 			'admin_email'     => get_option( 'admin_email' ),
 			'email_subject'   => __( 'New Invoice Payment Received', 'coinsnap-bitcoin-invoice-form' ),
 			'email_template'  => __( 'A new invoice payment has been received:
@@ -466,7 +462,28 @@ Transaction ID: {transaction_id}
 Payment Provider: {payment_provider}
 
 Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
-		) );
+		);
+		$customer_defaults = array(
+			'customer_email_enabled' => '1',
+			'customer_email_subject' => __( 'Your payment receipt for invoice {invoice_number}', 'coinsnap-bitcoin-invoice-form' ),
+			'customer_email_template' => __( "Hello {customer_name},\n\nThank you for your payment. Here are the details of your receipt:\n\nInvoice Number: {invoice_number}\nAmount Paid: {amount} {currency}\nPayment Status: {payment_status}\n\nDescription: {description}\n\nTransaction ID: {transaction_id}\nPayment Provider: {payment_provider}\n\nIf you have any questions, reply to this email.\n\nBest regards,\n{site_name}", 'coinsnap-bitcoin-invoice-form' ),
+		);
+
+		$admin_config    = get_post_meta( $transaction->form_id, '_bif_email', true );
+		$customer_config = get_post_meta( $transaction->form_id, '_bif_email_customer', true );
+
+		// Backward compatibility: if customer metabox not saved, fall back to any customer keys stored in admin metabox
+		$legacy_customer_subset = array();
+		if ( is_array( $admin_config ) ) {
+			foreach ( array( 'customer_email_enabled', 'customer_email_subject', 'customer_email_template' ) as $k ) {
+				if ( array_key_exists( $k, $admin_config ) ) {
+					$legacy_customer_subset[ $k ] = $admin_config[ $k ];
+				}
+			}
+		}
+
+		$admin_config    = wp_parse_args( is_array( $admin_config ) ? $admin_config : array(), $admin_defaults );
+		$customer_config = wp_parse_args( is_array( $customer_config ) ? $customer_config : array(), wp_parse_args( $legacy_customer_subset, $customer_defaults ) );
 
 		// Replace placeholders in email template
 		$placeholders = array(
@@ -479,19 +496,33 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			'{transaction_id}'  => $transaction->transaction_id,
 			'{payment_provider}' => ucfirst( $transaction->payment_provider ),
 			'{description}'     => $transaction->description,
+			'{site_name}'       => get_bloginfo( 'name' ),
 		);
 
-		$email_subject = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $email_config['email_subject'] );
-		$email_message = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $email_config['email_template'] );
+		$email_subject = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $admin_config['email_subject'] );
+		$email_message = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $admin_config['email_template'] );
 
-		// Send email
+		// Send email to admin
 		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
-		wp_mail( $email_config['admin_email'], $email_subject, $email_message, $headers );
+		wp_mail( $admin_config['admin_email'], $email_subject, $email_message, $headers );
 
-		BIF_Logger::info( 'Payment notification email sent', array(
+		BIF_Logger::info( 'Payment notification email sent (admin)', array(
 			'invoice_id' => $invoice_id,
-			'admin_email' => $email_config['admin_email'],
+			'admin_email' => $admin_config['admin_email'],
 		) );
+
+		// Optionally send email to customer
+		$send_customer = ( '1' === (string) ( $customer_config['customer_email_enabled'] ?? '0' ) || 'on' === (string) ( $customer_config['customer_email_enabled'] ?? '' ) );
+		$customer_email = sanitize_email( (string) $transaction->customer_email );
+		if ( $send_customer && ! empty( $customer_email ) && is_email( $customer_email ) ) {
+			$customer_subject = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $customer_config['customer_email_subject'] );
+			$customer_message = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $customer_config['customer_email_template'] );
+			wp_mail( $customer_email, $customer_subject, $customer_message, $headers );
+			BIF_Logger::info( 'Payment notification email sent (customer)', array(
+				'invoice_id' => $invoice_id,
+				'customer_email' => $customer_email,
+			) );
+		}
 	}
 
 	/**

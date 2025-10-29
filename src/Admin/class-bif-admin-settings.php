@@ -32,9 +32,8 @@ class BIF_Admin_Settings {
 	public static function get_settings(): array {
 		$defaults = array(
 			'payment_provider'        => 'coinsnap',
-			'default_amount'          => 0,
-			'coinsnap_api_key'        => '',
 			'coinsnap_store_id'       => '',
+			'coinsnap_api_key'        => '',
 			'coinsnap_api_base'       => 'https://app.coinsnap.io',
 			'coinsnap_webhook_secret' => '',
 			'btcpay_host'             => '',
@@ -74,7 +73,7 @@ class BIF_Admin_Settings {
 
 		add_settings_field(
 			'payment_provider',
-			__( 'Default Payment Provider', 'coinsnap-bitcoin-invoice-form' ),
+			__( 'Bitcoin Payment Gateway', 'coinsnap-bitcoin-invoice-form' ),
 			function () {
 				$s = self::get_settings();
 				echo '<select name="' . esc_attr( self::OPTION_KEY ) . '[payment_provider]">';
@@ -90,18 +89,17 @@ class BIF_Admin_Settings {
 			'bif_general'
 		);
 
+
 		add_settings_field(
-			'default_amount',
-			__( 'Default Amount', 'coinsnap-bitcoin-invoice-form' ),
+			'coinsnap_store_id',
+			__( 'Coinsnap Store ID', 'coinsnap-bitcoin-invoice-form' ),
 			function () {
 				$s = self::get_settings();
-				echo '<input type="number" min="0" step="0.01" name="' . esc_attr( self::OPTION_KEY ) . '[default_amount]" value="' . esc_attr( (string) $s['default_amount'] ) . '" />';
+				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_store_id]" value="' . esc_attr( $s['coinsnap_store_id'] ) . '" />';
 			},
 			'bif-settings',
-			'bif_general'
+			'bif_coinsnap'
 		);
-
-
 		add_settings_section( 'bif_coinsnap', __( 'Coinsnap', 'coinsnap-bitcoin-invoice-form' ), function () {
 			echo '<p class="description">' . esc_html__( 'Configure Coinsnap settings. These fields are only relevant when Coinsnap is selected as the payment provider.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		}, 'bif-settings' );
@@ -115,16 +113,7 @@ class BIF_Admin_Settings {
 			'bif-settings',
 			'bif_coinsnap'
 		);
-		add_settings_field(
-			'coinsnap_store_id',
-			__( 'Coinsnap Store ID', 'coinsnap-bitcoin-invoice-form' ),
-			function () {
-				$s = self::get_settings();
-				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_store_id]" value="' . esc_attr( $s['coinsnap_store_id'] ) . '" />';
-			},
-			'bif-settings',
-			'bif_coinsnap'
-		);
+
 //		add_settings_field(
 //			'coinsnap_api_base',
 //			__( 'Coinsnap API Base URL', 'coinsnap-bitcoin-invoice-form' ),
@@ -251,11 +240,6 @@ class BIF_Admin_Settings {
 			if ( isset( $input[ $field ] ) ) {
 				$sanitized[ $field ] = sanitize_text_field( $input[ $field ] );
 			}
-		}
-
-		// Sanitize numeric fields
-		if ( isset( $input['default_amount'] ) ) {
-			$sanitized['default_amount'] = floatval( $input['default_amount'] );
 		}
 
 		// Sanitize boolean fields
