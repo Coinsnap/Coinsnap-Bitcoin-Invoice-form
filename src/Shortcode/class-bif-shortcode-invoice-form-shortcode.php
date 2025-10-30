@@ -67,31 +67,31 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'name_required'       => '1',
 				'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
 				'name_order'          => '10',
-				'email_enabled'       => '1',
-				'email_required'      => '1',
-				'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
-				'email_order'         => '20',
-				'company_enabled'     => '0',
-				'company_required'    => '0',
-				'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
-				'company_order'       => '30',
 				'invoice_number_enabled' => '1',
 				'invoice_number_required' => '1',
 				'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
-				'invoice_number_order' => '40',
+				'invoice_number_order' => '20',
 				'amount_enabled'      => '1',
 				'amount_required'     => '1',
 				'amount_label'        => __( 'Amount', 'coinsnap-bitcoin-invoice-form' ),
-				'amount_order'        => '50',
+				'amount_order'        => '30',
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
-				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
-				'currency_order'      => '45',
+				'currency_label'      => __( 'Currency Selection', 'coinsnap-bitcoin-invoice-form' ),
+				'currency_order'      => '40',
+				'email_enabled'       => '1',
+				'email_required'      => '1',
+				'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
+				'email_order'         => '50',
+				'company_enabled'     => '0',
+				'company_required'    => '0',
+				'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
+				'company_order'       => '60',
 				'description_enabled' => '1',
 				'description_required' => '1',
-				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
-				'description_order'   => '60',
-				'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
+				'description_label'   => __( 'Message', 'coinsnap-bitcoin-invoice-form' ),
+				'description_order'   => '70',
+				'button_text'         => __( 'Pay Invoice with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 				'discount_enabled'    => '0',
 				'discount_type'       => 'fixed',
 				'discount_value'      => '0',
@@ -104,37 +104,77 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'name_required'       => '1',
 				'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
 				'name_order'          => '10',
-				'email_enabled'       => '1',
-				'email_required'      => '1',
-				'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
-				'email_order'         => '20',
-				'company_enabled'     => '0',
-				'company_required'    => '0',
-				'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
-				'company_order'       => '30',
 				'invoice_number_enabled' => '1',
 				'invoice_number_required' => '1',
 				'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
-				'invoice_number_order' => '40',
+				'invoice_number_order' => '20',
 				'amount_enabled'      => '1',
 				'amount_required'     => '1',
 				'amount_label'        => __( 'Amount', 'coinsnap-bitcoin-invoice-form' ),
-				'amount_order'        => '50',
+				'amount_order'        => '30',
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
-				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
-				'currency_order'      => '45',
+				'currency_label'      => __( 'Currency Selection', 'coinsnap-bitcoin-invoice-form' ),
+				'currency_order'      => '40',
+				'email_enabled'       => '1',
+				'email_required'      => '1',
+				'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
+				'email_order'         => '50',
+				'company_enabled'     => '0',
+				'company_required'    => '0',
+				'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
+				'company_order'       => '60',
 				'description_enabled' => '1',
 				'description_required' => '1',
-				'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
-				'description_order'   => '60',
-				'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
+				'description_label'   => __( 'Message', 'coinsnap-bitcoin-invoice-form' ),
+				'description_order'   => '70',
+				'button_text'         => __( 'Pay Invoice with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 				'discount_enabled'    => '0',
 				'discount_type'       => 'fixed',
 				'discount_value'      => '0',
 				'discount_notice'     => '',
 			);
 			$fields = wp_parse_args( $fields, $defaults );
+
+			// Normalize legacy labels and order if they match old defaults (preserve user customizations)
+			// Update labels only when they equal the previous defaults
+			if ( isset( $fields['name_label'] ) && $fields['name_label'] === __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ) ) {
+				$fields['name_label'] = __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' );
+			}
+			if ( isset( $fields['amount_label'] ) && $fields['amount_label'] === __( 'Invoice Amount', 'coinsnap-bitcoin-invoice-form' ) ) {
+				$fields['amount_label'] = __( 'Invoice Amount', 'coinsnap-bitcoin-invoice-form' );
+			}
+			if ( isset( $fields['description_label'] ) && $fields['description_label'] === __( 'Message to the Invoice recipient', 'coinsnap-bitcoin-invoice-form' ) ) {
+				$fields['description_label'] = __( 'Message to the invoice recipient', 'coinsnap-bitcoin-invoice-form' );
+			}
+
+			// Update orders only when they equal known old default values
+			$orders_map = array(
+				'invoice_number_order' => array( 40 ),
+				'amount_order'         => array( 50 ),
+				'currency_order'       => array( 45, 55 ),
+				'email_order'          => array( 20 ),
+				'company_order'        => array( 30 ),
+				'description_order'    => array( 60 ),
+			);
+			if ( isset( $fields['invoice_number_order'] ) && in_array( intval( $fields['invoice_number_order'] ), $orders_map['invoice_number_order'], true ) ) {
+				$fields['invoice_number_order'] = '20';
+			}
+			if ( isset( $fields['amount_order'] ) && in_array( intval( $fields['amount_order'] ), $orders_map['amount_order'], true ) ) {
+				$fields['amount_order'] = '30';
+			}
+			if ( isset( $fields['currency_order'] ) && in_array( intval( $fields['currency_order'] ), $orders_map['currency_order'], true ) ) {
+				$fields['currency_order'] = '40';
+			}
+			if ( isset( $fields['email_order'] ) && in_array( intval( $fields['email_order'] ), $orders_map['email_order'], true ) ) {
+				$fields['email_order'] = '50';
+			}
+			if ( isset( $fields['company_order'] ) && in_array( intval( $fields['company_order'] ), $orders_map['company_order'], true ) ) {
+				$fields['company_order'] = '60';
+			}
+			if ( isset( $fields['description_order'] ) && in_array( intval( $fields['description_order'] ), $orders_map['description_order'], true ) ) {
+				$fields['description_order'] = '70';
+			}
 		}
 
 		$payment = wp_parse_args( $payment, array(
@@ -222,17 +262,21 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 
 			<?php
 			$custom_notice = trim( (string) ( $fields['discount_notice'] ?? '' ) );
-			if ( $disc_enabled && $disc_value > 0 ) {
+			if ( $disc_enabled ) {
 				if ( '' !== $custom_notice ) {
 					$msg = $custom_notice;
 				} else {
-					$val_str = rtrim( rtrim( number_format( $disc_value, 2, '.', '' ), '0' ), '.' );
-					if ( 'percent' === $disc_type ) {
-						/* translators: %s is the discount percentage value (without the percent sign). */
-						$msg = sprintf( __( 'Good news! A discount of %s%% will be applied to the amount at checkout.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
+					if ( $disc_value > 0 ) {
+						$val_str = rtrim( rtrim( number_format( $disc_value, 2, '.', '' ), '0' ), '.' );
+						if ( 'percent' === $disc_type ) {
+							/* translators: %s is the discount percentage value (without the percent sign). */
+							$msg = sprintf( __( 'Good news! A discount of %s%% will be applied to the amount at checkout.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
+						} else {
+							/* translators: 1: fixed discount amount; 2: currency code. */
+							$msg = sprintf( __( 'Good news! A fixed discount of %s %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
+						}
 					} else {
-						/* translators: 1: fixed discount amount; 2: currency code. */
-						$msg = sprintf( __( 'Good news! A fixed discount of %s %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
+						$msg = __( 'Good news! A Bitcoin discount will be applied at checkout.', 'coinsnap-bitcoin-invoice-form' );
 					}
 				}
 				echo '<div class="bif-discount-notice">' . esc_html( $msg ) . '</div>';

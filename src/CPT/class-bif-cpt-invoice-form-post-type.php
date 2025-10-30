@@ -80,31 +80,31 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'name_required'       => '1',
 			'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
 			'name_order'          => '10',
-			'email_enabled'       => '1',
-			'email_required'      => '1',
-			'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
-			'email_order'         => '20',
-			'company_enabled'     => '0',
-			'company_required'    => '0',
-			'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
-			'company_order'       => '30',
 			'invoice_number_enabled' => '1',
 			'invoice_number_required' => '1',
 			'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
-			'invoice_number_order' => '40',
+			'invoice_number_order' => '20',
 			'amount_enabled'      => '1',
 			'amount_required'     => '1',
 			'amount_label'        => __( 'Amount', 'coinsnap-bitcoin-invoice-form' ),
-			'amount_order'        => '50',
+			'amount_order'        => '30',
 			'currency_enabled'    => '1',
 			'currency_required'   => '1',
-			'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
-			'currency_order'      => '55',
+			'currency_label'      => __( 'Currency Selection', 'coinsnap-bitcoin-invoice-form' ),
+			'currency_order'      => '40',
+			'email_enabled'       => '1',
+			'email_required'      => '1',
+			'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
+			'email_order'         => '50',
+			'company_enabled'     => '0',
+			'company_required'    => '0',
+			'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
+			'company_order'       => '60',
 			'description_enabled' => '1',
 			'description_required' => '1',
-			'description_label'   => __( 'Description/Notes', 'coinsnap-bitcoin-invoice-form' ),
-			'description_order'   => '60',
-			'button_text'         => __( 'Pay with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
+			'description_label'   => __( 'Message', 'coinsnap-bitcoin-invoice-form' ),
+			'description_order'   => '70',
+			'button_text'         => __( 'Pay Invoice with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 			'discount_enabled'    => '0',
 			'discount_type'       => 'fixed',
 			'discount_value'      => '0',
@@ -114,16 +114,32 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$values = get_post_meta( $post->ID, '_bif_fields', true );
 		$values = wp_parse_args( $values, $defaults );
 
+		// Build a placeholder for discount notice using the same default text as on the frontend
+		$discount_placeholder = '';
+		$disc_type  = $values['discount_type'] ?? 'fixed';
+		$disc_value = isset( $values['discount_value'] ) ? floatval( $values['discount_value'] ) : 0.0;
+		if ( $disc_value > 0 ) {
+			$payment = get_post_meta( $post->ID, '_bif_payment', true );
+			$payment = wp_parse_args( $payment, array(
+				'currency' => 'USD',
+			) );
+			$current_currency = (string) ( $payment['currency'] ?? 'USD' );
+			$val_str = rtrim( rtrim( number_format( $disc_value, 2, '.', '' ), '0' ), '.' );
+			if ( 'percent' === $disc_type ) {
+				/* translators: %s is the discount percentage value (without the percent sign). */
+				$discount_placeholder = sprintf( __( 'Good news! A discount of %s%% will be applied to the amount at checkout.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
+			} else {
+				/* translators: 1: fixed discount amount; 2: currency code. */
+				$discount_placeholder = sprintf( __( 'Good news! A fixed discount of %s %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
+			}
+		} else {
+			$discount_placeholder = __( 'Good news! A Bitcoin discount will be applied at checkout.', 'coinsnap-bitcoin-invoice-form' );
+		}
+
 		echo '<div class="bif-fields-config">';
 
 		// Name field
 		self::render_toggle_row( 'name', $values );
-
-		// Email field
-		self::render_toggle_row( 'email', $values );
-
-		// Company field
-		self::render_toggle_row( 'company', $values );
 
 		// Invoice Number field
 		self::render_toggle_row( 'invoice_number', $values );
@@ -133,6 +149,12 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 		// Currency field
 		self::render_toggle_row( 'currency', $values );
+
+		// Email field
+		self::render_toggle_row( 'email', $values );
+
+		// Company field
+		self::render_toggle_row( 'company', $values );
 
 		// Description field
 		self::render_toggle_row( 'description', $values );
@@ -149,17 +171,17 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 		// Discount settings
 		echo '<fieldset class="bif-discount-config" style="border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:4px;background:#fafafa;">';
-		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html__( 'Discount', 'coinsnap-bitcoin-invoice-form' ) . '</legend>';
+		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html__( 'Bitcoin Discount', 'coinsnap-bitcoin-invoice-form' ) . '</legend>';
 		echo '<div class="bif-field-options" style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;margin-top:10px;">';
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 		echo '<input type="checkbox" name="bif_fields[discount_enabled]" value="1" ' . checked( '1', $values['discount_enabled'] ?? '0', false ) . ' id="discount_enabled" />';
-		echo '<label for="discount_enabled" style="margin:0;font-weight:500;">' . esc_html__( 'Enable Discount', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
+		echo '<label for="discount_enabled" style="margin:0;font-weight:500;">' . esc_html__( 'Enable Bitcoin Discount', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
 		echo '</div>';
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
 		echo '<label for="discount_type" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Type', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
 		echo '<select name="bif_fields[discount_type]" id="discount_type" style="min-width:120px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;">';
 		echo '<option value="fixed" ' . selected( 'fixed', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Fixed amount', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
-		echo '<option value="percent" ' . selected( 'percent', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Percentage', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
+		echo '<option selected value="percent" ' . selected( 'percent', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Percentage', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
 		echo '</select>';
 		echo '</div>';
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
@@ -169,7 +191,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		echo '</div>';
 		echo '<div class="bif-option-group" style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">';
 		echo '<label for="discount_notice" style="margin:0;font-weight:500;">' . esc_html__( 'Customer-facing discount notice (optional)', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
-		echo '<textarea id="discount_notice" name="bif_fields[discount_notice]" style="width:100%;min-height:60px;padding:6px 8px;border:1px solid #ccc;border-radius:3px;">' . esc_textarea( $values['discount_notice'] ?? '' ) . '</textarea>';
+		echo '<textarea id="discount_notice" name="bif_fields[discount_notice]" style="width:100%;min-height:60px;padding:6px 8px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr( $discount_placeholder ) . '">' . esc_textarea( $values['discount_notice'] ?? '' ) . '</textarea>';
 		echo '<p class="description" style="margin:0;color:#666;font-size:13px;">' . esc_html__( 'Shown on the form when discount is enabled. Leave empty to use the automatic default message.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		echo '</div>';
 		echo '<p class="description" style="margin:8px 0 0 0;color:#666;font-size:13px;">' . esc_html__( 'If enabled, the discount will be applied to the invoice amount before creating the payment. Use percentage for relative discounts (e.g., 10%) or fixed amount for absolute discounts (e.g., 5.00).', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
@@ -199,7 +221,10 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
 
 		echo '<fieldset class="bif-field-config" style="border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:4px;background:#fafafa;">';
-		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html( ucwords( str_replace( '_', ' ', $field_name ) ) ) . '</legend>';
+		$legend_text = ( 'description' === $field_name )
+			? __( 'Message to the Invoice receiver', 'coinsnap-bitcoin-invoice-form' )
+			: ucwords( str_replace( '_', ' ', $field_name ) );
+		echo '<legend style="font-weight:bold;padding:0 8px;background:#fff;border-radius:3px;">' . esc_html( $legend_text ) . '</legend>';
 
 		echo '<div class="bif-field-options" style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;margin-top:10px;">';
 
