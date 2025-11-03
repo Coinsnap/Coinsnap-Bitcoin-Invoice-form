@@ -147,11 +147,35 @@
     function showFormError(form, message) {
         var messagesContainer = form.find('.bif-form-messages');
         var errorMessage = messagesContainer.find('.bif-message-error');
+        var successMessage = messagesContainer.find('.bif-message-success');
+
+        // Hide success if visible
+        successMessage.hide().text('');
 
         errorMessage.text(message).show();
         messagesContainer.show();
 
         // Scroll to error message
+        $('html, body').animate({
+            scrollTop: messagesContainer.offset().top - 100
+        }, 500);
+    }
+
+    /**
+     * Show form success (inline)
+     */
+    function showFormSuccess(form, message) {
+        var messagesContainer = form.find('.bif-form-messages');
+        var successMessage = messagesContainer.find('.bif-message-success');
+        var errorMessage = messagesContainer.find('.bif-message-error');
+
+        // Hide error if visible
+        errorMessage.hide().text('');
+
+        successMessage.text(message).show();
+        messagesContainer.show();
+
+        // Scroll to success message
         $('html, body').animate({
             scrollTop: messagesContainer.offset().top - 100
         }, 500);
@@ -188,6 +212,9 @@
         try {
             var modal = createModal();
             modal.frame.src = paymentData.payment_url;
+
+            // Store originating form id for later inline messaging
+            modal.backdrop.dataset.formId = String(formId);
 
             // Set redirect data on the backdrop
             if (paymentData.success_page) {
@@ -322,16 +349,22 @@
         console.log('Payment successful, closing modal');
         modal.backdrop.style.display = 'none';
 
-        // Redirect after 2 seconds
+        // Redirect after 2 seconds or show inline success
         setTimeout(function() {
             var successPage = modal.backdrop.dataset.successPage;
             if (successPage) {
                 window.location.href = successPage;
             } else {
                 var thankYouMessage = modal.backdrop.dataset.thankYouMessage || 'Thank you! Your payment has been processed successfully.';
-                alert(thankYouMessage);
+                var formId = modal.backdrop.dataset.formId;
+                if (formId) {
+                    var formEl = document.querySelector('.bif-form-' + formId);
+                    if (formEl) {
+                        showFormSuccess($(formEl), thankYouMessage);
+                    }
+                }
             }
-        }, 2000);
+        }, 1500);
     }
 
 

@@ -101,12 +101,17 @@ class BIF_Services_Payment_Service {
 
 			// Server-side required field validation for core and enabled+required fields
 			$errors = array();
-			$core_required = array('bif_name' => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ), 'bif_invoice_number' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ));
-			foreach ( $core_required as $key => $label ) {
-				$val = isset( $data[ $key ] ) ? trim( (string) $data[ $key ] ) : '';
-				if ( '' === $val ) {
-					$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
-				}
+			// Determine recipient value with backward compatibility
+			$recipient_val = isset( $data['bif_invoice_recipient'] ) ? trim( (string) $data['bif_invoice_recipient'] ) : '';
+			if ( '' === $recipient_val && isset( $data['bif_name'] ) ) {
+				$recipient_val = trim( (string) $data['bif_name'] );
+			}
+			if ( '' === $recipient_val ) {
+				$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ) );
+			}
+			$inv_no_val = isset( $data['bif_invoice_number'] ) ? trim( (string) $data['bif_invoice_number'] ) : '';
+			if ( '' === $inv_no_val ) {
+				$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ) );
 			}
 			// Validate other fields if they are enabled and marked required in form config
 			$maybe_required = array(
@@ -169,7 +174,7 @@ class BIF_Services_Payment_Service {
 
 			// Prepare invoice data
 			$invoice_data = array(
-				'name'            => sanitize_text_field( $data['bif_name'] ?? '' ),
+				'name'            => sanitize_text_field( ( $data['bif_invoice_recipient'] ?? '' ) !== '' ? $data['bif_invoice_recipient'] : ( $data['bif_name'] ?? '' ) ),
 				'email'           => sanitize_email( $data['bif_email'] ?? '' ),
 				'company'         => sanitize_text_field( $data['bif_company'] ?? '' ),
 				'invoice_number'  => sanitize_text_field( $data['bif_invoice_number'] ?? '' ),

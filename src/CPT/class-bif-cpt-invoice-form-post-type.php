@@ -76,10 +76,10 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		wp_nonce_field( 'bif_save_form_' . $post->ID, 'bif_form_nonce' );
 
 		$defaults = array(
-			'name_enabled'        => '1',
-			'name_required'       => '1',
-			'name_label'          => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ),
-			'name_order'          => '10',
+			'invoice_recipient_enabled'  => '1',
+			'invoice_recipient_required' => '1',
+			'invoice_recipient_label'    => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ),
+			'invoice_recipient_order'    => '10',
 			'invoice_number_enabled' => '1',
 			'invoice_number_required' => '1',
 			'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
@@ -113,6 +113,20 @@ class BIF_CPT_Invoice_Form_Post_Type {
 
 		$values = get_post_meta( $post->ID, '_bif_fields', true );
 		$values = wp_parse_args( $values, $defaults );
+
+		// Backward compatibility: map legacy 'name_*' settings to 'invoice_recipient_*' if present in saved values
+		if ( isset( $values['name_enabled'] ) && ! isset( $values['invoice_recipient_enabled'] ) ) {
+			$values['invoice_recipient_enabled'] = $values['name_enabled'];
+		}
+		if ( isset( $values['name_required'] ) && ! isset( $values['invoice_recipient_required'] ) ) {
+			$values['invoice_recipient_required'] = $values['name_required'];
+		}
+		if ( isset( $values['name_label'] ) && ! isset( $values['invoice_recipient_label'] ) ) {
+			$values['invoice_recipient_label'] = ( $values['name_label'] === __( 'Name', 'coinsnap-bitcoin-invoice-form' ) ) ? __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ) : $values['name_label'];
+		}
+		if ( isset( $values['name_order'] ) && ! isset( $values['invoice_recipient_order'] ) ) {
+			$values['invoice_recipient_order'] = $values['name_order'];
+		}
 
 		// Build a placeholder for discount notice using the same default text as on the frontend
 		$discount_placeholder = '';
@@ -435,10 +449,10 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			$fields = array_map( 'sanitize_text_field', wp_unslash( $_POST['bif_fields'] ) );
 
 			// Core fields that are always required
-			$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
+			$core_required_fields = array( 'invoice_recipient', 'invoice_number', 'amount', 'currency' );
 
 			// Ensure checkbox values are properly set (unchecked checkboxes don't send values)
-			$field_names = array( 'name', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' );
+			$field_names = array( 'invoice_recipient', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' );
 			foreach ( $field_names as $field_name ) {
 				$enabled_key = $field_name . '_enabled';
 				$required_key = $field_name . '_required';

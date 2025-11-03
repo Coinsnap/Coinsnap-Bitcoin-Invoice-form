@@ -63,10 +63,10 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 		// Set defaults - only if fields array is empty
 		if ( empty( $fields ) || ! is_array( $fields ) ) {
 			$fields = array(
-				'name_enabled'        => '1',
-				'name_required'       => '1',
-				'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
-				'name_order'          => '10',
+				'invoice_recipient_enabled'  => '1',
+				'invoice_recipient_required' => '1',
+				'invoice_recipient_label'    => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ),
+				'invoice_recipient_order'    => '10',
 				'invoice_number_enabled' => '1',
 				'invoice_number_required' => '1',
 				'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
@@ -100,10 +100,10 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 		} else {
 			// Merge with defaults to ensure all keys exist
 			$defaults = array(
-				'name_enabled'        => '1',
-				'name_required'       => '1',
-				'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
-				'name_order'          => '10',
+				'invoice_recipient_enabled'  => '1',
+				'invoice_recipient_required' => '1',
+				'invoice_recipient_label'    => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ),
+				'invoice_recipient_order'    => '10',
 				'invoice_number_enabled' => '1',
 				'invoice_number_required' => '1',
 				'invoice_number_label' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ),
@@ -136,11 +136,21 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			);
 			$fields = wp_parse_args( $fields, $defaults );
 
-			// Normalize legacy labels and order if they match old defaults (preserve user customizations)
-			// Update labels only when they equal the previous defaults
-			if ( isset( $fields['name_label'] ) && $fields['name_label'] === __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ) ) {
-				$fields['name_label'] = __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' );
+			// Backward compatibility: map legacy 'name_*' settings to 'invoice_recipient_*' if present
+			if ( isset( $fields['name_enabled'] ) && ! isset( $fields['invoice_recipient_enabled'] ) ) {
+				$fields['invoice_recipient_enabled'] = $fields['name_enabled'];
 			}
+			if ( isset( $fields['name_required'] ) && ! isset( $fields['invoice_recipient_required'] ) ) {
+				$fields['invoice_recipient_required'] = $fields['name_required'];
+			}
+			if ( isset( $fields['name_label'] ) && ! isset( $fields['invoice_recipient_label'] ) ) {
+				$fields['invoice_recipient_label'] = ( $fields['name_label'] === __( 'Name', 'coinsnap-bitcoin-invoice-form' ) ) ? __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ) : $fields['name_label'];
+			}
+			if ( isset( $fields['name_order'] ) && ! isset( $fields['invoice_recipient_order'] ) ) {
+				$fields['invoice_recipient_order'] = $fields['name_order'];
+			}
+
+			// Normalize legacy labels and order if they match old defaults (preserve user customizations)
 			if ( isset( $fields['amount_label'] ) && $fields['amount_label'] === __( 'Invoice Amount', 'coinsnap-bitcoin-invoice-form' ) ) {
 				$fields['amount_label'] = __( 'Invoice Amount', 'coinsnap-bitcoin-invoice-form' );
 			}
@@ -228,7 +238,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				<?php
 				// Render enabled fields in order
 				$field_order = array();
-				foreach ( array( 'name', 'email', 'company', 'invoice_number', 'currency', 'amount', 'description' ) as $field ) {
+				foreach ( array( 'invoice_recipient', 'email', 'company', 'invoice_number', 'currency', 'amount', 'description' ) as $field ) {
 					$enabled = $fields[ $field . '_enabled' ] ?? '0';
 					if ( '1' === $enabled || 'on' === $enabled || true === $enabled ) {
 						$order = intval( $fields[ $field . '_order' ] ?? '10' );
@@ -354,7 +364,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 		}
 
 		// Core fields are always required on the frontend
-		$core_required_fields = array( 'name', 'invoice_number', 'amount', 'currency' );
+		$core_required_fields = array( 'invoice_recipient', 'invoice_number', 'amount', 'currency' );
 		if ( in_array( $field, $core_required_fields, true ) ) {
 			$required = true;
 		}
