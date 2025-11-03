@@ -99,6 +99,43 @@ class BIF_Services_Payment_Service {
 				);
 			}
 
+			// Server-side required field validation for core and enabled+required fields
+			$errors = array();
+			$core_required = array('bif_name' => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ), 'bif_invoice_number' => __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ));
+			foreach ( $core_required as $key => $label ) {
+				$val = isset( $data[ $key ] ) ? trim( (string) $data[ $key ] ) : '';
+				if ( '' === $val ) {
+					$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
+				}
+			}
+			// Validate other fields if they are enabled and marked required in form config
+			$maybe_required = array(
+				'email' => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
+				'company' => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
+				'description' => __( 'Message', 'coinsnap-bitcoin-invoice-form' ),
+			);
+			foreach ( $maybe_required as $f => $label ) {
+				$enabled_val = $fields[ $f . '_enabled' ] ?? '0';
+				$required_val = $fields[ $f . '_required' ] ?? '0';
+				$enabled = ( '1' === $enabled_val || 'on' === $enabled_val || true === $enabled_val );
+				$required = ( '1' === $required_val || 'on' === $required_val || true === $required_val );
+				if ( $enabled && $required ) {
+					$key = 'bif_' . $f;
+					$val = isset( $data[ $key ] ) ? trim( (string) $data[ $key ] ) : '';
+					if ( '' === $val ) {
+						$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
+					} elseif ( 'email' === $f && ! is_email( $val ) ) {
+						$errors[] = __( 'Please enter a valid email address.', 'coinsnap-bitcoin-invoice-form' );
+					}
+				}
+			}
+			if ( ! empty( $errors ) ) {
+				return array(
+					'success' => false,
+					'message' => implode( ' ', $errors ),
+				);
+			}
+
 			// Apply discount if configured on the form
 			$discount_enabled = $fields['discount_enabled'] ?? '0';
 			if ( '1' === $discount_enabled || 'on' === $discount_enabled ) {
@@ -512,7 +549,8 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		) );
 
 		// Optionally send email to customer
-		$send_customer = ( '1' === (string) ( $customer_config['customer_email_enabled'] ?? '0' ) || 'on' === (string) ( $customer_config['customer_email_enabled'] ?? '' ) );
+		$enabled_raw = isset( $customer_config['customer_email_enabled'] ) ? (string) $customer_config['customer_email_enabled'] : '';
+		$send_customer = in_array( strtolower( $enabled_raw ), array( '1', 'on', 'yes', 'true' ), true ) || $enabled_raw === '';
 		$customer_email = sanitize_email( (string) $transaction->customer_email );
 		if ( $send_customer && ! empty( $customer_email ) && is_email( $customer_email ) ) {
 			$customer_subject = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $customer_config['customer_email_subject'] );
@@ -521,6 +559,13 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			BIF_Logger::info( 'Payment notification email sent (customer)', array(
 				'invoice_id' => $invoice_id,
 				'customer_email' => $customer_email,
+			) );
+		} else {
+			BIF_Logger::info( 'Customer email not sent', array(
+				'invoice_id'      => $invoice_id,
+				'enabled_flag'    => $enabled_raw,
+				'has_customer_email' => ! empty( $customer_email ),
+				'is_valid_email'  => is_email( $customer_email ),
 			) );
 		}
 	}

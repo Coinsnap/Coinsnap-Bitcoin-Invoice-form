@@ -36,6 +36,7 @@
 
         // Validate form
         if (!validateForm(form)) {
+            showFormError(form, 'Please fill out all required fields correctly.');
             return;
         }
 
@@ -82,12 +83,12 @@
      */
     function validateForm(form) {
         var isValid = true;
-        var requiredFields = form.find('[required]');
 
+        // 1) All fields marked as required must be non-empty
+        var requiredFields = form.find('[required]');
         requiredFields.each(function() {
             var field = $(this);
-            var value = field.val().trim();
-
+            var value = (field.val() || '').toString().trim();
             if (!value) {
                 field.addClass('error');
                 isValid = false;
@@ -96,14 +97,44 @@
             }
         });
 
-        // Validate email field
+        // 2) All enabled (rendered) fields should be non-empty as well (except hidden/disabled)
+        form.find('.bif-field').each(function() {
+            var container = $(this);
+            var input = container.find('input:not([type="hidden"]):not([disabled]), textarea:not([disabled])').first();
+            if (input.length) {
+                var val = (input.val() || '').toString().trim();
+                if (!val) {
+                    input.addClass('error');
+                    isValid = false;
+                } else {
+                    input.removeClass('error');
+                }
+            }
+        });
+
+        // 3) Validate email field format when present
         var emailField = form.find('input[type="email"]');
-        if (emailField.length && emailField.val()) {
-            var email = emailField.val();
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                emailField.addClass('error');
+        if (emailField.length) {
+            var email = (emailField.val() || '').toString().trim();
+            if (email !== '') {
+                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    emailField.addClass('error');
+                    isValid = false;
+                }
+            }
+        }
+
+        // 4) Validate amount > 0 when amount field exists
+        var amountField = form.find('#bif_amount');
+        if (amountField.length) {
+            var raw = (amountField.val() || '').toString().trim();
+            var numeric = parseFloat(raw.replace(/,/g, '.'));
+            if (!raw || isNaN(numeric) || numeric <= 0) {
+                amountField.addClass('error');
                 isValid = false;
+            } else {
+                amountField.removeClass('error');
             }
         }
 

@@ -78,7 +78,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$defaults = array(
 			'name_enabled'        => '1',
 			'name_required'       => '1',
-			'name_label'          => __( 'Name', 'coinsnap-bitcoin-invoice-form' ),
+			'name_label'          => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ),
 			'name_order'          => '10',
 			'invoice_number_enabled' => '1',
 			'invoice_number_required' => '1',
@@ -90,10 +90,10 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'amount_order'        => '30',
 			'currency_enabled'    => '1',
 			'currency_required'   => '1',
-			'currency_label'      => __( 'Currency Selection', 'coinsnap-bitcoin-invoice-form' ),
+			'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
 			'currency_order'      => '40',
 			'email_enabled'       => '1',
-			'email_required'      => '1',
+			'email_required'      => '0',
 			'email_label'         => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
 			'email_order'         => '50',
 			'company_enabled'     => '0',
@@ -101,13 +101,13 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			'company_label'       => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
 			'company_order'       => '60',
 			'description_enabled' => '1',
-			'description_required' => '1',
-			'description_label'   => __( 'Message', 'coinsnap-bitcoin-invoice-form' ),
+			'description_required' => '0',
+			'description_label'   => __( 'Your message to the Invoice receiver', 'coinsnap-bitcoin-invoice-form' ),
 			'description_order'   => '70',
 			'button_text'         => __( 'Pay Invoice with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
-			'discount_enabled'    => '0',
-			'discount_type'       => 'fixed',
-			'discount_value'      => '0',
+			'discount_enabled'    => '1',
+			'discount_type'       => 'percentage',
+			'discount_value'      => '10',
 			'discount_notice'     => '',
 		);
 
@@ -139,7 +139,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		echo '<div class="bif-fields-config">';
 
 		// Name field
-		self::render_toggle_row( 'name', $values );
+		self::render_toggle_row( 'invoice_recipient', $values );
 
 		// Invoice Number field
 		self::render_toggle_row( 'invoice_number', $values );
@@ -218,7 +218,7 @@ class BIF_CPT_Invoice_Form_Post_Type {
 		$order    = $values[ $order_key ] ?? '10';
 
 		// Core fields that are always required and don't need enabled/required checkboxes
-		$core_required_fields = array( 'invoice_number', 'amount', 'currency', 'email' );
+		$core_required_fields = array( 'invoice_recipient', 'invoice_number', 'amount', 'currency');
 
 		echo '<fieldset class="bif-field-config" style="border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:4px;background:#fafafa;">';
 		$legend_text = ( 'description' === $field_name )
@@ -238,17 +238,6 @@ class BIF_CPT_Invoice_Form_Post_Type {
 			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
 			echo '<input type="checkbox" name="bif_fields[' . esc_attr( $required_key ) . ']" value="1" ' . checked( '1', $required, false ) . ' id="' . esc_attr( $required_key ) . '" />';
 			echo '<label for="' . esc_attr( $required_key ) . '" style="margin:0;font-weight:500;">' . esc_html__( 'Required', 'coinsnap-bitcoin-invoice-form' ) . '</label>';
-			echo '</div>';
-		} else {
-			// For core fields, show disabled checkboxes to indicate they're always enabled and required
-			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
-			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
-			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Enabled', 'coinsnap-bitcoin-invoice-form' ) . ' <em>(' . esc_html__( 'always', 'coinsnap-bitcoin-invoice-form' ) . ')</em></label>';
-			echo '</div>';
-
-			echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:5px;">';
-			echo '<input type="checkbox" checked disabled style="opacity:0.6;" />';
-			echo '<label style="margin:0;font-weight:500;color:#666;">' . esc_html__( 'Required', 'coinsnap-bitcoin-invoice-form' ) . ' <em>(' . esc_html__( 'always', 'coinsnap-bitcoin-invoice-form' ) . ')</em></label>';
 			echo '</div>';
 		}
 

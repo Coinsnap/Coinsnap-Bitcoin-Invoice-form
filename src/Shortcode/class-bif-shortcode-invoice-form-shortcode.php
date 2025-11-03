@@ -353,6 +353,12 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			return;
 		}
 
+		// Core fields are always required on the frontend
+		$core_required_fields = array( 'name', 'invoice_number', 'amount', 'currency' );
+		if ( in_array( $field, $core_required_fields, true ) ) {
+			$required = true;
+		}
+
 		$field_id = 'bif_' . $field;
 		$field_name = 'bif_' . $field;
 
@@ -379,7 +385,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 					$selected_currency = $fields['_currency_default'] ?? 'USD';
 					// Display the currency as read-only to the user; do not allow changing it on the frontend.
 					// Include a hidden input for compatibility, but backend enforces form-configured currency regardless.
-					echo '<input type="hidden" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $selected_currency ) . '" />';
+					echo '<input type="hidden" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $selected_currency ) . '"' . ( $required ? ' required' : '' ) . ' />';
 					echo '<input type="text" id="' . esc_attr( $field_id ) . '_display" value="' . esc_attr( $selected_currency ) . '" readonly disabled style="background:#f8f8f8; color:#333; max-width:120px;" aria-readonly="true" />';
 					break;
 				case 'email':
