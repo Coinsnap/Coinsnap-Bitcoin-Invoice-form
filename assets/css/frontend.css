@@ -102,9 +102,8 @@
 
 
 .bif-field-currency {
-  margin-right: 20px;
   width: calc(20% - 10px);
-  margin-left: 0;
+  margin-left: 20px;
 }
 
 /* Discount badge and totals */
