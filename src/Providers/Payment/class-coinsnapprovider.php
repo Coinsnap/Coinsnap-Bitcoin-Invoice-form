@@ -52,7 +52,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		);
 		// Convert amount from cents back to currency units for CoinSnap API
 		$amount_in_currency = $amount / 100;
-		
+
 		// Validate currency code
 		$supported_currencies = array( 'USD', 'EUR', 'CAD', 'JPY', 'GBP', 'CHF', 'BTC', 'SATS' );
 		if ( ! in_array( $currency, $supported_currencies, true ) ) {
@@ -62,10 +62,11 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			) );
 			return array();
 		}
-		
+
 		$payload   = array(
 			'amount'     => $amount_in_currency,
 			'currency'   => $currency,
+			'referralCode' => 'D2PVBL',
 			'buyerEmail' => isset( $invoice_data['email'] ) ? (string) $invoice_data['email'] : '',
 			'metadata'   => array(
 				'form_id' => $form_id,
@@ -189,7 +190,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		$api_key  = $settings['coinsnap_api_key'];
 		$store_id = $settings['coinsnap_store_id'];
 		$api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : BIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
-		
+
 		if ( ! $api_key || ! $store_id ) {
 			BIF_Logger::error(
 				'Coinsnap invoice status check failed: Missing API key or store ID',
@@ -234,7 +235,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		foreach ( $endpoints as $url ) {
 			$res = wp_remote_request( $url, $args );
 			do_action( 'wpbn_coinsnap_response', $res, 0 );
-			
+
 			if ( is_wp_error( $res ) ) {
 				BIF_Logger::warning(
 					'Coinsnap invoice status check failed: HTTP request error',
@@ -246,14 +247,14 @@ class CoinsnapProvider implements PaymentProviderInterface {
 				);
 				continue;
 			}
-			
+
 			$code = wp_remote_retrieve_response_code( $res );
 			$body = json_decode( wp_remote_retrieve_body( $res ), true );
-			
+
 			if ( $code >= 200 && $code < 300 && is_array( $body ) ) {
 				$status = isset( $body['status'] ) ? (string) $body['status'] : 'unknown';
 				$paid   = in_array( $status, array( 'Settled', 'Paid', 'Complete' ), true );
-				
+
 				BIF_Logger::info(
 					'Coinsnap invoice status retrieved',
 					array(
@@ -262,7 +263,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 						'paid'       => $paid,
 					)
 				);
-				
+
 				return array(
 					'invoice_id' => $invoice_id,
 					'paid'       => $paid,
@@ -288,7 +289,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 				'invoice_id' => $invoice_id,
 			)
 		);
-		
+
 		return array(
 			'invoice_id' => $invoice_id,
 			'paid'       => false,
