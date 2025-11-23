@@ -107,11 +107,11 @@ class BIF_Services_Payment_Service {
 				$recipient_val = trim( (string) $data['bif_name'] );
 			}
 			if ( '' === $recipient_val ) {
-				$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ) );
+				$errors[] = __( 'Invoice Recipient is required.', 'coinsnap-bitcoin-invoice-form' );
 			}
 			$inv_no_val = isset( $data['bif_invoice_number'] ) ? trim( (string) $data['bif_invoice_number'] ) : '';
 			if ( '' === $inv_no_val ) {
-				$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), __( 'Invoice Number', 'coinsnap-bitcoin-invoice-form' ) );
+				$errors[] = __( 'Invoice Number is required.', 'coinsnap-bitcoin-invoice-form' );
 			}
 			// Validate other fields if they are enabled and marked required in form config
 			$maybe_required = array(
@@ -125,13 +125,15 @@ class BIF_Services_Payment_Service {
 				$enabled = ( '1' === $enabled_val || 'on' === $enabled_val || true === $enabled_val );
 				$required = ( '1' === $required_val || 'on' === $required_val || true === $required_val );
 				if ( $enabled && $required ) {
-					$key = 'bif_' . $f;
-					$val = isset( $data[ $key ] ) ? trim( (string) $data[ $key ] ) : '';
-					if ( '' === $val ) {
-						$errors[] = sprintf( __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
-					} elseif ( 'email' === $f && ! is_email( $val ) ) {
-						$errors[] = __( 'Please enter a valid email address.', 'coinsnap-bitcoin-invoice-form' );
-					}
+                                    $key = 'bif_' . $f;
+                                    $val = isset( $data[ $key ] ) ? trim( (string) $data[ $key ] ) : '';
+                                    if ( '' === $val ) {
+					$errors[] = sprintf(
+                                            /* translators: 1: Required value */
+                                            __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
+                                    } elseif ( 'email' === $f && ! is_email( $val ) ) {
+					$errors[] = __( 'Please enter a valid email address.', 'coinsnap-bitcoin-invoice-form' );
+                                    }
 				}
 			}
 			if ( ! empty( $errors ) ) {
@@ -392,7 +394,8 @@ class BIF_Services_Payment_Service {
 			// Properly prepare query inline
 			$transaction = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
+					"SELECT * FROM %s WHERE payment_invoice_id = %s",
+                                        $table_name,
 					$invoice_id
 				)
 			);
@@ -477,7 +480,8 @@ class BIF_Services_Payment_Service {
 		// Properly prepare query inline
 		$transaction = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
+				"SELECT * FROM %s WHERE payment_invoice_id = %s",
+                                $table_name,
 				$invoice_id
 			)
 		);

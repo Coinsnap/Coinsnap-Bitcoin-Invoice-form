@@ -31,50 +31,53 @@ class BIF_Admin_Transactions_Page {
 	 * Render the transactions page.
 	 */
 	public static function render_page(): void {
-		global $wpdb;
+            global $wpdb;
 
-		$table_name = Installer::table_name();
-		$per_page   = 20;
+            $table_name = Installer::table_name();
+            $per_page   = 20;
 
-		// Handle pagination with nonce verification for filter state
-		$current_page = 1;
-		if ( isset( $_GET['paged'] ) ) {
-			// If filters are active, require nonce. Otherwise allow pagination without nonce.
-			$has_filters = isset( $_GET['form_id'] ) || isset( $_GET['payment_status'] ) ||
-			               isset( $_GET['date_from'] ) || isset( $_GET['date_to'] );
+            // Handle pagination with nonce verification for filter state
+            $current_page = 1;
+            if (filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null) {
+        
+            // If filters are active, require nonce. Otherwise allow pagination without nonce.
+            $has_filters = 
+                filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) !== null || filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null ||                          filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null || filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null; 
 
-			if ( ! $has_filters || ( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'bif_transactions_filter' ) ) ) {
-				$current_page = max( 1, intval( $_GET['paged'] ) );
-			}
-		}
+            if ( !$has_filters || ( filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null && wp_verify_nonce( sanitize_text_field( filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS)), 'bif_transactions_filter' ))){
+		$current_page = max( 1, intval( filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ));
+            }
+        }
 
-		$offset = ( $current_page - 1 ) * $per_page;
+	$offset = ( $current_page - 1 ) * $per_page;
 
-		// Handle filters with nonce verification
-		$filters_enabled = isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'bif_transactions_filter' );
+	// Handle filters with nonce verification
+	$filters_enabled = 
+            filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null && 
+            wp_verify_nonce( sanitize_text_field( filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ), 'bif_transactions_filter' );
 
-		$where_conditions = array( '1 = %d' );
-		$where_values     = array( 1 );
+	$where_conditions = array( '1 = %d' );
+	$where_values     = array( 1 );
 
 		if ( $filters_enabled ) {
-			if ( isset( $_GET['form_id'] ) && '' !== $_GET['form_id'] ) {
+			if (filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) !== null && filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) !== '') {
 				$where_conditions[] = 'form_id = %d';
-				$where_values[]     = intval( $_GET['form_id'] );
+				$where_values[]     = intval( filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) );
 			}
 
-			if ( isset( $_GET['payment_status'] ) && '' !== $_GET['payment_status'] ) {
+			if (filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null && filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== '') {
 				$where_conditions[] = 'payment_status = %s';
-				$where_values[]     = sanitize_text_field( wp_unslash( $_GET['payment_status'] ) );
+				$where_values[]     = sanitize_text_field( wp_unslash(filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS)) );
 			}
 
-			if ( ! empty( $_GET['date_from'] ) ) {
+			if ( ! empty( filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) {
 				$where_conditions[] = 'created_at >= %s';
-				$where_values[]     = sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) . ' 00:00:00';
+				$where_values[]     = sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) . ' 00:00:00';
 			}
 
-			if ( ! empty( $_GET['date_to'] ) ) {
+			if ( ! empty( filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) {
 				$where_conditions[] = 'created_at <= %s';
-				$where_values[]     = sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) . ' 23:59:59';
+				$where_values[]     = sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) . ' 23:59:59';
 			}
 		}
 
@@ -83,27 +86,21 @@ class BIF_Admin_Transactions_Page {
 		// Get total count - query uses a dynamic table name and dynamic WHERE built with placeholders.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from Installer::table_name(); WHERE clause contains only placeholder fragments, values are passed to prepare; direct query is acceptable within admin listing.
 		$total_items = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$table_name} WHERE {$where_clause}",
-				$where_values
-			)
+                    $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE {$where_clause}",$where_values)
 		);
 
 		// Get transactions - prepared with LIMIT/OFFSET and dynamic WHERE with placeholders
 		$query_values = array_merge( $where_values, array( $per_page, $offset ) );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from Installer::table_name(); WHERE clause contains only placeholder fragments; values are passed to prepare; direct query is acceptable within admin listing.
 		$transactions = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE {$where_clause} ORDER BY created_at DESC LIMIT %d OFFSET %d",
-				$query_values
-			)
+                    $wpdb->prepare("SELECT * FROM {$table_name} WHERE {$where_clause} ORDER BY created_at DESC LIMIT %d OFFSET %d",$query_values)
 		);
 
 		// Get forms for filter dropdown
 		$forms = get_posts( array(
-			'post_type'      => BIF_Constants::CPT_INVOICE_FORM,
-			'posts_per_page' => -1,
-			'post_status'    => 'publish',
+                    'post_type'      => BIF_Constants::CPT_INVOICE_FORM,
+                    'posts_per_page' => -1,
+                    'post_status'    => 'publish',
 		) );
 
 		?>
@@ -120,7 +117,7 @@ class BIF_Admin_Transactions_Page {
               <select name="form_id">
                 <option value=""><?php esc_html_e( 'All Forms', 'coinsnap-bitcoin-invoice-form' ); ?></option>
 				  <?php foreach ( $forms as $form ) : ?>
-                    <option value="<?php echo esc_attr( $form->ID ); ?>" <?php selected( isset( $_GET['form_id'] ) ? intval( $_GET['form_id'] ) : '', $form->ID ); ?>>
+                    <option value="<?php echo esc_attr( $form->ID ); ?>" <?php selected( filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) !== null ? intval( filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) ) : '', $form->ID ); ?>>
 						<?php echo esc_html( $form->post_title ); ?>
                     </option>
 				  <?php endforeach; ?>
@@ -128,14 +125,14 @@ class BIF_Admin_Transactions_Page {
 
               <select name="payment_status">
                 <option value=""><?php esc_html_e( 'All Statuses', 'coinsnap-bitcoin-invoice-form' ); ?></option>
-                <option value="unpaid" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'unpaid' ); ?>><?php esc_html_e( 'Unpaid', 'coinsnap-bitcoin-invoice-form' ); ?></option>
-                <option value="paid" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'paid' ); ?>><?php esc_html_e( 'Paid', 'coinsnap-bitcoin-invoice-form' ); ?></option>
-                <option value="failed" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'failed' ); ?>><?php esc_html_e( 'Failed', 'coinsnap-bitcoin-invoice-form' ); ?></option>
-                <option value="refunded" <?php selected( isset( $_GET['payment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['payment_status'] ) ) : '', 'refunded' ); ?>><?php esc_html_e( 'Refunded', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+                <option value="unpaid" <?php selected( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null ? sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) : '', 'unpaid' ); ?>><?php esc_html_e( 'Unpaid', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+                <option value="paid" <?php selected( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null ? sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) : '', 'paid' ); ?>><?php esc_html_e( 'Paid', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+                <option value="failed" <?php selected( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null ? sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) : '', 'failed' ); ?>><?php esc_html_e( 'Failed', 'coinsnap-bitcoin-invoice-form' ); ?></option>
+                <option value="refunded" <?php selected( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null ? sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) : '', 'refunded' ); ?>><?php esc_html_e( 'Refunded', 'coinsnap-bitcoin-invoice-form' ); ?></option>
               </select>
 
-              <input type="date" name="date_from" value="<?php echo esc_attr( isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'From Date', 'coinsnap-bitcoin-invoice-form' ); ?>" />
-              <input type="date" name="date_to" value="<?php echo esc_attr( isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'To Date', 'coinsnap-bitcoin-invoice-form' ); ?>" />
+              <input type="date" name="date_from" value="<?php echo esc_attr( filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS)!== null ? sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'From Date', 'coinsnap-bitcoin-invoice-form' ); ?>" />
+              <input type="date" name="date_to" value="<?php echo esc_attr( filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null ? sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) : '' ); ?>" placeholder="<?php esc_attr_e( 'To Date', 'coinsnap-bitcoin-invoice-form' ); ?>" />
 
               <input type="submit" class="button" value="<?php esc_attr_e( 'Filter', 'coinsnap-bitcoin-invoice-form' ); ?>" />
             </div>
@@ -227,20 +224,6 @@ class BIF_Admin_Transactions_Page {
             </div>
 		  <?php endif; ?>
       </div>
-
-      <style>
-        .bif-status {
-          padding: 4px 8px;
-          border-radius: 3px;
-          font-size: 12px;
-          font-weight: bold;
-          text-transform: uppercase;
-        }
-        .bif-status-paid { background: #d4edda; color: #155724; }
-        .bif-status-unpaid { background: #fff3cd; color: #856404; }
-        .bif-status-failed { background: #f8d7da; color: #721c24; }
-        .bif-status-refunded { background: #d1ecf1; color: #0c5460; }
-      </style>
 		<?php
 	}
 }

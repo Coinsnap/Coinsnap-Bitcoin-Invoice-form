@@ -43,7 +43,7 @@ class BIF_Admin_Settings {
 			'log_level'               => 'error',
 			'disable_webhook_verification' => false,
 		);
-		$defaults = apply_filters( 'bif_default_settings', $defaults );
+		//$defaults = apply_filters( 'bif_default_settings', $defaults );
 		$opts     = get_option( self::OPTION_KEY, array() );
 		if ( ! is_array( $opts ) ) {
 			$opts = array();

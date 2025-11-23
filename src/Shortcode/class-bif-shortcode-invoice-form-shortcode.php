@@ -228,8 +228,12 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				<?php
 					$val_str = rtrim( rtrim( number_format( $disc_value, 2, '.', '' ), '0' ), '.' );
 					$badge = ( 'percent' === $disc_type )
-						? sprintf( __( 'Bitcoin Discount: %s%%', 'coinsnap-bitcoin-invoice-form' ), $val_str )
-						: sprintf( __( 'Bitcoin Discount: %s %s', 'coinsnap-bitcoin-invoice-form' ), $val_str, esc_html( $current_currency ));
+						? sprintf(
+                                                        /* translators: 1: percent discount */
+                                                        __( 'Bitcoin Discount: %1$s', 'coinsnap-bitcoin-invoice-form' ), $val_str ).'%'
+						: sprintf( 
+                                                        /* translators: 1: fixed discount amount; 2: currency. */
+                                                        __( 'Bitcoin Discount: %1$s %2$s', 'coinsnap-bitcoin-invoice-form' ), $val_str, esc_html( $current_currency ));
 				?>
 				<div class="bif-discount-badge" aria-live="polite"><?php echo esc_html( $badge ); ?></div>
 			<?php endif; ?>
@@ -283,7 +287,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 							$msg = sprintf( __( 'Good news! A discount of %s%% will be applied to the amount at checkout.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
 						} else {
 							/* translators: 1: fixed discount amount; 2: currency code. */
-							$msg = sprintf( __( 'Good news! A fixed discount of %s %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
+							$msg = sprintf( __( 'Good news! A fixed discount of %1$s %2$s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
 						}
 					} else {
 						$msg = __( 'Good news! A Bitcoin discount will be applied at checkout.', 'coinsnap-bitcoin-invoice-form' );
@@ -389,7 +393,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 					$disc_type = $fields['discount_type'] ?? 'fixed';
 					$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
 					$step_attr = ' step="0.01"';
-					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . $step_attr . ' min="0"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
+					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . esc_attr($step_attr) . ' min="0"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
 					break;
 				case 'currency':
 					$selected_currency = $fields['_currency_default'] ?? 'USD';

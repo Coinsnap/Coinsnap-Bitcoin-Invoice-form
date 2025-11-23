@@ -1,6 +1,13 @@
-# Bitcoin Invoice Form Plugin
+# Bitcoin Invoice Form
 
-A WordPress plugin that enables merchants to generate and embed customizable Bitcoin Invoice Forms on their website. Customers can complete and pay invoices directly on the merchant's site with payment processing via CoinSnap or BTCPay Server.
+Contributors: coinsnap
+Tags: Lightning, bitcoin, invoice form, BTCPay
+Tested up to: 6.8
+Stable tag: 1.0.0
+License: GPL2
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Generate and embed customizable Bitcoin Invoice Forms on your website (Coinsnap & BTCPay server Integration).
 
 ## Features
 

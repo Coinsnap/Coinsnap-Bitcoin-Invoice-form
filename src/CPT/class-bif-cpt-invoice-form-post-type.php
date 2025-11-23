@@ -143,8 +143,9 @@ class BIF_CPT_Invoice_Form_Post_Type {
 				/* translators: %s is the discount percentage value (without the percent sign). */
 				$discount_placeholder = sprintf( __( 'Good news! A discount of %s%% will be applied to the amount at checkout.', 'coinsnap-bitcoin-invoice-form' ), $val_str );
 			} else {
-				/* translators: 1: fixed discount amount; 2: currency code. */
-				$discount_placeholder = sprintf( __( 'Good news! A fixed discount of %s %s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
+                            $discount_placeholder = sprintf(
+                                /* translators: 1: fixed discount amount; 2: currency code. */
+                                 __( 'Good news! A fixed discount of %1$s %2$s will be applied in the selected currency.', 'coinsnap-bitcoin-invoice-form' ), $val_str, $current_currency );
 			}
 		} else {
 			$discount_placeholder = __( 'Good news! A Bitcoin discount will be applied at checkout.', 'coinsnap-bitcoin-invoice-form' );
@@ -370,7 +371,7 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		echo '<div class="bif-email-config">';
 		echo '<p><label for="customer_email_enabled">' . esc_html__( 'Send email to customer', 'coinsnap-bitcoin-invoice-form' ) . ':</label> ';
 		$checked = ( '1' === (string) ( $values['customer_email_enabled'] ?? '0' ) || 'on' === (string) ( $values['customer_email_enabled'] ?? '' ) ) ? 'checked' : '';
-		echo '<input type="checkbox" id="customer_email_enabled" name="bif_email_customer[customer_email_enabled]" value="1" ' . $checked . ' />';
+		echo '<input type="checkbox" id="customer_email_enabled" name="bif_email_customer[customer_email_enabled]" value="1" ' . esc_attr($checked) . ' />';
 		echo '</p>';
 
 		echo '<p><label for="customer_email_subject">' . esc_html__( 'Customer Email Subject', 'coinsnap-bitcoin-invoice-form' ) . ':</label></p>';
@@ -392,7 +393,7 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		$defaults = array(
 			'success_page' => '',
 			'error_page'   => '',
-			'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
+			'thank_you_message' => esc_html__( 'Thank you! Your payment has been processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
 		);
 
 		$values = get_post_meta( $post->ID, '_bif_redirect', true );

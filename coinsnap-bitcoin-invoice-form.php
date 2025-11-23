@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name:        Bitcoin Invoice Form (Coinsnap & BTCPay server Integration)
+ * Plugin Name:        Bitcoin Invoice Form
  * Plugin URI:         https://coinsnap.io/coinsnap-bitcoin-invoice-form/
  * Description:        Generate and embed customizable Bitcoin Invoice Forms on your website. Customers can complete and pay invoices directly on your site with payment processing via Coinsnap or BTCPay Server.
  * Version:            1.0.0
