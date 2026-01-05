@@ -189,9 +189,12 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		$api_key  = $settings['coinsnap_api_key'];
 		$store_id = $settings['coinsnap_store_id'];
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		$api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : BIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
 		
 =======
+=======
+>>>>>>> Stashed changes
 		$api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : CoinsnapBIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
 
 >>>>>>> Stashed changes
@@ -259,8 +262,13 @@ class CoinsnapProvider implements PaymentProviderInterface {
 				$status = isset( $body['status'] ) ? (string) $body['status'] : 'unknown';
 				$paid   = in_array( $status, array( 'Settled', 'Paid', 'Complete' ), true );
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 				
 				BIF_Logger::info(
+=======
+
+				CoinsnapBIF_Logger::info(
+>>>>>>> Stashed changes
 =======
 
 				CoinsnapBIF_Logger::info(

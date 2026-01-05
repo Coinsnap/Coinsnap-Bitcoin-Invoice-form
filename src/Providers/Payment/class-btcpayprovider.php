@@ -38,8 +38,11 @@ class BTCPayProvider implements PaymentProviderInterface {
 			return array();
 		}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		$url     = $host . sprintf( BIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
 =======
+=======
+>>>>>>> Stashed changes
 		$url     = $host . sprintf( CoinsnapBIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
 		// Convert from minor units to BTCPay expected units.
 		// Our service stores amounts in minor units (e.g., cents for fiat, centisats for SATS).

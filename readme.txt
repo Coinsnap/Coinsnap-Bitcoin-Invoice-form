@@ -60,7 +60,11 @@ Plugin's page on Coinsnap website: [https://coinsnap.io/coinsnap-bitcoin-invoice
 === Changelog ===
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 = 1.0.0 :: 2025-09-26 =
+=======
+= 1.0.0 :: 2025-11-26 =
+>>>>>>> Stashed changes
 * First tests.
 =======
 = 1.0.0 :: 2025-11-26 =

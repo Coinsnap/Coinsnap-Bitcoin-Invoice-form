@@ -85,6 +85,9 @@
             var value = field.val().trim();
 =======
             var value = (field.val() || '').toString().trim();
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             
             if (!value) {
@@ -232,9 +235,12 @@
             
             tries++;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             var statusUrl = BIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
             
 =======
+=======
+>>>>>>> Stashed changes
             var statusUrl = CoinsnapBIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
 
 >>>>>>> Stashed changes
@@ -290,10 +296,15 @@
                 return;
             }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             
             var verifyUrl = BIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
             
 =======
+=======
+
+            var verifyUrl = CoinsnapBIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
+>>>>>>> Stashed changes
 
             var verifyUrl = CoinsnapBIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
 
@@ -497,6 +508,23 @@
                 else{
                     disc = Math.min(value, amt);
                 }
+<<<<<<< Updated upstream
+=======
+
+                var finalVal = Math.max(0, amt - disc);
+                if(originalEl){ originalEl.textContent = fmt(amt,currency); }
+                if(discountEl){ discountEl.textContent = '-' + fmt(disc,currency); }
+                if(finalEl){ finalEl.textContent = fmt(finalVal,currency); }
+            }
+
+            if(amountInput){
+                amountInput.addEventListener('input', update);
+            }
+        }
+    });
+    
+    
+>>>>>>> Stashed changes
 
                 var finalVal = Math.max(0, amt - disc);
                 if(originalEl){ originalEl.textContent = fmt(amt,currency); }
