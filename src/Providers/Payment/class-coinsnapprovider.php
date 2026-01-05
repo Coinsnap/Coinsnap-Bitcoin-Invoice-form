@@ -7,11 +7,11 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Providers\Payment;
+namespace CoinsnapBIF\Providers\Payment;
 
-use BitcoinInvoiceForm\Admin\BIF_Admin_Settings as Settings;
-use BitcoinInvoiceForm\Util\BIF_Logger;
-use BitcoinInvoiceForm\BIF_Constants;
+use CoinsnapBIF\Admin\CoinsnapBIF_Admin_Settings as Settings;
+use CoinsnapBIF\Util\CoinsnapBIF_Logger;
+use CoinsnapBIF\CoinsnapBIF_Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -34,9 +34,9 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		$settings = Settings::get_settings();
 		$api_key  = $settings['coinsnap_api_key'];
 		$store_id = $settings['coinsnap_store_id'];
-		$api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : BIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
+		$api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : CoinsnapBIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
 		if ( ! $api_key || ! $store_id ) {
-			BIF_Logger::error(
+			CoinsnapBIF_Logger::error(
 				'Coinsnap invoice creation failed: Missing API key or store ID',
 				array(
 					'has_api_key'  => ! empty( $api_key ),
@@ -47,8 +47,8 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			return array();
 		}
 		$endpoints = array(
-			$api_base . sprintf( BIF_Constants::COINSNAP_INVOICES_ENDPOINT_V1, rawurlencode( $store_id ) ),
-			$api_base . sprintf( BIF_Constants::COINSNAP_INVOICES_ENDPOINT_ALT, rawurlencode( $store_id ) ),
+			$api_base . sprintf( CoinsnapBIF_Constants::COINSNAP_INVOICES_ENDPOINT_V1, rawurlencode( $store_id ) ),
+			$api_base . sprintf( CoinsnapBIF_Constants::COINSNAP_INVOICES_ENDPOINT_ALT, rawurlencode( $store_id ) ),
 		);
 		// Convert amount from cents back to currency units for CoinSnap API
 		$amount_in_currency = $amount / 100;
@@ -56,7 +56,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		// Validate currency code
 		$supported_currencies = array( 'USD', 'EUR', 'CAD', 'JPY', 'GBP', 'CHF', 'BTC', 'SATS' );
 		if ( ! in_array( $currency, $supported_currencies, true ) ) {
-			BIF_Logger::error( 'Unsupported currency for CoinSnap', array(
+			CoinsnapBIF_Logger::error( 'Unsupported currency for CoinSnap', array(
 				'currency' => $currency,
 				'form_id'  => $form_id,
 			) );
@@ -75,7 +75,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 				'defaultPaymentMethod' => 'LightningNetwork',
 			),
 		);
-		$payload   = apply_filters( 'wpbn_coinsnap_invoice_payload', $payload, $form_id, $invoice_data );
+		//$payload   = apply_filters( 'wpbn_coinsnap_invoice_payload', $payload, $form_id, $invoice_data );
 		$args      = array(
 			'method'  => 'POST',
 			'headers' => array(
@@ -88,9 +88,9 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			'timeout' => 20,
 			'body'    => wp_json_encode( $payload ),
 		);
-		$args      = apply_filters( 'wpbn_coinsnap_request_args', $args, $form_id );
+		//$args      = apply_filters( 'coinsnapbif_coinsnap_request_args', $args, $form_id );
 
-		BIF_Logger::debug(
+		CoinsnapBIF_Logger::debug(
 			'Coinsnap invoice creation request',
 			array(
 				'form_id'   => $form_id,
@@ -106,7 +106,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			/** Action: on Coinsnap response (raw) */
 			do_action( 'wpbn_coinsnap_response', $res, $form_id );
 			if ( is_wp_error( $res ) ) {
-				BIF_Logger::warning(
+				CoinsnapBIF_Logger::warning(
 					'Coinsnap invoice creation failed: HTTP request error',
 					array(
 						'url'     => $url,
@@ -122,7 +122,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 				$invoice_id  = isset( $body['id'] ) ? (string) $body['id'] : '';
 				$payment_url = isset( $body['checkoutLink'] ) ? (string) $body['checkoutLink'] : '';
 				if ( $invoice_id && $payment_url ) {
-					BIF_Logger::info(
+					CoinsnapBIF_Logger::info(
 						'Coinsnap invoice created successfully',
 						array(
 							'invoice_id' => $invoice_id,
@@ -137,7 +137,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 					);
 				}
 			} else {
-				BIF_Logger::error(
+				CoinsnapBIF_Logger::error(
 					'Coinsnap invoice creation failed: Invalid response',
 					array(
 						'url'           => $url,
@@ -149,7 +149,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			}
 		}
 
-		BIF_Logger::error(
+		CoinsnapBIF_Logger::error(
 			'Coinsnap invoice creation failed: All endpoints failed',
 			array(
 				'form_id'  => $form_id,
@@ -188,10 +188,15 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		$settings = Settings::get_settings();
 		$api_key  = $settings['coinsnap_api_key'];
 		$store_id = $settings['coinsnap_store_id'];
+<<<<<<< Updated upstream
 		$api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : BIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
 		
+=======
+		$api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : CoinsnapBIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
+
+>>>>>>> Stashed changes
 		if ( ! $api_key || ! $store_id ) {
-			BIF_Logger::error(
+			CoinsnapBIF_Logger::error(
 				'Coinsnap invoice status check failed: Missing API key or store ID',
 				array(
 					'invoice_id' => $invoice_id,
@@ -223,7 +228,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			'timeout' => 20,
 		);
 
-		BIF_Logger::debug(
+		CoinsnapBIF_Logger::debug(
 			'Coinsnap invoice status check request',
 			array(
 				'invoice_id' => $invoice_id,
@@ -236,7 +241,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			do_action( 'wpbn_coinsnap_response', $res, 0 );
 			
 			if ( is_wp_error( $res ) ) {
-				BIF_Logger::warning(
+				CoinsnapBIF_Logger::warning(
 					'Coinsnap invoice status check failed: HTTP request error',
 					array(
 						'url'        => $url,
@@ -253,8 +258,13 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			if ( $code >= 200 && $code < 300 && is_array( $body ) ) {
 				$status = isset( $body['status'] ) ? (string) $body['status'] : 'unknown';
 				$paid   = in_array( $status, array( 'Settled', 'Paid', 'Complete' ), true );
+<<<<<<< Updated upstream
 				
 				BIF_Logger::info(
+=======
+
+				CoinsnapBIF_Logger::info(
+>>>>>>> Stashed changes
 					'Coinsnap invoice status retrieved',
 					array(
 						'invoice_id' => $invoice_id,
@@ -270,7 +280,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 					'metadata'   => $body,
 				);
 			} else {
-				BIF_Logger::error(
+				CoinsnapBIF_Logger::error(
 					'Coinsnap invoice status check failed: Invalid response',
 					array(
 						'url'           => $url,
@@ -282,7 +292,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			}
 		}
 
-		BIF_Logger::error(
+		CoinsnapBIF_Logger::error(
 			'Coinsnap invoice status check failed: All endpoints failed',
 			array(
 				'invoice_id' => $invoice_id,

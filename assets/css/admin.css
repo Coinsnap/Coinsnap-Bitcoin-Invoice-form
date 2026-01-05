@@ -409,6 +409,21 @@
     color: white;
 }
 
+.bif-log-message {
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+                
+		.bif-log-emergency .bif-log-level { background: #dc3545; color: white; }
+		.bif-log-alert .bif-log-level { background: #fd7e14; color: white; }
+		.bif-log-critical .bif-log-level { background: #dc3545; color: white; }
+		.bif-log-error .bif-log-level { background: #dc3545; color: white; }
+		.bif-log-warning .bif-log-level { background: #ffc107; color: black; }
+		.bif-log-notice .bif-log-level { background: #17a2b8; color: white; }
+		.bif-log-info .bif-log-level { background: #28a745; color: white; }
+		.bif-log-debug .bif-log-level { background: #6c757d; color: white; }
+		.bif-log-unknown .bif-log-level { background: #6c757d; color: white; }
+
 /* Modal Styles */
 .bif-modal {
     position: fixed;

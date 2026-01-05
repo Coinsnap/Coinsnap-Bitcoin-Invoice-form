@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Database;
+namespace CoinsnapBIF\Database;
 
-use BitcoinInvoiceForm\BIF_Constants;
+use CoinsnapBIF\CoinsnapBIF_Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -28,7 +28,7 @@ class Installer {
 	public static function table_name( $wpdb_param = null ): string {
 		global $wpdb;
 		$db = $wpdb_param ? $wpdb_param : $wpdb;
-		return $db->prefix . \BitcoinInvoiceForm\BIF_Constants::INVOICES_TABLE_SUFFIX;
+		return $db->prefix . \CoinsnapBIF\CoinsnapBIF_Constants::INVOICES_TABLE_SUFFIX;
 	}
 
 	/**
@@ -63,7 +63,7 @@ class Installer {
             customer_name VARCHAR(190) NOT NULL,
             customer_email VARCHAR(190) NOT NULL,
             customer_company VARCHAR(190) NULL,
-            amount BIGINT NOT NULL,
+            amount DOUBLE NOT NULL,
             currency VARCHAR(10) NOT NULL,
             description TEXT NULL,
             payment_provider VARCHAR(50) NOT NULL,

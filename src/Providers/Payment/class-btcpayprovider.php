@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Providers\Payment;
+namespace CoinsnapBIF\Providers\Payment;
 
-use BitcoinInvoiceForm\Admin\BIF_Admin_Settings as Settings;
-use BitcoinInvoiceForm\BIF_Constants;
+use CoinsnapBIF\Admin\CoinsnapBIF_Admin_Settings as Settings;
+use CoinsnapBIF\CoinsnapBIF_Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -37,7 +37,15 @@ class BTCPayProvider implements PaymentProviderInterface {
 		if ( ! $host || ! $api_key || ! $store ) {
 			return array();
 		}
+<<<<<<< Updated upstream
 		$url     = $host . sprintf( BIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
+=======
+		$url     = $host . sprintf( CoinsnapBIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
+		// Convert from minor units to BTCPay expected units.
+		// Our service stores amounts in minor units (e.g., cents for fiat, centisats for SATS).
+		// BTCPay expects major units for fiat (e.g., USD) and whole sats for SATS.
+		$api_amount = $amount / 100;
+>>>>>>> Stashed changes
 		$payload = array(
 			'amount'   => (string) $amount,
 			'currency' => $currency,
@@ -55,7 +63,7 @@ class BTCPayProvider implements PaymentProviderInterface {
 			'timeout' => 20,
 			'body'    => wp_json_encode( $payload ),
 		);
-		$args    = apply_filters( 'wpbn_btcpay_request_args', $args, $form_id );
+		//$args    = apply_filters( 'wpbn_btcpay_request_args', $args, $form_id );
 		$res     = wp_remote_request( $url, $args );
 		do_action( 'wpbn_btcpay_response', $res, $form_id );
 		if ( is_wp_error( $res ) ) {

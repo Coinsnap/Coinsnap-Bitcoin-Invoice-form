@@ -101,10 +101,10 @@
         
         // Load transaction details via AJAX
         $.ajax({
-            url: bifRestUrl.restUrl + 'transactions/' + transactionId,
+            url: CoinsnapBIFRestUrl.restUrl + 'transactions/' + transactionId,
             method: 'GET',
             headers: {
-                'X-WP-Nonce': bifRestUrl.nonce
+                'X-WP-Nonce': CoinsnapBIFRestUrl.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -219,14 +219,14 @@
         
         // Perform bulk action
         $.ajax({
-            url: bifRestUrl.restUrl + 'transactions/bulk-action',
+            url: CoinsnapBIFRestUrl.restUrl + 'transactions/bulk-action',
             method: 'POST',
             data: {
                 action: action,
                 ids: ids
             },
             headers: {
-                'X-WP-Nonce': bifRestUrl.nonce
+                'X-WP-Nonce': CoinsnapBIFRestUrl.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -329,10 +329,10 @@
         button.prop('disabled', true).text('Testing...');
         
         $.ajax({
-            url: bifRestUrl.restUrl + 'test-connection/' + provider,
+            url: CoinsnapBIFRestUrl.restUrl + 'test-connection/' + provider,
             method: 'POST',
             headers: {
-                'X-WP-Nonce': bifRestUrl.nonce
+                'X-WP-Nonce': CoinsnapBIFRestUrl.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -351,9 +351,9 @@
     });
 
     // Expose functions globally for external use
-    window.BIFAdmin = window.BIFAdmin || {};
-    window.BIFAdmin.handleBulkAction = handleBulkAction;
-    window.BIFAdmin.validateForm = validateForm;
-    window.BIFAdmin.closeModal = closeModal;
+    window.CoinsnapBIFAdmin = window.CoinsnapBIFAdmin || {};
+    window.CoinsnapBIFAdmin.handleBulkAction = handleBulkAction;
+    window.CoinsnapBIFAdmin.validateForm = validateForm;
+    window.CoinsnapBIFAdmin.closeModal = closeModal;
 
 })(jQuery);

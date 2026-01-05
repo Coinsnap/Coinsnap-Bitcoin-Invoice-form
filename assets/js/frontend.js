@@ -43,13 +43,13 @@
         
         // Submit form
         $.ajax({
-            url: BIF.restUrl + 'payment/create',
+            url: CoinsnapBIF.restUrl + 'payment/create',
             method: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             headers: {
-                'X-WP-Nonce': BIF.nonce
+                'X-WP-Nonce': CoinsnapBIF.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -81,7 +81,11 @@
         
         requiredFields.each(function() {
             var field = $(this);
+<<<<<<< Updated upstream
             var value = field.val().trim();
+=======
+            var value = (field.val() || '').toString().trim();
+>>>>>>> Stashed changes
             
             if (!value) {
                 field.addClass('error');
@@ -90,6 +94,7 @@
                 field.removeClass('error');
             }
         });
+<<<<<<< Updated upstream
         
         // Validate email field
         var emailField = form.find('input[type="email"]');
@@ -98,6 +103,45 @@
             var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 emailField.addClass('error');
+=======
+
+        // 2) All enabled (rendered) fields should be non-empty as well (except hidden/disabled)
+        form.find('.bif-field').each(function() {
+            var container = $(this);
+            var input = container.find('input:not([type="hidden"]):not([disabled]), textarea:not([disabled])').first();
+            if (input.length && input.attr('required') !== undefined) {
+                var val = (input.val() || '').toString().trim();
+                if (!val) {
+                    input.addClass('error');
+                    isValid = false;
+                } else {
+                    input.removeClass('error');
+                }
+            }
+        });
+
+        // 3) Validate email field format when present
+        var emailField = form.find('input[type="email"]');
+        if (emailField.length) {
+            var email = (emailField.val() || '').toString().trim();
+            console.log(email + ': ' + email.length);
+            if (email !== '' && email.length > 0) {
+                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    emailField.addClass('error');
+                    isValid = false;
+                }
+            }
+        }
+
+        // 4) Validate amount > 0 when amount field exists
+        var amountField = form.find('#bif_amount');
+        if (amountField.length) {
+            var raw = (amountField.val() || '').toString().trim();
+            var numeric = parseFloat(raw.replace(/,/g, '.'));
+            if (!raw || isNaN(numeric) || numeric <= 0) {
+                amountField.addClass('error');
+>>>>>>> Stashed changes
                 isValid = false;
             }
         }
@@ -187,15 +231,20 @@
             }
             
             tries++;
+<<<<<<< Updated upstream
             var statusUrl = BIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
             
+=======
+            var statusUrl = CoinsnapBIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
+
+>>>>>>> Stashed changes
             console.log('Polling status for invoice:', invoiceId, 'attempt:', tries);
             
             $.ajax({
                 url: statusUrl,
                 method: 'GET',
                 headers: {
-                    'X-WP-Nonce': BIF.nonce
+                    'X-WP-Nonce': CoinsnapBIF.nonce
                 }
             })
             .done(function(response) {
@@ -240,16 +289,22 @@
                 console.log('Verification stopped - modal closed');
                 return;
             }
+<<<<<<< Updated upstream
             
             var verifyUrl = BIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
             
+=======
+
+            var verifyUrl = CoinsnapBIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
+
+>>>>>>> Stashed changes
             console.log('Attempting manual payment verification...');
             
             $.ajax({
                 url: verifyUrl,
                 method: 'POST',
                 headers: {
-                    'X-WP-Nonce': BIF.nonce
+                    'X-WP-Nonce': CoinsnapBIF.nonce
                 }
             })
             .done(function(response) {
@@ -339,10 +394,129 @@
         element.removeClass('bif-loading');
     }
 
+<<<<<<< Updated upstream
+=======
+    /**
+     * Setup live discount calculation
+     */
+    function setupLiveDiscount(form) {
+        var amountInput = form.find('#bif_amount');
+        if (!amountInput.length) return;
+        var hasDiscount = amountInput.data('discount-enabled') === 1 || amountInput.data('discount-enabled') === '1';
+        if (!hasDiscount) return;
+
+        var finalField = form.find('.bif-amount-final');
+        var currencySelect = form.find('#bif_currency');
+        var formCurrency = form.data('currency') || 'USD';
+        var discType = amountInput.data('discount-type') || 'fixed';
+        var discValue = parseFloat(amountInput.data('discount-value')) || 0;
+
+        function parseLocaleAmount(val) {
+            if (val == null) return 0;
+            var s = String(val).trim();
+            if (s === '') return 0;
+            var hasComma = s.indexOf(',') !== -1;
+            var hasDot = s.indexOf('.') !== -1;
+            if (hasComma && hasDot) {
+                var lastComma = s.lastIndexOf(',');
+                var lastDot = s.lastIndexOf('.');
+                if (lastComma > lastDot) {
+                    s = s.replace(/\./g, '');
+                    s = s.replace(',', '.');
+                } else {
+                    s = s.replace(/,/g, '');
+                }
+            } else if (hasComma && !hasDot) {
+                s = s.replace(/,/g, '.');
+            } else {
+                s = s.replace(/,/g, '');
+            }
+            var n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function computeFinal(base, type, value) {
+            var amt = base;
+            if (value > 0) {
+                if (type === 'percent') {
+                    amt = amt - (amt * (value / 100));
+                } else {
+                    amt = amt - value;
+                }
+            }
+            if (amt < 0) amt = 0;
+            return amt;
+        }
+
+        function decimalsFor(currency) {
+            return currency === 'SATS' ? 0 : 2;
+        }
+
+        function updateFinal() {
+            if (!finalField.length) return;
+            var currency = currencySelect.length ? currencySelect.val() : formCurrency;
+            var base = parseLocaleAmount(amountInput.val());
+            var finalAmt = computeFinal(base, discType, discValue);
+            var dec = decimalsFor(currency);
+            // Format value with fixed decimals (no currency symbol to keep it simple)
+            finalField.val(finalAmt.toFixed(dec));
+        }
+
+        amountInput.on('input change', updateFinal);
+        currencySelect.on('change', updateFinal);
+        // Initial calc
+        updateFinal();
+    }
+    
+    function fmt(n,currency){
+        if(isNaN(n)) return '—';
+        return currency + ' ' + (Math.round(n * 100) / 100).toFixed(2);
+    }
+    
+    $('form.bif-form').each(function(){
+        
+        if(parseInt($(this).attr('data-discount-enabled')) === 1){
+            
+            var form = document.querySelector('.bif-form-' + $(this).attr('data-form-inline-id'));
+            if(!form) return;
+            var amountInput = form.querySelector('#bif_amount');
+            var originalEl = form.querySelector('.bif-totals-original');
+            var discountEl = form.querySelector('.bif-totals-discount');
+            var finalEl = form.querySelector('.bif-totals-final');
+            var currency = form.getAttribute('data-currency') || '';
+            var type = form.getAttribute('data-discount-type') || 'fixed';
+            var value = parseFloat(form.getAttribute('data-discount-value') || '0') || 0;
+                                
+            function update(){
+                var amt = parseFloat(amountInput && amountInput.value ? amountInput.value : '0');
+                if(isNaN(amt)){ amt = 0; }
+                var disc = 0;
+                if(type === 'percent'){
+                    disc = amt * (value/100);
+                }
+                else{
+                    disc = Math.min(value, amt);
+                }
+
+                var finalVal = Math.max(0, amt - disc);
+                if(originalEl){ originalEl.textContent = fmt(amt,currency); }
+                if(discountEl){ discountEl.textContent = '-' + fmt(disc,currency); }
+                if(finalEl){ finalEl.textContent = fmt(finalVal,currency); }
+            }
+
+            if(amountInput){
+                amountInput.addEventListener('input', update);
+            }
+        }
+    });
+    
+    
+
+>>>>>>> Stashed changes
     // Expose functions globally for external use
-    window.BIF = window.BIF || {};
-    window.BIF.showPaymentModal = showPaymentModal;
-    window.BIF.closeModal = closeModal;
-    window.BIF.formatCurrency = formatCurrency;
+    window.CoinsnapBIF = window.CoinsnapBIF || {};
+    window.CoinsnapBIF.showPaymentModal = showPaymentModal;
+    window.CoinsnapBIF.closeModal = closeModal;
+    window.CoinsnapBIF.formatCurrency = formatCurrency;
 
 })(jQuery);

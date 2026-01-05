@@ -2,7 +2,7 @@
 
 Contributors: coinsnap
 Tags: Lightning, bitcoin, invoice form, BTCPay
-Tested up to: 6.8
+Tested up to: 6.9
 Stable tag: 1.0.0
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -59,5 +59,10 @@ Plugin's page on Coinsnap website: [https://coinsnap.io/coinsnap-bitcoin-invoice
  
 === Changelog ===
 
+<<<<<<< Updated upstream
 = 1.0.0 :: 2025-09-26 =
 * First tests.
+=======
+= 1.0.0 :: 2025-11-26 =
+* First tests.
+>>>>>>> Stashed changes

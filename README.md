@@ -159,7 +159,7 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 ### Basic Form Shortcode
 
 ```php
-[bif_invoice_form id="123"]
+[coinsnapbif_invoice_form id="123"]
 ```
 
 **Parameters:**
@@ -168,7 +168,7 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 ### Advanced Shortcode Options
 
 ```php
-[bif_invoice_form id="123" class="custom-class" style="border: 2px solid #000;"]
+[coinsnapbif_invoice_form id="123" class="custom-class" style="border: 2px solid #000;"]
 ```
 
 **Parameters:**
@@ -180,12 +180,12 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 
 1. **Simple Form**
    ```php
-   [bif_invoice_form id="1"]
+   [coinsnapbif_invoice_form id="1"]
    ```
 
 2. **Styled Form**
    ```php
-   [bif_invoice_form id="1" class="invoice-form" style="max-width: 500px; margin: 0 auto;"]
+   [coinsnapbif_invoice_form id="1" class="invoice-form" style="max-width: 500px; margin: 0 auto;"]
    ```
 
 ## Advanced Customization
@@ -229,7 +229,7 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 
 1. **Form Display Filter**
    ```php
-   add_filter('bif_form_html', function($html, $form_id) {
+   add_filter('coinsnapbif_form_html', function($html, $form_id) {
        // Modify form HTML before display
        return $html;
    }, 10, 2);
@@ -237,7 +237,7 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 
 2. **Payment Success Action**
    ```php
-   add_action('bif_payment_success', function($transaction_id, $payment_data) {
+   add_action('coinsnapbif_payment_success', function($transaction_id, $payment_data) {
        // Custom action after successful payment
        error_log('Payment successful for transaction: ' . $transaction_id);
    }, 10, 2);
@@ -245,7 +245,7 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 
 3. **Email Template Filter**
    ```php
-   add_filter('bif_email_template', function($template, $transaction_id) {
+   add_filter('coinsnapbif_email_template', function($template, $transaction_id) {
        // Modify email template
        return $template;
    }, 10, 2);

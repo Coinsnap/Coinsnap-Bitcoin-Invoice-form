@@ -8,8 +8,8 @@
  * Author URI:         https://coinsnap.io/
  * Text Domain:        coinsnap-bitcoin-invoice-form
  * Domain Path:         /languages
- * Tested up to:        6.8
- * Requires at least:   5.8
+ * Tested up to:        6.9
+ * Requires at least:   6.2
  * Requires PHP:        7.4
  * License:             GPL2
  * License URI:         https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,21 +23,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_REFERRAL_CODE' ) ) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_REFERRAL_CODE', 'D85536' );}
-if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_VERSION' ) ) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_VERSION', '1.0.0' );}
-if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_PHP_VERSION' ) ) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_PHP_VERSION', '7.4' );}
+if(!defined('COINSNAPBIF_REFERRAL_CODE' ) ) { define( 'COINSNAPBIF_REFERRAL_CODE', 'D85536' );}
+if(!defined('COINSNAPBIF_VERSION' ) ) { define( 'COINSNAPBIF_VERSION', '1.0.0' );}
+if(!defined('COINSNAPBIF_PHP_VERSION' ) ) { define( 'COINSNAPBIF_PHP_VERSION', '7.4' );}
 if(!defined('COINSNAP_CURRENCIES')){define( 'COINSNAP_CURRENCIES', array("EUR","USD","SATS","BTC","CAD","JPY","GBP","CHF","RUB") );}
 if(!defined('COINSNAP_SERVER_URL')){define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );}
 
-if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_FILE')) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_FILE', __FILE__ ); }
-if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR' )) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) ); }
-if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL' )) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL', plugin_dir_url( __FILE__ ) ); }
+if(!defined('COINSNAPBIF_PLUGIN_FILE')) { define( 'COINSNAPBIF_PLUGIN_FILE', __FILE__ ); }
+if(!defined('COINSNAPBIF_PLUGIN_DIR' )) { define( 'COINSNAPBIF_PLUGIN_DIR', plugin_dir_path( __FILE__ ) ); }
+if(!defined('COINSNAPBIF_PLUGIN_URL' )) { define( 'COINSNAPBIF_PLUGIN_URL', plugin_dir_url( __FILE__ ) ); }
 /**
  * Register a PSR-4 autoloader for this plugin namespace with WordPress class name mapping.
  */
 spl_autoload_register(
 	function ( $autoload_class ) {
-		$prefix = 'BitcoinInvoiceForm\\';
+		$prefix = 'CoinsnapBIF\\';
 		if ( strpos( $autoload_class, $prefix ) !== 0 ) {
 			return;
 		}
@@ -47,33 +47,33 @@ spl_autoload_register(
 		// Map WordPress-style class names to WordPress-style filenames.
 		$class_mapping = array(
 			// Main classes.
-			'BIF_Plugin'                                  => 'class-bif-plugin',
-			'BIF_Constants'                               => 'class-bif-constants',
+			'CoinsnapBIF_Plugin'                                  => 'class-coinsnapbif-plugin',
+			'CoinsnapBIF_Constants'                               => 'class-coinsnapbif-constants',
 
 			// Admin classes.
-			'Admin\\BIF_Admin_Logs_Page'                  => 'Admin/class-bif-admin-logs-page',
-			'Admin\\BIF_Admin_Settings'                   => 'Admin/class-bif-admin-settings',
-			'Admin\\BIF_Admin_Transactions_Page'          => 'Admin/class-bif-admin-transactions-page',
+			'Admin\\CoinsnapBIF_Admin_Logs_Page'                  => 'Admin/class-coinsnapbif-admin-logs-page',
+			'Admin\\CoinsnapBIF_Admin_Settings'                   => 'Admin/class-coinsnapbif-admin-settings',
+			'Admin\\CoinsnapBIF_Admin_Transactions_Page'          => 'Admin/class-coinsnapbif-admin-transactions-page',
 
 			// CPT classes.
-			'CPT\\BIF_CPT_Invoice_Form_Post_Type'         => 'CPT/class-bif-cpt-invoice-form-post-type',
+			'CPT\\CoinsnapBIF_CPT_Invoice_Form_Post_Type'         => 'CPT/class-coinsnapbif-cpt-invoice-form-post-type',
 
 			// Database classes.
 			'Database\\Installer'                         => 'Database/class-installer',
 
 			// Rest classes.
-			'Rest\\BIF_Rest_Routes'                       => 'Rest/class-bif-rest-routes',
+			'Rest\\CoinsnapBIF_Rest_Routes'                       => 'Rest/class-coinsnapbif-rest-routes',
 
 			// Services classes.
-			'Services\\BIF_Services_Payment_Service'      => 'Services/class-bif-services-payment-service',
+			'Services\\CoinsnapBIF_Services_Payment_Service'      => 'Services/class-coinsnapbif-services-payment-service',
 
 			// Shortcode classes.
-			'Shortcode\\BIF_Shortcode_Invoice_Form_Shortcode' => 'Shortcode/class-bif-shortcode-invoice-form-shortcode',
+			'Shortcode\\CoinsnapBIF_Shortcode_Invoice_Form_Shortcode' => 'Shortcode/class-coinsnapbif-shortcode-invoice-form-shortcode',
 
 			// Util classes.
-			'Util\\BIF_Logger'                            => 'Util/class-bif-logger',
-			'Util\\BIF_Log_Levels'                        => 'Util/class-bif-log-levels',
-			'Util\\BIF_Util_Provider_Factory'             => 'Util/class-bif-util-provider-factory',
+			'Util\\CoinsnapBIF_Logger'                            => 'Util/class-coinsnapbif-logger',
+			'Util\\CoinsnapBIF_Log_Levels'                        => 'Util/class-coinsnapbif-log-levels',
+			'Util\\CoinsnapBIF_Util_Provider_Factory'             => 'Util/class-coinsnapbif-util-provider-factory',
 
 			// Payment Provider classes.
 			'Providers\\Payment\\BTCPayProvider'          => 'Providers/Payment/class-btcpayprovider',
@@ -83,10 +83,10 @@ spl_autoload_register(
 
 		// Check if this is a WordPress-style class name.
 		if ( isset( $class_mapping[ $relative ] ) ) {
-			$file = COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR . 'src/' . $class_mapping[ $relative ] . '.php';
+			$file = COINSNAPBIF_PLUGIN_DIR . 'src/' . $class_mapping[ $relative ] . '.php';
 		} else {
 			// Default PSR-4 mapping.
-			$file = COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR . 'src/' . str_replace( '\\', '/', $relative ) . '.php';
+			$file = COINSNAPBIF_PLUGIN_DIR . 'src/' . str_replace( '\\', '/', $relative ) . '.php';
 		}
 
 		if ( file_exists( $file ) ) {
@@ -101,10 +101,10 @@ spl_autoload_register(
 register_activation_hook(
 	__FILE__,
 	function () {
-		if ( ! class_exists( 'BitcoinInvoiceForm\\Database\\Installer' ) ) {
-			require_once COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR . 'src/Database/class-installer.php';
+		if ( ! class_exists( 'CoinsnapBIF\\Database\\Installer' ) ) {
+			require_once COINSNAPBIF_PLUGIN_DIR . 'src/Database/class-installer.php';
 		}
-		\BitcoinInvoiceForm\Database\Installer::activate();
+		\CoinsnapBIF\Database\Installer::activate();
 	}
 );
 
@@ -114,9 +114,9 @@ register_activation_hook(
 add_action(
 	'plugins_loaded',
 	function () {
-		if ( ! class_exists( 'BitcoinInvoiceForm\\BIF_Plugin' ) ) {
-			require_once COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR . 'src/class-bif-plugin.php';
+		if ( ! class_exists( 'CoinsnapBIF\\CoinsnapBIF_Plugin' ) ) {
+			require_once COINSNAPBIF_PLUGIN_DIR . 'src/class-coinsnapbif-plugin.php';
 		}
-		\BitcoinInvoiceForm\BIF_Plugin::instance()->boot();
+		\CoinsnapBIF\CoinsnapBIF_Plugin::instance()->boot();
 	}
 );

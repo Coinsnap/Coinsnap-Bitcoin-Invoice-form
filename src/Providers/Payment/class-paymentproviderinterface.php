@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Providers\Payment;
+namespace CoinsnapBIF\Providers\Payment;
 
 /**
  * Payment providers must implement invoice creation and webhook handling.
