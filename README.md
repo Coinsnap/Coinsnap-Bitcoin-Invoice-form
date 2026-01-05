@@ -1,6 +1,13 @@
-# Bitcoin Invoice Form Plugin
+# Bitcoin Invoice Form
 
-A WordPress plugin that enables merchants to generate and embed customizable Bitcoin Invoice Forms on their website. Customers can complete and pay invoices directly on the merchant's site with payment processing via CoinSnap or BTCPay Server.
+Contributors: coinsnap
+Tags: Lightning, bitcoin, invoice form, BTCPay
+Tested up to: 6.8
+Stable tag: 1.0.0
+License: GPL2
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Generate and embed customizable Bitcoin Invoice Forms on your website (Coinsnap & BTCPay server Integration).
 
 ## Features
 
@@ -47,7 +54,7 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
 2. **General Settings**
    - **Default Payment Gateway**: Choose between CoinSnap or BTCPay Server
    - **Default Amount**: Set default invoice amount
-   - **Default Currency**: Choose default currency (USD, EUR, CHF, JPY, SATS)
+   - [Removed] Default Currency: Currency is now configured per form in each Invoice Form’s Payment settings.
 
 ### Payment Gateway Setup
 
@@ -94,6 +101,30 @@ A WordPress plugin that enables merchants to generate and embed customizable Bit
    - **Required**: Make field mandatory
    - **Label**: Customize field label
    - **Order**: Set field display order
+
+### Discounts
+
+1. Enable Discounts
+   - Go to Bitcoin Invoice Forms → Invoice Forms → Add New (or edit an existing form)
+   - In the Fields metabox, open the “Discount” section
+   - Check “Enable Discount”
+
+2. Choose Discount Type
+   - Fixed amount: subtracts an absolute value (e.g., 5.00) from the total
+   - Percentage: subtracts a percentage of the amount (e.g., 10%)
+
+3. Set Discount Amount
+   - Enter a positive value for the selected type
+   - The plugin guarantees the total never goes below zero
+
+4. Customer-facing Notice (Optional)
+   - Add your own message to be shown on the form when a discount is active
+   - If left empty, a friendly default message is auto-generated based on your type and amount
+   - The notice is sanitized and shown above the submit button
+
+5. How It’s Applied
+   - The discount is applied server-side before creating the invoice with your payment provider (CoinSnap/BTCPay)
+   - Currency handling follows the form/default settings; fixed discounts are in the selected currency
 
 ### Payment Settings
 

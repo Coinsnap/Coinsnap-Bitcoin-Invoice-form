@@ -16,6 +16,11 @@
     function initInvoiceForms() {
         // Handle form submissions
         $('.bif-form').on('submit', handleFormSubmit);
+
+        // Setup live discount calculation if applicable
+        $('.bif-form').each(function() {
+            setupLiveDiscount($(this));
+        });
     }
 
     /**
@@ -23,24 +28,25 @@
      */
     function handleFormSubmit(e) {
         e.preventDefault();
-        
+
         var form = $(this);
         var formId = form.data('form-id');
         var submitButton = form.find('.bif-button');
         var messagesContainer = form.find('.bif-form-messages');
-        
+
         // Validate form
         if (!validateForm(form)) {
+            showFormError(form, 'Please fill out all required fields correctly.');
             return;
         }
-        
+
         // Disable submit button and show loading state
         submitButton.prop('disabled', true).text('Processing...');
         messagesContainer.hide();
-        
+
         // Prepare form data
         var formData = new FormData(this);
-        
+
         // Submit form
         $.ajax({
             url: CoinsnapBIF.restUrl + 'payment/create',
@@ -77,18 +83,12 @@
      */
     function validateForm(form) {
         var isValid = true;
+
+        // 1) All fields marked as required must be non-empty
         var requiredFields = form.find('[required]');
-        
         requiredFields.each(function() {
             var field = $(this);
-<<<<<<< Updated upstream
-            var value = field.val().trim();
-=======
             var value = (field.val() || '').toString().trim();
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
             
             if (!value) {
                 field.addClass('error');
@@ -97,16 +97,6 @@
                 field.removeClass('error');
             }
         });
-<<<<<<< Updated upstream
-        
-        // Validate email field
-        var emailField = form.find('input[type="email"]');
-        if (emailField.length && emailField.val()) {
-            var email = emailField.val();
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                emailField.addClass('error');
-=======
 
         // 2) All enabled (rendered) fields should be non-empty as well (except hidden/disabled)
         form.find('.bif-field').each(function() {
@@ -144,11 +134,12 @@
             var numeric = parseFloat(raw.replace(/,/g, '.'));
             if (!raw || isNaN(numeric) || numeric <= 0) {
                 amountField.addClass('error');
->>>>>>> Stashed changes
                 isValid = false;
+            } else {
+                amountField.removeClass('error');
             }
         }
-        
+
         return isValid;
     }
 
@@ -158,11 +149,35 @@
     function showFormError(form, message) {
         var messagesContainer = form.find('.bif-form-messages');
         var errorMessage = messagesContainer.find('.bif-message-error');
-        
+        var successMessage = messagesContainer.find('.bif-message-success');
+
+        // Hide success if visible
+        successMessage.hide().text('');
+
         errorMessage.text(message).show();
         messagesContainer.show();
-        
+
         // Scroll to error message
+        $('html, body').animate({
+            scrollTop: messagesContainer.offset().top - 100
+        }, 500);
+    }
+
+    /**
+     * Show form success (inline)
+     */
+    function showFormSuccess(form, message) {
+        var messagesContainer = form.find('.bif-form-messages');
+        var successMessage = messagesContainer.find('.bif-message-success');
+        var errorMessage = messagesContainer.find('.bif-message-error');
+
+        // Hide error if visible
+        errorMessage.hide().text('');
+
+        successMessage.text(message).show();
+        messagesContainer.show();
+
+        // Scroll to success message
         $('html, body').animate({
             scrollTop: messagesContainer.offset().top - 100
         }, 500);
@@ -182,8 +197,8 @@
         modal.appendChild(iframe);
         backdrop.appendChild(modal);
         document.body.appendChild(backdrop);
-        backdrop.addEventListener('click', function(e) { 
-            if (e.target === backdrop) backdrop.style.display = 'none'; 
+        backdrop.addEventListener('click', function(e) {
+            if (e.target === backdrop) backdrop.style.display = 'none';
         });
         return { backdrop: backdrop, frame: iframe };
     }
@@ -194,12 +209,15 @@
     function showPaymentModal(formId, paymentData) {
         console.log('Invoice created:', paymentData.invoice_id);
         console.log('Payment URL:', paymentData.payment_url);
-        
+
         // Try inline modal for Coinsnap-compatible checkout link; otherwise redirect
         try {
             var modal = createModal();
             modal.frame.src = paymentData.payment_url;
-            
+
+            // Store originating form id for later inline messaging
+            modal.backdrop.dataset.formId = String(formId);
+
             // Set redirect data on the backdrop
             if (paymentData.success_page) {
                 modal.backdrop.dataset.successPage = paymentData.success_page;
@@ -207,7 +225,7 @@
             if (paymentData.thank_you_message) {
                 modal.backdrop.dataset.thankYouMessage = paymentData.thank_you_message;
             }
-            
+
             modal.backdrop.style.display = 'flex';
             console.log('Modal created, starting status polling...');
             startPaymentPolling(paymentData.invoice_id, modal);
@@ -225,27 +243,19 @@
         var maxTries = 60; // ~60s
         var verifyTries = 0;
         var maxVerifyTries = 3; // Try manual verification 3 times
-        
+
         function step() {
             // Check if modal is still open and polling should continue
             if (!modal.backdrop.pollingActive) {
                 console.log('Polling stopped - modal closed');
                 return;
             }
-            
+
             tries++;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            var statusUrl = BIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
-            
-=======
-=======
->>>>>>> Stashed changes
             var statusUrl = CoinsnapBIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
 
->>>>>>> Stashed changes
             console.log('Polling status for invoice:', invoiceId, 'attempt:', tries);
-            
+
             $.ajax({
                 url: statusUrl,
                 method: 'GET',
@@ -255,20 +265,20 @@
             })
             .done(function(response) {
                 console.log('Status response:', response);
-                
+
                 if (response && response.success && response.data && response.data.paid) {
                     console.log('Payment confirmed');
                     showPaymentSuccess(modal);
                     return;
                 }
-                
+
                 // If we've been polling for a while and still not paid, try manual verification
                 if (tries > 30 && verifyTries < maxVerifyTries) {
                     verifyTries++;
                     console.log('Trying manual payment verification, attempt:', verifyTries);
                     return verifyPayment();
                 }
-                
+
                 if (tries < maxTries) {
                     console.log('Payment not yet confirmed, retrying in 1s...');
                     setTimeout(step, 1000);
@@ -288,29 +298,18 @@
                 }
             });
         }
-        
+
         function verifyPayment() {
             // Check if modal is still open and polling should continue
             if (!modal.backdrop.pollingActive) {
                 console.log('Verification stopped - modal closed');
                 return;
             }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            
-            var verifyUrl = BIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
-            
-=======
-=======
-
-            var verifyUrl = CoinsnapBIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
->>>>>>> Stashed changes
 
             var verifyUrl = CoinsnapBIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
 
->>>>>>> Stashed changes
             console.log('Attempting manual payment verification...');
-            
+
             $.ajax({
                 url: verifyUrl,
                 method: 'POST',
@@ -320,7 +319,7 @@
             })
             .done(function(response) {
                 console.log('Verification response:', response);
-                
+
                 if (response && response.success && response.data && response.data.paid) {
                     console.log('Payment verified manually');
                     showPaymentSuccess(modal);
@@ -339,12 +338,10 @@
                 }
             });
         }
-        
-        // Start polling
-        step();
-        
-        // Store polling state for cleanup
+
+        // Store polling state for cleanup and start polling
         modal.backdrop.pollingActive = true;
+        step();
     }
 
     /**
@@ -353,17 +350,23 @@
     function showPaymentSuccess(modal) {
         console.log('Payment successful, closing modal');
         modal.backdrop.style.display = 'none';
-        
-        // Redirect after 2 seconds
+
+        // Redirect after 2 seconds or show inline success
         setTimeout(function() {
             var successPage = modal.backdrop.dataset.successPage;
             if (successPage) {
                 window.location.href = successPage;
             } else {
                 var thankYouMessage = modal.backdrop.dataset.thankYouMessage || 'Thank you! Your payment has been processed successfully.';
-                alert(thankYouMessage);
+                var formId = modal.backdrop.dataset.formId;
+                if (formId) {
+                    var formEl = document.querySelector('.bif-form-' + formId);
+                    if (formEl) {
+                        showFormSuccess($(formEl), thankYouMessage);
+                    }
+                }
             }
-        }, 2000);
+        }, 1500);
     }
 
 
@@ -405,8 +408,6 @@
         element.removeClass('bif-loading');
     }
 
-<<<<<<< Updated upstream
-=======
     /**
      * Setup live discount calculation
      */
@@ -508,23 +509,6 @@
                 else{
                     disc = Math.min(value, amt);
                 }
-<<<<<<< Updated upstream
-=======
-
-                var finalVal = Math.max(0, amt - disc);
-                if(originalEl){ originalEl.textContent = fmt(amt,currency); }
-                if(discountEl){ discountEl.textContent = '-' + fmt(disc,currency); }
-                if(finalEl){ finalEl.textContent = fmt(finalVal,currency); }
-            }
-
-            if(amountInput){
-                amountInput.addEventListener('input', update);
-            }
-        }
-    });
-    
-    
->>>>>>> Stashed changes
 
                 var finalVal = Math.max(0, amt - disc);
                 if(originalEl){ originalEl.textContent = fmt(amt,currency); }
@@ -540,7 +524,6 @@
     
     
 
->>>>>>> Stashed changes
     // Expose functions globally for external use
     window.CoinsnapBIF = window.CoinsnapBIF || {};
     window.CoinsnapBIF.showPaymentModal = showPaymentModal;
