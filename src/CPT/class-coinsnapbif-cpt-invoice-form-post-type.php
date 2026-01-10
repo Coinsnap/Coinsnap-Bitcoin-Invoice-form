@@ -59,25 +59,25 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
         
     }
 
-	/** Register meta boxes for the CPT. */
-	public static function register_metaboxes(): void {
-		add_meta_box( 'coinsnapbif_fields', __( 'Invoice Fields', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_fields_metabox' ), self::POST_TYPE, 'normal' );
-		add_meta_box( 'coinsnapbif_payment', __( 'Payment Configuration', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_payment_metabox' ), self::POST_TYPE, 'side' );
-		add_meta_box( 'coinsnapbif_email', __( 'Admin Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_email_metabox' ), self::POST_TYPE, 'normal' );
-		add_meta_box( 'coinsnapbif_email_customer', __( 'Customer Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_customer_email_metabox' ), self::POST_TYPE, 'normal' );
-		add_meta_box( 'coinsnapbif_redirect', __( 'Redirect Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_redirect_metabox' ), self::POST_TYPE, 'side' );
-		add_meta_box( 'coinsnapbif_shortcode', __( 'Shortcode', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_shortcode_metabox' ), self::POST_TYPE, 'side' );
-	}
+    /** Register meta boxes for the CPT. */
+    public static function register_metaboxes(): void {
+        add_meta_box( 'coinsnapbif_fields',__( 'Invoice Fields', 'coinsnap-bitcoin-invoice-form' ),array( __CLASS__, 'render_fields_metabox' ),self::POST_TYPE, 'normal' );
+	add_meta_box( 'coinsnapbif_payment',__( 'Payment Configuration', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__,'render_payment_metabox' ),self::POST_TYPE, 'side' );
+	add_meta_box( 'coinsnapbif_email', __( 'Admin Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_email_metabox' ), self::POST_TYPE, 'normal' );
+	add_meta_box( 'coinsnapbif_email_customer', __( 'Customer Email Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_customer_email_metabox' ), self::POST_TYPE, 'normal' );
+	add_meta_box( 'coinsnapbif_redirect', __( 'Redirect Settings', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_redirect_metabox' ), self::POST_TYPE, 'side' );
+	add_meta_box( 'coinsnapbif_shortcode', __( 'Shortcode', 'coinsnap-bitcoin-invoice-form' ), array( __CLASS__, 'render_shortcode_metabox' ), self::POST_TYPE, 'side' );
+    }
 
-	/**
-	 * Render the fields metabox.
-	 *
-	 * @param \WP_Post $post Post object.
-	 */
-	public static function render_fields_metabox( \WP_Post $post ): void {
-		wp_nonce_field( 'coinsnapbif_save_form_' . $post->ID, 'coinsnapbif_form_nonce' );
+    /**
+    * Render the fields metabox.
+    *
+    * @param \WP_Post $post Post object.
+    */
+    public static function render_fields_metabox( \WP_Post $post ): void {
+        wp_nonce_field( 'coinsnapbif_save_form_' . $post->ID, 'coinsnapbif_form_nonce' );
 
-		$defaults = array(
+        $defaults = array(
 			'invoice_recipient_enabled'  => '1',
 			'invoice_recipient_required' => '1',
 			'invoice_recipient_label'    => __( 'Invoice Recipient', 'coinsnap-bitcoin-invoice-form' ),
@@ -111,10 +111,10 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
 			'discount_type'       => 'percentage',
 			'discount_value'      => '10',
 			'discount_notice'     => '',
-		);
+        );
 
-		$values = get_post_meta( $post->ID, '_coinsnapbif_fields', true );
-		$values = wp_parse_args( $values, $defaults );
+        $values = get_post_meta( $post->ID, '_coinsnapbif_fields', true );
+	$values = wp_parse_args( $values, $defaults );
 
 		// Backward compatibility: map legacy 'name_*' settings to 'invoice_recipient_*' if present in saved values
 		if ( isset( $values['name_enabled'] ) && ! isset( $values['invoice_recipient_enabled'] ) ) {
@@ -215,7 +215,7 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
 		echo '</fieldset>';
 
 		echo '</div>';
-	}
+    }
 
 	/**
 	 * Render a toggle row for a field.
@@ -428,88 +428,75 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		echo '</div>';
 	}
 
-	/**
-	 * Save meta data for the form.
-	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post    Post object.
-	 */
-	public static function save_meta( int $post_id, \WP_Post $post ): void {
-		if ( null === filter_input(INPUT_POST,'coinsnapbif_form_nonce',FILTER_SANITIZE_SPECIAL_CHARS) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( filter_input(INPUT_POST,'coinsnapbif_form_nonce',FILTER_SANITIZE_SPECIAL_CHARS) ) ), 'coinsnapbif_save_form_' . $post_id ) ) {
-			return;
-		}
-
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-
-		// Save fields
-		if ( isset( $_POST['coinsnapbif_fields'] ) ) {
-			$fields = array_map( 'sanitize_text_field', wp_unslash( $_POST['coinsnapbif_fields'] ) );
-
-			// Core fields that are always required
-			$core_required_fields = array( 'invoice_recipient', 'invoice_number', 'amount', 'currency' );
-
-			// Ensure checkbox values are properly set (unchecked checkboxes don't send values)
-			$field_names = array( 'invoice_recipient', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description' );
-			foreach ( $field_names as $field_name ) {
-				$enabled_key = $field_name . '_enabled';
-				$required_key = $field_name . '_required';
-
-				// Set to '0' if not present (unchecked checkbox)
-				if ( ! isset( $fields[ $enabled_key ] ) ) {
-					$fields[ $enabled_key ] = '0';
-				}
-				if ( ! isset( $fields[ $required_key ] ) ) {
-					$fields[ $required_key ] = '0';
-				}
-
-				// Force core fields to always be enabled and required
-				if ( in_array( $field_name, $core_required_fields, true ) ) {
-					$fields[ $enabled_key ] = '1';
-					$fields[ $required_key ] = '1';
-				}
-			}
-
-			// Handle discount settings
-			if ( ! isset( $fields['discount_enabled'] ) ) {
-				$fields['discount_enabled'] = '0';
-			}
-			$fields['discount_type'] = in_array( $fields['discount_type'] ?? 'fixed', array( 'fixed', 'percent' ), true ) ? $fields['discount_type'] : 'fixed';
-			$fields['discount_value'] = isset( $fields['discount_value'] ) ? (string) max( 0, floatval( $fields['discount_value'] ) ) : '0';
-
-			update_post_meta( $post_id, '_coinsnapbif_fields', $fields );
-		}
-
-		// Save payment settings
-		if ( isset( $_POST['coinsnapbif_payment'] ) ) {
-			$payment = array_map( 'sanitize_text_field', wp_unslash( $_POST['coinsnapbif_payment'] ) );
-			update_post_meta( $post_id, '_coinsnapbif_payment', $payment );
-		}
-
-		// Save admin email settings
-		if ( isset( $_POST['coinsnapbif_email'] ) ) {
-			$email = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['coinsnapbif_email'] ) );
-			update_post_meta( $post_id, '_coinsnapbif_email', $email );
-		}
-
-		// Save customer email settings
-		if ( isset( $_POST['coinsnapbif_email_customer'] ) ) {
-			$customer_email = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['coinsnapbif_email_customer'] ) );
-			if ( ! isset( $customer_email['customer_email_enabled'] ) ) {
-				$customer_email['customer_email_enabled'] = '0';
-			}
-			update_post_meta( $post_id, '_coinsnapbif_email_customer', $customer_email );
-		}
-
-		// Save redirect settings
-		if ( isset( $_POST['coinsnapbif_redirect'] ) ) {
-			$redirect = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['coinsnapbif_redirect'] ) );
-			update_post_meta( $post_id, '_coinsnapbif_redirect', $redirect );
-		}
+    /**
+     * Save meta data for the form.
+     *
+     * @param int      $post_id Post ID.
+     * @param \WP_Post $post    Post object.
+     */
+    public static function save_meta( int $post_id, \WP_Post $post ): void {
+            
+        $_nonce = filter_input(INPUT_POST,'coinsnapbif_form_nonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS);            
+        if(($_nonce === null || !wp_verify_nonce($_nonce,'coinsnapbif_save_form_'.$post_id)) || 
+            !current_user_can('edit_post',$post_id) || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)){
+            return;
 	}
+
+        // Save fields
+        if ( isset( $_POST['coinsnapbif_fields'])){
+            $fields = array_map( 'sanitize_text_field', wp_unslash( $_POST['coinsnapbif_fields'] ) );
+
+            // Core fields that are always required
+            $core_required_fields = ['invoice_recipient', 'invoice_number', 'amount', 'currency'];
+
+            // Ensure checkbox values are properly set (unchecked checkboxes don't send values)
+            $field_names = ['invoice_recipient', 'email', 'company', 'invoice_number', 'amount', 'currency', 'description'];
+			
+            foreach ( $field_names as $field_name ){
+                $enabled_key = $field_name . '_enabled';
+                $required_key = $field_name . '_required';
+
+		// Set to '0' if not present (unchecked checkbox)
+		if (!isset( $fields[ $enabled_key ])) { $fields[ $enabled_key ] = '0'; }
+		if (!isset( $fields[ $required_key ])){ $fields[ $required_key ] = '0'; }
+
+		// Force core fields to always be enabled and required
+		if ( in_array( $field_name, $core_required_fields, true ) ) {
+                    $fields[ $enabled_key ] = '1';
+                    $fields[ $required_key ] = '1';
+		}
+            }
+
+            // Handle discount settings
+            if (!isset( $fields['discount_enabled'])) { $fields['discount_enabled'] = '0'; }
+            $fields['discount_type'] = in_array( $fields['discount_type'] ?? 'fixed', array( 'fixed', 'percent' ), true ) ? $fields['discount_type'] : 'fixed';
+            $fields['discount_value'] = isset( $fields['discount_value'] ) ? (string) max( 0, floatval( $fields['discount_value'] ) ) : '0';
+            update_post_meta( $post_id, '_coinsnapbif_fields', $fields );
+        }
+
+	// Save payment settings
+	if ( isset( $_POST['coinsnapbif_payment'] ) ) {
+            $payment = array_map( 'sanitize_text_field', wp_unslash( $_POST['coinsnapbif_payment'] ) );
+            update_post_meta( $post_id, '_coinsnapbif_payment', $payment );
+	}
+
+	// Save admin email settings
+	if ( isset( $_POST['coinsnapbif_email'] ) ) {
+            $email = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['coinsnapbif_email'] ) );
+            update_post_meta( $post_id, '_coinsnapbif_email', $email );
+	}
+
+	// Save customer email settings
+	if ( isset( $_POST['coinsnapbif_email_customer'] ) ) {
+            $customer_email = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['coinsnapbif_email_customer'] ) );
+            if( !isset( $customer_email['customer_email_enabled'] )) { $customer_email['customer_email_enabled'] = '0'; }
+            update_post_meta( $post_id, '_coinsnapbif_email_customer', $customer_email );
+	}
+
+	// Save redirect settings
+	if ( isset( $_POST['coinsnapbif_redirect'] ) ) {
+            $redirect = array_map( 'sanitize_textarea_field', wp_unslash( $_POST['coinsnapbif_redirect'] ) );
+            update_post_meta( $post_id, '_coinsnapbif_redirect', $redirect );
+	}
+    }
 }

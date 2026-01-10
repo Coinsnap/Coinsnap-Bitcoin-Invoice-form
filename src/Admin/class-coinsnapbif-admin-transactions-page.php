@@ -35,54 +35,57 @@ class CoinsnapBIF_Admin_Transactions_Page {
         global $wpdb;
 
         $table_name = Installer::table_name();
-        $per_page   = 20;
+        $per_page   = 5;
+        $_paged = filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $_nonce = filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $filters_enabled = ($_nonce !== null && wp_verify_nonce( $_nonce, 'coinsnapbif_transactions_filter' ))? true : false;
+        
+        $filter_form_id = filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT);
+        $filter_payment_status = filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $filter_date_from = filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $filter_date_to =  filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         // Handle pagination with nonce verification for filter state
-            $current_page = 1;
-            if (filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null) {
+        $current_page = 1;
+        if ($_paged !== null) {
         
             // If filters are active, require nonce. Otherwise allow pagination without nonce.
-            $has_filters = 
-                filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) !== null || filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null ||                          filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null || filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null; 
+            $has_filters = ($filter_form_id !== null || $filter_payment_status !== null ||  $filter_date_from !== null || $filter_date_to !== null)? true : false; 
 
-            if ( !$has_filters || ( filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null && wp_verify_nonce( sanitize_text_field( filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS)), 'bif_transactions_filter' ))){
-		$current_page = max( 1, intval( filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ));
+            if ( !$has_filters || ($has_filters && $filters_enabled)){
+		$current_page = max( 1, intval( $_paged ));
             }
         }
-
-	$offset = ( $current_page - 1 ) * $per_page;
-
-	// Handle filters with nonce verification
-	$filters_enabled = 
-            filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null && 
-            wp_verify_nonce( sanitize_text_field( filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ), 'bif_transactions_filter' );
+        
+        $offset = ( $current_page - 1 ) * $per_page;
 
 	$where_conditions = array( '1 = %d' );
 	$where_values     = array( 1 );
 
-		if ( $filters_enabled ) {
-			if (filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) !== null && filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) !== '') {
-				$where_conditions[] = 'form_id = %d';
-				$where_values[]     = intval( filter_input(INPUT_GET,'form_id',FILTER_VALIDATE_INT) );
-			}
+	if ( $filters_enabled ) {
+                    
+            if ($filter_form_id !== null && intval($filter_form_id) > 0) {
+		$where_conditions[] = 'form_id = %d';
+		$where_values[]     = intval($filter_form_id);
+            }
+                        
+            if ($filter_payment_status !== null && $filter_payment_status !== '') {
+		$where_conditions[] = 'payment_status = %s';
+		$where_values[]     = sanitize_text_field( wp_unslash($filter_payment_status) );
+            }
+                        
+            if ($filter_date_from !== null && $filter_date_from !== '') {
+		$where_conditions[] = 'created_at >= %s';
+		$where_values[]     = sanitize_text_field( wp_unslash( $filter_date_from ) ) . ' 00:00:00';
+            }
+                        
+            if ($filter_date_to !== null && $filter_date_to !== '') {
+		$where_conditions[] = 'created_at <= %s';
+		$where_values[]     = sanitize_text_field( wp_unslash( $filter_date_to ) ) . ' 23:59:59';
+            }
+	}
 
-			if (filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null && filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== '') {
-				$where_conditions[] = 'payment_status = %s';
-				$where_values[]     = sanitize_text_field( wp_unslash(filter_input(INPUT_GET,'payment_status',FILTER_SANITIZE_FULL_SPECIAL_CHARS)) );
-			}
-
-			if ( ! empty( filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) {
-				$where_conditions[] = 'created_at >= %s';
-				$where_values[]     = sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'date_from',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) . ' 00:00:00';
-			}
-
-			if ( ! empty( filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) {
-				$where_conditions[] = 'created_at <= %s';
-				$where_values[]     = sanitize_text_field( wp_unslash( filter_input(INPUT_GET,'date_to',FILTER_SANITIZE_FULL_SPECIAL_CHARS) ) ) . ' 23:59:59';
-			}
-		}
-
-		$where_clause = implode( ' AND ', $where_conditions );
+	$where_clause = implode( ' AND ', $where_conditions );
 
 		// Get total count - query uses a dynamic table name and dynamic WHERE built with placeholders.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from Installer::table_name(); WHERE clause contains only placeholder fragments, values are passed to prepare; direct query is acceptable within admin listing.
