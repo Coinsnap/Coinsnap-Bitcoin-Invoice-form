@@ -94,7 +94,7 @@ class CoinsnapBIF_Shortcode_Invoice_Form_Shortcode {
 				'amount_order'        => '30',
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
-				'currency_label'      => __( 'Currency Selection', 'coinsnap-bitcoin-invoice-form' ),
+				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
 				'currency_order'      => '40',
 				'email_enabled'       => '1',
 				'email_required'      => '1',
@@ -275,20 +275,35 @@ class CoinsnapBIF_Shortcode_Invoice_Form_Shortcode {
 			</div>
 
 			<?php if ( $disc_enabled && $disc_value > 0 ) : ?>
-				<div class="bif-discount-totals" role="status" aria-live="polite">
-					<div class="bif-totals-row">
-						<span class="bif-totals-label"><?php esc_html_e( 'Original', 'coinsnap-bitcoin-invoice-form' ); ?></span>
-						<span class="bif-totals-original" data-value="0">—</span>
-					</div>
-					<div class="bif-totals-row">
-						<span class="bif-totals-label"><?php esc_html_e( 'Discount', 'coinsnap-bitcoin-invoice-form' ); ?></span>
-						<span class="bif-totals-discount" data-value="0">—</span>
-					</div>
-					<div class="bif-totals-row bif-totals-final-row">
-						<span class="bif-totals-label"><?php esc_html_e( 'You pay', 'coinsnap-bitcoin-invoice-form' ); ?></span>
-						<span class="bif-totals-final" data-value="0">—</span>
-					</div>
-				</div>
+			<div class="bif-discount-totals" role="status" aria-live="polite">
+                            <div class="bif-totals-row">
+                                <span class="bif-totals-label"><?php
+                                if(isset($fields['discount_original_text']) && !empty($fields['discount_original_text'])){
+                                    echo esc_html($fields['discount_original_text']);
+                                } else { 
+                                    esc_html_e( 'Original', 'coinsnap-bitcoin-invoice-form' ); 
+                                }?></span>
+				<span class="bif-totals-original" data-value="0">—</span>
+                            </div>
+                            <div class="bif-totals-row">
+                                <span class="bif-totals-label"><?php 
+                                if(isset($fields['discount_discount_text']) && !empty($fields['discount_discount_text'])){
+                                    echo esc_html($fields['discount_discount_text']);
+                                } else { 
+                                    esc_html_e( 'Discount', 'coinsnap-bitcoin-invoice-form' ); 
+                                }?></span>
+                                <span class="bif-totals-discount" data-value="0">—</span>
+                            </div>
+                            <div class="bif-totals-row bif-totals-final-row">
+                                <span class="bif-totals-label"><?php
+                                if(isset($fields['discount_youpay_text']) && !empty($fields['discount_youpay_text'])){
+                                    echo esc_html($fields['discount_youpay_text']);
+                                } else { 
+                                    esc_html_e( 'You pay', 'coinsnap-bitcoin-invoice-form' );
+                                }?></span>
+				<span class="bif-totals-final" data-value="0">—</span>
+                            </div>
+			</div>
 			<?php endif; ?>
 
 			<?php

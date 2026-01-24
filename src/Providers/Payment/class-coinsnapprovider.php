@@ -54,7 +54,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
 		$amount_in_currency = $amount / 100;
 
 		// Validate currency code
-		$supported_currencies = array( 'USD', 'EUR', 'CAD', 'JPY', 'GBP', 'CHF', 'BTC', 'SATS' );
+		$supported_currencies = COINSNAP_CURRENCIES;
 		if ( ! in_array( $currency, $supported_currencies, true ) ) {
 			CoinsnapBIF_Logger::error( 'Unsupported currency for CoinSnap', array(
 				'currency' => $currency,

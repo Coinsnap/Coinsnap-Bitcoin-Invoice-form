@@ -1,9 +1,9 @@
 <?php
 /*
  * Plugin Name:        Bitcoin Invoice Form
- * Plugin URI:         https://coinsnap.io/coinsnap-bitcoin-invoice-form/
+ * Plugin URI:         https://coinsnap.io/modules/bitcoin-invoice/
  * Description:        Generate and embed customizable Bitcoin Invoice Forms on your website. Customers can complete and pay invoices directly on your site with payment processing via Coinsnap or BTCPay Server.
- * Version:            1.0.0
+ * Version:            1.0.1
  * Author:             Coinsnap
  * Author URI:         https://coinsnap.io/
  * Text Domain:        coinsnap-bitcoin-invoice-form
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if(!defined('COINSNAPBIF_REFERRAL_CODE' ) ) { define( 'COINSNAPBIF_REFERRAL_CODE', 'D85536' );}
-if(!defined('COINSNAPBIF_VERSION' ) ) { define( 'COINSNAPBIF_VERSION', '1.0.0' );}
+if(!defined('COINSNAPBIF_VERSION' ) ) { define( 'COINSNAPBIF_VERSION', '1.0.1' );}
 if(!defined('COINSNAPBIF_PHP_VERSION' ) ) { define( 'COINSNAPBIF_PHP_VERSION', '7.4' );}
 if(!defined('COINSNAP_CURRENCIES')){define( 'COINSNAP_CURRENCIES', array("EUR","USD","SATS","BTC","CAD","JPY","GBP","CHF","RUB") );}
 if(!defined('COINSNAP_SERVER_URL')){define( 'COINSNAP_SERVER_URL', 'https://app.coinsnap.io' );}

@@ -6,9 +6,7 @@
  */
 
 declare(strict_types=1);
-
 namespace CoinsnapBIF\Database;
-
 use CoinsnapBIF\CoinsnapBIF_Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,43 +17,44 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Database table installer and utilities.
  */
 class Installer {
-	/**
-	 * Get invoices table name with prefix.
-	 *
-	 * @param \wpdb|null $wpdb_param Optional wpdb instance.
-	 * @return string Table name.
-	 */
-	public static function table_name( $wpdb_param = null ): string {
-		global $wpdb;
-		$db = $wpdb_param ? $wpdb_param : $wpdb;
-		return $db->prefix . \CoinsnapBIF\CoinsnapBIF_Constants::INVOICES_TABLE_SUFFIX;
-	}
 
-	/**
-	 * Back-compat alias for camelCase method.
-	 *
-	 * @deprecated 0.2.0 Use table_name() instead.
-	 *
-	 * @param \wpdb|null $wpdb_param Optional wpdb instance.
-	 * @return string Table name.
-	 *
+    /**
+     * Get invoices table name with prefix.
+     *
+     * @param \wpdb|null $wpdb_param Optional wpdb instance.
+     * @return string Table name.
+     */
+    public static function table_name( $wpdb_param = null ): string {
+        global $wpdb;
+        $db = $wpdb_param ? $wpdb_param : $wpdb;
+        return $db->prefix . \CoinsnapBIF\CoinsnapBIF_Constants::INVOICES_TABLE_SUFFIX;
+    }
+
+    /**
+     * Back-compat alias for camelCase method.
+     *
+     * @deprecated 0.2.0 Use table_name() instead.
+     *
+     * @param \wpdb|null $wpdb_param Optional wpdb instance.
+     * @return string Table name.
+     *
      * @phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-	 */
-	public static function tableName( $wpdb_param = null ): string { // phpcs:ignore Squiz.NamingConventions.ValidFunctionName.NotCamelCaps
-		return self::table_name( $wpdb_param );
-	}
+     */
+    public static function tableName( $wpdb_param = null ): string { // phpcs:ignore Squiz.NamingConventions.ValidFunctionName.NotCamelCaps
+	return self::table_name( $wpdb_param );
+    }
 
-	/**
-	 * Activation callback to create/update DB schema.
-	 */
-	public static function activate(): void {
-		global $wpdb;
-		$table           = self::tableName( $wpdb );
-		$charset_collate = $wpdb->get_charset_collate();
+    /**
+     * Activation callback to create/update DB schema.
+     */
+    public static function activate(): void {
+	global $wpdb;
+	$table           = self::tableName( $wpdb );
+	$charset_collate = $wpdb->get_charset_collate();
 
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		$sql = "CREATE TABLE $table (
+	$sql = "CREATE TABLE $table (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             form_id BIGINT UNSIGNED NOT NULL,
             transaction_id VARCHAR(190) NOT NULL,
@@ -82,7 +81,6 @@ class Installer {
             KEY payment_status (payment_status),
             KEY payment_provider (payment_provider)
         ) $charset_collate;";
-
-		\dbDelta( $sql );
-	}
+        \dbDelta( $sql );
+    }
 }

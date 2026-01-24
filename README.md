@@ -2,8 +2,8 @@
 
 Contributors: coinsnap
 Tags: Lightning, bitcoin, invoice form, BTCPay
-Tested up to: 6.8
-Stable tag: 1.0.0
+Tested up to: 6.9
+Stable tag: 1.0.1
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -421,18 +421,19 @@ Generate and embed customizable Bitcoin Invoice Forms on your website (Coinsnap 
 
 ## Changelog
 
-### Version 0.1.0
-- Initial release
-- CoinSnap and BTCPay Server integration
-- Custom invoice form builder
-- Transaction management
-- Email notifications
-- Webhook handling
-- Admin interface
+### 0.1.0 :: 2025-09-27
+* Initial release
+* CoinSnap and BTCPay Server integration
+* Custom invoice form builder
+* Transaction management
+* Email notifications
+* Webhook handling
+* Admin interface
 
----
+### 1.0.0 :: 2026-01-14
+* Plugin is published in Wordpress plugin directory.
 
-**Plugin Version**: 0.1.0  
-**Last Updated**: 2025  
-**WordPress Compatibility**: 5.8+  
-**PHP Compatibility**: 7.4+
+### 1.0.1 :: 2026-01-23
+* Update: added all the currencies supported by Coinsnap.
+* Updated plugin URI.
+* Updated default field labels for invoice form.

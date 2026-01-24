@@ -45,9 +45,9 @@ class CoinsnapBIF_Services_Payment_Service {
 			}
 
 			// Get form configuration
-			$fields = get_post_meta( $form_id, '_bif_fields', true );
-			$payment_config = get_post_meta( $form_id, '_bif_payment', true );
-			$email_config = get_post_meta( $form_id, '_bif_email', true );
+			$fields = get_post_meta( $form_id, '_coinsnapbif_fields', true );
+			$payment_config = get_post_meta( $form_id, '_coinsnapbif_payment', true );
+			$email_config = get_post_meta( $form_id, '_coinsnapbif_email', true );
 
 			// Set defaults
 			$fields = wp_parse_args( $fields, array() );
@@ -131,7 +131,7 @@ class CoinsnapBIF_Services_Payment_Service {
                                     if ( '' === $val ) {
 					$errors[] = sprintf(
                                             /* translators: 1: Required value */
-                                            __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
+                                            __( '%s is required', 'coinsnap-bitcoin-invoice-form' ), $label );
                                     } elseif ( 'email' === $f && ! is_email( $val ) ) {
 					$errors[] = __( 'Please enter a valid email address.', 'coinsnap-bitcoin-invoice-form' );
                                     }
@@ -260,7 +260,7 @@ class CoinsnapBIF_Services_Payment_Service {
 			) );
 
 			// Get redirect configuration
-			$redirect_config = get_post_meta( $form_id, '_bif_redirect', true );
+			$redirect_config = get_post_meta( $form_id, '_coinsnapbif_redirect', true );
 			$redirect_config = wp_parse_args( $redirect_config, array(
 				'success_page' => '',
 				'error_page'   => '',
@@ -516,8 +516,8 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			'customer_email_template' => __( "Hello {customer_name},\n\nThank you for your payment. Here are the details of your receipt:\n\nInvoice Number: {invoice_number}\nAmount Paid: {amount} {currency}\nPayment Status: {payment_status}\n\nDescription: {description}\n\nTransaction ID: {transaction_id}\nPayment Provider: {payment_provider}\n\nIf you have any questions, reply to this email.\n\nBest regards,\n{site_name}", 'coinsnap-bitcoin-invoice-form' ),
 		);
 
-		$admin_config    = get_post_meta( $transaction->form_id, '_bif_email', true );
-		$customer_config = get_post_meta( $transaction->form_id, '_bif_email_customer', true );
+		$admin_config    = get_post_meta( $transaction->form_id, '_coinsnapbif_email', true );
+		$customer_config = get_post_meta( $transaction->form_id, '_coinsnapbif_email_customer', true );
 
 		// Backward compatibility: if customer metabox not saved, fall back to any customer keys stored in admin metabox
 		$legacy_customer_subset = array();

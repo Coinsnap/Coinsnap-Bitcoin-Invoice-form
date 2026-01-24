@@ -6,14 +6,14 @@
  */
 
 declare(strict_types=1);
-
 namespace CoinsnapBIF;
 
 /**
  * Shared constants for endpoints and namespaces.
  */
 class CoinsnapBIF_Constants {
-	/** REST namespace for the plugin. */
+
+    /** REST namespace for the plugin. */
 	public const REST_NAMESPACE              = 'coinsnapbif/v1';
 	public const REST_ROUTE_PAYMENT_COINSNAP = '/payment/coinsnap';
 	public const REST_ROUTE_PAYMENT_BTCPAY   = '/payment/btcpay';
@@ -21,23 +21,23 @@ class CoinsnapBIF_Constants {
 	public const REST_ROUTE_WEBHOOK_COINSNAP = '/webhook/coinsnap';
 	public const REST_ROUTE_WEBHOOK_BTCPAY   = '/webhook/btcpay';
 
-	/** CoinSnap endpoints (relative to API base). */
+    /** CoinSnap endpoints (relative to API base). */
 	public const COINSNAP_DEFAULT_API_BASE      = 'https://app.coinsnap.io';
 	public const COINSNAP_INVOICES_ENDPOINT_V1  = '/api/v1/stores/%s/invoices';
 	public const COINSNAP_INVOICES_ENDPOINT_ALT = '/api/stores/%s/invoices';
 
-	/** CoinSnap API header names. */
+    /** CoinSnap API header names. */
 	public const COINSNAP_HEADER_API_KEY = 'X-Api-Key';
 
-	/** BTCPay endpoint (relative to host). */
+    /** BTCPay endpoint (relative to host). */
 	public const BTCPAY_INVOICES_ENDPOINT = '/api/v1/stores/%s/invoices';
 
-	/** DB table suffixes. */
+    /** DB table suffixes. */
 	public const INVOICES_TABLE_SUFFIX = 'coinsnapbif_invoices';
 
-	/** Custom Post Type. */
+    /** Custom Post Type. */
 	public const CPT_INVOICE_FORM = 'coinsnapbif';
 
-	/** Shortcode. */
+    /** Shortcode. */
 	public const SHORTCODE_INVOICE_FORM = 'coinsnap_invoice_form';
 }
