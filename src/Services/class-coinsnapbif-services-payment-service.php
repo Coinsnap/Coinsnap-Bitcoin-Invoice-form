@@ -12,7 +12,7 @@ namespace CoinsnapBIF\Services;
 use CoinsnapBIF\Database\Installer;
 use CoinsnapBIF\Util\CoinsnapBIF_Logger;
 use CoinsnapBIF\Util\CoinsnapBIF_Util_Provider_Factory;
-use CoinsnapBIF\Admin\CoinsnapBIF_Admin_Settings;
+use CoinsnapBIF\Admin\CoinsnapBIF_Admin_Settings as Settings;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -225,7 +225,7 @@ class CoinsnapBIF_Services_Payment_Service {
 					'amount'             => $amount,
 					'currency'           => $currency,
 					'description'        => $invoice_data['description'],
-					'payment_provider'   => $payment_config['provider_override'] ?? CoinsnapBIF_Admin_Settings::get_settings()['payment_provider'],
+					'payment_provider'   => (!empty($payment_config['provider_override']))? $payment_config['provider_override'] : Settings::get_settings()['payment_provider'],
 					'payment_invoice_id' => $payment_result['invoice_id'],
 					'payment_url'        => $payment_result['payment_url'] ?? '',
 					'payment_status'     => 'unpaid',

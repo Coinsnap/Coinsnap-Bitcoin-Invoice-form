@@ -48,7 +48,93 @@
 
         // Initialize other admin features
         initAdminFeatures();
+        
+        
+        
+        $('#coinsnapbif_btcpay_wizard_button').click(function(e) {
+        e.preventDefault();
+        const host = $('#btcpay_url').val();
+	if (isCoinsnapBIFValidUrl(host)) {
+            let data = {
+                'action': 'coinsnapbif_btcpay_apiurl_handler',
+                'host': host,
+                'apiNonce': coinsnapbif_ajax.nonce
+            };
+            
+            $.post(coinsnapbif_ajax.ajax_url, data, function(response) {
+                if (response.data.url) {
+                    window.location = response.data.url;
+		}
+            }).fail( function() {
+		alert('Error processing your request. Please make sure to enter a valid BTCPay Server instance URL.')
+            });
+	}
+        else {
+            alert('Please enter a valid url including https:// in the BTCPay Server URL input field.')
+        }
     });
+    
+    if($('#coinsnap_bitcoin_invoice_polls_currency').length){
+        
+        setStep();
+        $('#coinsnap_bitcoin_invoice_polls_currency').change(
+            function(){
+                setStep();
+            }    
+        );
+        
+    }
+    
+    /*
+    if($('.coinsnapConnectionStatus').length){
+        
+        console.log('Connection check is activated');
+        
+        let ajaxurl = coinsnapbif_ajax.ajax_url;
+        let data = {
+            action: 'coinsnapbif_connection_handler',
+            apiNonce: coinsnapbif_ajax.nonce,
+            apiPost: coinsnapbif_ajax.post
+        };
+
+        jQuery.post( ajaxurl, data, function( response ){
+
+            var connectionCheckResponse = $.parseJSON(response);
+            let resultClass = (connectionCheckResponse.result === true)? 'success' : 'error';
+            $('.coinsnapConnectionStatus').html('<span class="'+resultClass+'">'+ connectionCheckResponse.message +'</span>');
+            
+        });
+    }
+    */
+  });
+  
+  function setStep(){
+        let step = 0.01;
+        let currency = $('#coinsnap_bitcoin_invoice_polls_currency').val();
+        if(currency === 'RUB' || currency === 'JPY' || currency === 'SATS'){
+            step = 1;
+        }
+        $('#coinsnap_bitcoin_invoice_polls_amount').attr('step', step);
+    }
+  
+    function isCoinsnapBIFValidUrl(serverUrl) {
+        if(serverUrl.indexOf('http') > -1){
+            try {
+                const url = new URL(serverUrl);
+                if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+                    return false;
+                }
+            }
+            catch (e) {
+                console.error(e);
+                return false;
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     /**
      * Initialize admin features

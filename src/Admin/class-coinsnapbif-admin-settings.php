@@ -18,13 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CoinsnapBIF_Admin_Settings {
 	public const OPTION_KEY = 'bif_settings';
+        public const WEBHOOK_KEY = 'coinsnapbif_webhook';
 
 	/** Register hooks to initialize settings. */
 	public static function register(): void {
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 	}
-
-	/**
+        
+        /**
 	 * Get merged settings with defaults.
 	 *
 	 * @return array Settings array.
@@ -256,6 +257,8 @@ class CoinsnapBIF_Admin_Settings {
 		echo '<h1>' . esc_html__( 'Bitcoin Invoice Form Settings', 'coinsnap-bitcoin-invoice-form' ) . '</h1>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'coinsnapbif_settings_group' );
+                
+                echo '<div class="coinsnapConnectionStatus"></div>';
 
 		// Render general settings section
 		echo '<div id="bif-general-settings">';

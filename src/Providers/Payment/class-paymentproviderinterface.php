@@ -39,4 +39,25 @@ interface PaymentProviderInterface {
 	 * @return array { invoice_id: string, paid: bool, status: string, metadata: array }
 	 */
 	public function check_invoice_status( string $invoice_id ): array;
+        
+        /**
+	 * Check webhook.
+	 *
+	 * @return bool
+	 */
+	public function check_webhook(): bool;
+        
+        /**
+	 * Webhook registration.
+	 *
+	 * @return array
+	 */
+	public function register_webhook(): array;
+        
+        /**
+	 * Getting Store data.
+	 *
+	 * @return array
+	 */
+	public function get_store(): array;
 }

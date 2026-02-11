@@ -35,7 +35,7 @@ class CoinsnapBIF_Admin_Transactions_Page {
         global $wpdb;
 
         $table_name = Installer::table_name();
-        $per_page   = 5;
+        $per_page   = 10;
         $_paged = filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $_nonce = filter_input(INPUT_GET,'_wpnonce',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $filters_enabled = ($_nonce !== null && wp_verify_nonce( $_nonce, 'coinsnapbif_transactions_filter' ))? true : false;

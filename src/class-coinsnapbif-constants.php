@@ -23,14 +23,18 @@ class CoinsnapBIF_Constants {
 
     /** CoinSnap endpoints (relative to API base). */
 	public const COINSNAP_DEFAULT_API_BASE      = 'https://app.coinsnap.io';
+	public const COINSNAP_STORE_ENDPOINT_V1 = '/api/v1/stores/%s';
 	public const COINSNAP_INVOICES_ENDPOINT_V1  = '/api/v1/stores/%s/invoices';
 	public const COINSNAP_INVOICES_ENDPOINT_ALT = '/api/stores/%s/invoices';
+        public const COINSNAP_WEBHOOKS_ENDPOINT_V1 = '/api/v1/stores/%s/webhooks';
 
     /** CoinSnap API header names. */
 	public const COINSNAP_HEADER_API_KEY = 'X-Api-Key';
 
     /** BTCPay endpoint (relative to host). */
-	public const BTCPAY_INVOICES_ENDPOINT = '/api/v1/stores/%s/invoices';
+	public const BTCPAY_STORE_ENDPOINT = '/api/v1/stores/%s';
+        public const BTCPAY_INVOICES_ENDPOINT = '/api/v1/stores/%s/invoices';
+        public const BTCPAY_WEBHOOKS_ENDPOINT = '/api/v1/stores/%s/webhooks';
 
     /** DB table suffixes. */
 	public const INVOICES_TABLE_SUFFIX = 'coinsnapbif_invoices';

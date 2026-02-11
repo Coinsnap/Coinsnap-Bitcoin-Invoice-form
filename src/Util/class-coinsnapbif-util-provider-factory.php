@@ -28,14 +28,18 @@ class CoinsnapBIF_Util_Provider_Factory {
 	 * @param int|string $form_id Form ID.
 	 * @return PaymentProviderInterface Provider instance.
 	 */
-	public static function payment_for_form( $form_id ): PaymentProviderInterface {
+	public static function payment_for_form( $form_id = 0 ): PaymentProviderInterface {
 		// Ensure we always work with an integer ID.
 		$form_id = (int) $form_id;
 
 		$settings = Settings::get_settings();
-		$payment  = get_post_meta( $form_id, '_bif_payment', true );
-		$override = is_array( $payment ) && ! empty( $payment['provider_override'] ) ? $payment['provider_override'] : '';
-		$key      = $override ? $override : $settings['payment_provider'];
+                
+                if($form_id > 0){
+                    $payment  = get_post_meta( $form_id, '_coinsnapbif_payment', true );
+                    $override = (is_array( $payment ) && ! empty( $payment['provider_override'] )) ? $payment['provider_override'] : '';
+                }
+		
+		$key      = (isset($override) && !empty($override)) ? $override : $settings['payment_provider'];
 		switch ( $key ) {
 			case 'btcpay':
 				return new BTCPayProvider();

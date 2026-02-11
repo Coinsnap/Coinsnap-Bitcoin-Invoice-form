@@ -21,7 +21,206 @@ if ( ! defined( 'ABSPATH' ) ) {
  * CoinSnap payment provider implementation.
  */
 class CoinsnapProvider implements PaymentProviderInterface {
-	/**
+	
+    /**
+     * Get store data from Coinsnap server
+     *
+     * @param void.
+     * @return array().
+     */
+    public function get_store(): array {
+        //  Coinsnap server connection credentials check
+        
+        $settings = Settings::get_settings();
+        $api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : CoinsnapBIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
+	$api_key = (string) $settings['coinsnap_api_key'];
+	$store   = (string) $settings['coinsnap_store_id'];
+        
+	
+        if ( ! $api_base || ! $api_key || ! $store ) {
+            return array('error' => true,'message'=>__('Connection credentials error','coinsnap-bitcoin-invoice-form'));
+        }
+        
+        $url = $api_base . sprintf( CoinsnapBIF_Constants::COINSNAP_STORE_ENDPOINT_V1, rawurlencode( $store ) );
+                
+        $args = array(
+            'method'  => 'GET',
+            'headers' => array(
+                'X-Api-Key'     => $api_key,
+				'Authorization' => 'token ' . $api_key,
+				'Content-Type'  => 'application/json',
+				'accept'        => 'application/json',
+            ),
+            'timeout' => 20
+        );
+		
+        $res = wp_remote_request( $url, $args );
+                
+        if ( is_wp_error( $res ) ) {
+            return array('error' => true,'message'=>__('Store data error','coinsnap-bitcoin-invoice-form'));
+        }
+                
+        $code = wp_remote_retrieve_response_code( $res );
+        $result = json_decode( wp_remote_retrieve_body( $res ), true );
+        if ( $code >= 200 && $code < 300 && is_array($result) ) {
+            return ['code' => $code, 'result' => $result];
+        }
+        else {
+            return array('error' => true,'message'=>__('Coinsnap server request error','coinsnap-bitcoin-invoice-form'));
+        }
+    }
+    
+    
+    /**
+     * Check existing webhook on Coinsnap server.
+     *
+     * @param void.
+     * @return bool.
+     */
+    public function check_webhook(): bool {
+        
+        $webhookExists = false;
+        $settings = Settings::get_settings();
+            
+        //  Coinsnap server connection credentials check
+        
+        $api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : CoinsnapBIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
+	$api_key = (string) $settings['coinsnap_api_key'];
+	$store   = (string) $settings['coinsnap_store_id'];
+        $webhook_url = $api_base . sprintf( CoinsnapBIF_Constants::COINSNAP_WEBHOOKS_ENDPOINT_V1, rawurlencode( $store ) ) . '/' . $webhook['id'];
+	
+        if ( ! $api_base || ! $api_key || ! $store ) {
+            return false;
+        }
+                
+        if ($storedWebhook = get_option(Settings::WEBHOOK_KEY)['coinsnap']) {
+                
+            
+            
+            $url     = $api_base . sprintf( CoinsnapBIF_Constants::COINSNAP_WEBHOOKS_ENDPOINT_V1, rawurlencode( $store ) );
+                
+            $args    = array(
+                'method'  => 'GET',
+                'headers' => array(
+                    'X-Api-Key'     => $api_key,
+				'Authorization' => 'token ' . $api_key,
+				'Content-Type'  => 'application/json',
+				'accept'        => 'application/json',
+                ),
+                'timeout' => 20,
+            );
+		
+            $res     = wp_remote_request( $url, $args );
+                
+            if ( is_wp_error( $res ) ) {
+                return false;
+            }
+                
+            $code = wp_remote_retrieve_response_code( $res );
+            $storeWebhooks = json_decode( wp_remote_retrieve_body( $res ), true );
+            if ( $code >= 200 && $code < 300 && is_array($storeWebhooks) ) {
+		
+            //  Registered webhooks analysis    
+                foreach($storeWebhooks as $webhook){
+                    
+                //  If webhook is registered this site    
+                    if(strpos( $webhook['url'], $webhook_url ) !== false){
+                        
+                        //  Return TRUE if stored webhook ID equals registered webhook ID
+                        if($webhook['id'] === $storedWebhook['id']){
+                            $webhookExists = true;
+                        }
+                        
+                        //  If not - we delete this webhook from server
+                        else {
+                            
+                            $url     = $webhook_url;
+                            $args    = array(
+                                'method'  => 'DELETE',
+                                'headers' => array(
+                                    'X-Api-Key'     => $api_key,
+				'Authorization' => 'token ' . $api_key,
+				'Content-Type'  => 'application/json',
+				'accept'        => 'application/json',
+                                ),
+                                'timeout' => 20,
+                            );
+                            $res     = wp_remote_request( $url, $args );
+                            $code = wp_remote_retrieve_response_code( $res );
+                            if ($code !== 204 && $code !== 200) {
+                                
+                            }
+                        }
+                    }
+                }
+                    
+                return $webhookExists;
+            }
+            return false;
+        }
+        else {
+            return false;
+        }
+    }
+    
+    /**
+     * Webhook registration on Coinsnap Server.
+     *
+     * @param void.
+     * @return array { id: string, secret: string, url: string }
+     */
+    public function register_webhook(): array {
+        
+        //  Coinsnap server connection credentials check
+        
+        $settings = Settings::get_settings();
+        $api_base = rtrim( $settings['coinsnap_api_base'] ? $settings['coinsnap_api_base'] : CoinsnapBIF_Constants::COINSNAP_DEFAULT_API_BASE, '/' );
+	$api_key = (string) $settings['coinsnap_api_key'];
+	$store   = (string) $settings['coinsnap_store_id'];
+        $webhook_url = $api_base . sprintf( CoinsnapBIF_Constants::COINSNAP_WEBHOOKS_ENDPOINT_V1, rawurlencode( $store ) ) . '/' . $webhook['id'];
+	
+        if ( ! $api_base || ! $api_key || ! $store ) {
+            return array('error' => true,'message'=>__('Connection credentials error','coinsnap-bitcoin-invoice-form'));
+        }
+        
+        $data = [
+            'url' => $webhook_url,
+            'authorizedEvents' => ['everything' => false,'specificEvents' => ['New','Expired','Settled','Processing']],
+        ];
+        
+        $url = $api_base . sprintf( CoinsnapBIF_Constants::COINSNAP_WEBHOOKS_ENDPOINT_V1, rawurlencode( $store ) );
+                
+        $args = array(
+            'method'  => 'POST',
+            'headers' => array(
+                'X-Api-Key'     => $api_key,
+				'Authorization' => 'token ' . $api_key,
+				'Content-Type'  => 'application/json',
+				'accept'        => 'application/json',
+            ),
+            'timeout' => 20,
+            'body'    => wp_json_encode($data)
+        );
+		
+        $res = wp_remote_request( $url, $args );
+                
+        if ( is_wp_error( $res ) ) {
+            return array('error' => true,'message'=>__('Webhook creation error','coinsnap-bitcoin-invoice-form'));
+        }
+                
+        $code = wp_remote_retrieve_response_code( $res );
+        $result = json_decode( wp_remote_retrieve_body( $res ), true );
+        if ( $code >= 200 && $code < 300 && is_array($result) ) {
+            return ['code' => $code, 'result' => $result];
+        }
+        else {
+            return array('error' => true,'message'=>__('Coinsnap server request error','coinsnap-bitcoin-invoice-form'),'code' => $code, 'result' => $result);
+        }
+    
+    }
+    
+    
+    /**
 	 * Create a payment invoice.
 	 *
 	 * @param int    $form_id        Form ID.
