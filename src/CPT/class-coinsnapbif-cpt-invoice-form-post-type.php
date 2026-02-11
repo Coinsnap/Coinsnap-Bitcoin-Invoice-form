@@ -76,6 +76,8 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
     */
     public static function render_fields_metabox( \WP_Post $post ): void {
         wp_nonce_field( 'coinsnapbif_save_form_' . $post->ID, 'coinsnapbif_form_nonce' );
+        
+        
 
         $defaults = array(
 			'invoice_recipient_enabled'  => '1',
@@ -154,6 +156,8 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
 		}
 
 		echo '<div class="bif-fields-config">';
+                
+                
 
 		// Name field
 		self::render_toggle_row( 'invoice_recipient', $values );

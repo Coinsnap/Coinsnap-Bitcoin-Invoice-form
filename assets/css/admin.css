@@ -7,6 +7,8 @@
         font-weight: 600;
         margin-top:1em;
         margin-bottom:1em;
+        line-height:160%;
+        margin-left:15px;
 }
 
 .coinsnapConnectionStatus span:before {
@@ -15,7 +17,7 @@
     display:inline-block;
     vertical-align: baseline;
     width:10px; height:10px;
-    margin:0 5px 0 0;
+    margin:0 5px 0 -15px;
 }
 
 .coinsnapConnectionStatus span.error {

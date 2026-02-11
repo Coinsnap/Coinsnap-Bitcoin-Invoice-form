@@ -85,7 +85,10 @@
         
     }
     
-    /*
+    if(!$('.coinsnapConnectionStatus').length){
+        $('form#post').prepend('<div class="coinsnapConnectionStatus"></div>');
+    }
+   
     if($('.coinsnapConnectionStatus').length){
         
         console.log('Connection check is activated');
@@ -105,7 +108,6 @@
             
         });
     }
-    */
   });
   
   function setStep(){

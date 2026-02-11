@@ -66,7 +66,7 @@ class CoinsnapProvider implements PaymentProviderInterface {
             return ['code' => $code, 'result' => $result];
         }
         else {
-            return array('error' => true,'message'=>__('Coinsnap server request error','coinsnap-bitcoin-invoice-form'));
+            return array('error' => true,'message'=>__('Coinsnap server request error','coinsnap-bitcoin-invoice-form'),'code' => $code, 'result' => $result);
         }
     }
     
