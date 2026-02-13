@@ -441,11 +441,14 @@ class CoinsnapBIF_Plugin {
 		RestRoutes::register();
 	}
 
-	/**
-	 * Enqueue frontend assets.
-	 */
-	public function enqueue_frontend(): void {
-		wp_register_style( 'coinsnapbif-frontend', COINSNAPBIF_PLUGIN_URL . 'assets/css/frontend.css', array(), COINSNAPBIF_VERSION );
+    /**
+     * Enqueue frontend assets.
+     */
+    public function enqueue_frontend(): void {
+        global $post;
+    
+        if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'coinsnap_invoice_form') ) {
+                wp_register_style( 'coinsnapbif-frontend', COINSNAPBIF_PLUGIN_URL . 'assets/css/frontend.css', array(), COINSNAPBIF_VERSION );
 		wp_register_script( 'coinsnapbif-frontend', COINSNAPBIF_PLUGIN_URL . 'assets/js/frontend.js', array( 'jquery' ), COINSNAPBIF_VERSION, true );
 
 		wp_localize_script(
@@ -461,6 +464,7 @@ class CoinsnapBIF_Plugin {
 		wp_enqueue_style( 'coinsnapbif-frontend' );
 		wp_enqueue_script( 'coinsnapbif-frontend' );
 	}
+    }
 
     /**
      * Enqueue admin assets.
