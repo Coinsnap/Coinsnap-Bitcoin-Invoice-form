@@ -32,7 +32,8 @@ class CoinsnapBIF_Constants {
 	public const COINSNAP_HEADER_API_KEY = 'X-Api-Key';
 
     /** BTCPay endpoint (relative to host). */
-	public const BTCPAY_STORE_ENDPOINT = '/api/v1/stores/%s';
+	public const BTCPAY_STORES_ENDPOINT = '/api/v1/stores';
+        public const BTCPAY_STORE_ENDPOINT = '/api/v1/stores/%s';
         public const BTCPAY_INVOICES_ENDPOINT = '/api/v1/stores/%s/invoices';
         public const BTCPAY_WEBHOOKS_ENDPOINT = '/api/v1/stores/%s/webhooks';
 

@@ -144,7 +144,7 @@ class CoinsnapBIF_Admin_Settings {
 			__( 'BTCPay Server Host', 'coinsnap-bitcoin-invoice-form' ),
 			function () {
 				$s = self::get_settings();
-				echo '<input type="url" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[btcpay_host]" value="' . esc_attr( $s['btcpay_host'] ) . '" />';
+				echo '<input type="url" id="coinsnapbif_btcpay_url" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[btcpay_host]" value="' . esc_attr( $s['btcpay_host'] ) . '" /><br/><button class="button btcpay-apikey-link" type="button" id="coinsnapbif_btcpay_wizard_button" target="_blank">'. esc_html__('Generate API key','coinsnap-bitcoin-invoice-form') .'</button>';
 			},
 			'coinsnapbif-settings',
 			'coinsnapbif_btcpay'
@@ -201,7 +201,7 @@ class CoinsnapBIF_Admin_Settings {
 			},
 			'coinsnapbif-settings',
 			'coinsnapbif_advanced'
-		);
+		);/*
 		add_settings_field(
 			'disable_webhook_verification',
 			__( 'Disable Webhook Verification', 'coinsnap-bitcoin-invoice-form' ),
@@ -211,7 +211,7 @@ class CoinsnapBIF_Admin_Settings {
 			},
 			'coinsnapbif-settings',
 			'coinsnapbif_advanced'
-		);
+		);*/
 	}
 
 	/**

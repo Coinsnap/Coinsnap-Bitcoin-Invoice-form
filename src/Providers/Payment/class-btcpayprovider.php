@@ -64,8 +64,7 @@ class BTCPayProvider implements PaymentProviderInterface {
         else {
             return array('error' => true,'message'=>__('BTCPay server request error','coinsnap-bitcoin-invoice-form'),'code' => $code, 'result' => $result);
         }
-    }
-    
+    }    
     
     /**
      * Check existing webhook on BTCPay server.

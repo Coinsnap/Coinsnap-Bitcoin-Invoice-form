@@ -51,9 +51,9 @@
         
         
         
-        $('#coinsnapbif_btcpay_wizard_button').click(function(e) {
+    $('#coinsnapbif_btcpay_wizard_button').click(function(e) {
         e.preventDefault();
-        const host = $('#btcpay_url').val();
+        const host = $('#coinsnapbif_btcpay_url').val();
 	if (isCoinsnapBIFValidUrl(host)) {
             let data = {
                 'action': 'coinsnapbif_btcpay_apiurl_handler',
