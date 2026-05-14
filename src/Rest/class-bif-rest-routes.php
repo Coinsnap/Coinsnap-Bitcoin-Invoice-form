@@ -11,6 +11,8 @@ namespace BitcoinInvoiceForm\Rest;
 
 use BitcoinInvoiceForm\BIF_Constants;
 use BitcoinInvoiceForm\Services\BIF_Services_Payment_Service;
+use BitcoinInvoiceForm\Util\BIF_Util_Provider_Factory;
+use CoinsnapCore\Rest\WebhookHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -95,7 +97,7 @@ class BIF_Rest_Routes {
 		if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new \WP_REST_Response( array(
 				'success' => false,
-				'message' => __( 'Invalid nonce.', 'coinsnap-bitcoin-invoice-form' ),
+				'message' => __( 'Invalid nonce.', 'Coinsnap-Bitcoin-Invoice-form' ),
 			), 403 );
 		}
 
@@ -131,10 +133,16 @@ class BIF_Rest_Routes {
 	 * @return \WP_REST_Response REST response.
 	 */
 	public static function handle_coinsnap_webhook( \WP_REST_Request $request ): \WP_REST_Response {
-		$data = $request->get_json_params();
-		$result = BIF_Services_Payment_Service::handle_webhook( 'coinsnap', $data );
+		$instance = BIF_Util_Provider_Factory::make_instance();
 
-		// Always return 200 to acknowledge webhook receipt
+		if ( ! WebhookHelper::verify_coinsnap_signature( $instance ) ) {
+			return new \WP_REST_Response( array( 'success' => false, 'message' => 'Invalid signature.' ), 401 );
+		}
+
+		$body   = json_decode( $request->get_body(), true );
+		$parsed = WebhookHelper::parse_webhook( 'coinsnap', is_array( $body ) ? $body : array() );
+		$result = BIF_Services_Payment_Service::handle_webhook( 'coinsnap', $parsed );
+
 		return new \WP_REST_Response( $result, 200 );
 	}
 
@@ -145,10 +153,16 @@ class BIF_Rest_Routes {
 	 * @return \WP_REST_Response REST response.
 	 */
 	public static function handle_btcpay_webhook( \WP_REST_Request $request ): \WP_REST_Response {
-		$data = $request->get_json_params();
-		$result = BIF_Services_Payment_Service::handle_webhook( 'btcpay', $data );
+		$instance = BIF_Util_Provider_Factory::make_instance();
 
-		// Always return 200 to acknowledge webhook receipt
+		if ( ! WebhookHelper::verify_btcpay_signature( $instance ) ) {
+			return new \WP_REST_Response( array( 'success' => false, 'message' => 'Invalid signature.' ), 401 );
+		}
+
+		$body   = json_decode( $request->get_body(), true );
+		$parsed = WebhookHelper::parse_webhook( 'btcpay', is_array( $body ) ? $body : array() );
+		$result = BIF_Services_Payment_Service::handle_webhook( 'btcpay', $parsed );
+
 		return new \WP_REST_Response( $result, 200 );
 	}
 }

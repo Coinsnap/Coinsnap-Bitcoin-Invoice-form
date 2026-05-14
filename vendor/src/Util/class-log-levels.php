@@ -2,17 +2,17 @@
 /**
  * Log levels enumeration.
  *
- * @package bitcoin-invoice-form
+ * @package coinsnap-core
  */
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Util;
+namespace CoinsnapCore\Util;
 
 /**
  * Log levels for the plugin logging system.
  */
-class BIF_Log_Levels {
+class LogLevels {
 	/**
 	 * Emergency: system is unusable.
 	 */
@@ -99,14 +99,14 @@ class BIF_Log_Levels {
 	 */
 	public static function get_level_names(): array {
 		return array(
-			self::EMERGENCY => __( 'Emergency', 'Coinsnap-Bitcoin-Invoice-form' ),
-			self::ALERT     => __( 'Alert', 'Coinsnap-Bitcoin-Invoice-form' ),
-			self::CRITICAL  => __( 'Critical', 'Coinsnap-Bitcoin-Invoice-form' ),
-			self::ERROR     => __( 'Error', 'Coinsnap-Bitcoin-Invoice-form' ),
-			self::WARNING   => __( 'Warning', 'Coinsnap-Bitcoin-Invoice-form' ),
-			self::NOTICE    => __( 'Notice', 'Coinsnap-Bitcoin-Invoice-form' ),
-			self::INFO      => __( 'Info', 'Coinsnap-Bitcoin-Invoice-form' ),
-			self::DEBUG     => __( 'Debug', 'Coinsnap-Bitcoin-Invoice-form' ),
+			self::EMERGENCY => __( 'Emergency', 'coinsnap-core' ),
+			self::ALERT     => __( 'Alert', 'coinsnap-core' ),
+			self::CRITICAL  => __( 'Critical', 'coinsnap-core' ),
+			self::ERROR     => __( 'Error', 'coinsnap-core' ),
+			self::WARNING   => __( 'Warning', 'coinsnap-core' ),
+			self::NOTICE    => __( 'Notice', 'coinsnap-core' ),
+			self::INFO      => __( 'Info', 'coinsnap-core' ),
+			self::DEBUG     => __( 'Debug', 'coinsnap-core' ),
 		);
 	}
 }

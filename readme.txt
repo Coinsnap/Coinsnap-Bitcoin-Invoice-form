@@ -2,7 +2,7 @@
 
 Contributors: coinsnap
 Tags: Lightning, bitcoin, invoice form, BTCPay
-Tested up to: 6.8
+Tested up to: 6.9
 Stable tag: 1.0.0
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html

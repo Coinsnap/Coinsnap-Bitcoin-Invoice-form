@@ -39,7 +39,7 @@ class BIF_Services_Payment_Service {
 			if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Invalid form ID.', 'coinsnap-bitcoin-invoice-form' ),
+					'message' => __( 'Invalid form ID.', 'Coinsnap-Bitcoin-Invoice-form' ),
 				);
 			}
 
@@ -95,7 +95,7 @@ class BIF_Services_Payment_Service {
 			if ( $amount <= 0 ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Invalid amount.', 'coinsnap-bitcoin-invoice-form' ),
+					'message' => __( 'Invalid amount.', 'Coinsnap-Bitcoin-Invoice-form' ),
 				);
 			}
 
@@ -107,17 +107,17 @@ class BIF_Services_Payment_Service {
 				$recipient_val = trim( (string) $data['bif_name'] );
 			}
 			if ( '' === $recipient_val ) {
-				$errors[] = __( 'Invoice Recipient is required.', 'coinsnap-bitcoin-invoice-form' );
+				$errors[] = __( 'Invoice Recipient is required.', 'Coinsnap-Bitcoin-Invoice-form' );
 			}
 			$inv_no_val = isset( $data['bif_invoice_number'] ) ? trim( (string) $data['bif_invoice_number'] ) : '';
 			if ( '' === $inv_no_val ) {
-				$errors[] = __( 'Invoice Number is required.', 'coinsnap-bitcoin-invoice-form' );
+				$errors[] = __( 'Invoice Number is required.', 'Coinsnap-Bitcoin-Invoice-form' );
 			}
 			// Validate other fields if they are enabled and marked required in form config
 			$maybe_required = array(
-				'email' => __( 'Email', 'coinsnap-bitcoin-invoice-form' ),
-				'company' => __( 'Company', 'coinsnap-bitcoin-invoice-form' ),
-				'description' => __( 'Message', 'coinsnap-bitcoin-invoice-form' ),
+				'email' => __( 'Email', 'Coinsnap-Bitcoin-Invoice-form' ),
+				'company' => __( 'Company', 'Coinsnap-Bitcoin-Invoice-form' ),
+				'description' => __( 'Message', 'Coinsnap-Bitcoin-Invoice-form' ),
 			);
 			foreach ( $maybe_required as $f => $label ) {
 				$enabled_val = $fields[ $f . '_enabled' ] ?? '0';
@@ -130,9 +130,9 @@ class BIF_Services_Payment_Service {
                                     if ( '' === $val ) {
 					$errors[] = sprintf(
                                             /* translators: 1: Required value */
-                                            __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
+                                            __( '%s is required.', 'Coinsnap-Bitcoin-Invoice-form' ), $label );
                                     } elseif ( 'email' === $f && ! is_email( $val ) ) {
-					$errors[] = __( 'Please enter a valid email address.', 'coinsnap-bitcoin-invoice-form' );
+					$errors[] = __( 'Please enter a valid email address.', 'Coinsnap-Bitcoin-Invoice-form' );
                                     }
 				}
 			}
@@ -198,7 +198,7 @@ class BIF_Services_Payment_Service {
 				) );
 				return array(
 					'success' => false,
-					'message' => __( 'Failed to create payment invoice.', 'coinsnap-bitcoin-invoice-form' ),
+					'message' => __( 'Failed to create payment invoice.', 'Coinsnap-Bitcoin-Invoice-form' ),
 				);
 			}
 
@@ -246,7 +246,7 @@ class BIF_Services_Payment_Service {
 				) );
 				return array(
 					'success' => false,
-					'message' => __( 'Failed to save transaction.', 'coinsnap-bitcoin-invoice-form' ),
+					'message' => __( 'Failed to save transaction.', 'Coinsnap-Bitcoin-Invoice-form' ),
 				);
 			}
 
@@ -263,7 +263,7 @@ class BIF_Services_Payment_Service {
 			$redirect_config = wp_parse_args( $redirect_config, array(
 				'success_page' => '',
 				'error_page'   => '',
-				'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
+				'thank_you_message' => __( 'Thank you! Your payment has been processed successfully.', 'Coinsnap-Bitcoin-Invoice-form' ),
 			) );
 
 			return array(
@@ -288,7 +288,7 @@ class BIF_Services_Payment_Service {
 			) );
 			return array(
 				'success' => false,
-				'message' => __( 'An error occurred while creating the invoice.', 'coinsnap-bitcoin-invoice-form' ),
+				'message' => __( 'An error occurred while creating the invoice.', 'Coinsnap-Bitcoin-Invoice-form' ),
 			);
 		}
 	}
@@ -296,34 +296,26 @@ class BIF_Services_Payment_Service {
 	/**
 	 * Handle payment webhook.
 	 *
-	 * @param string $provider Payment provider name.
-	 * @param array  $data     Webhook data.
+	 * Receives pre-parsed webhook data from the REST route (verified and
+	 * normalised by CoinsnapCore\Rest\WebhookHelper::parse_webhook()).
+	 *
+	 * @param string $provider Payment provider name ('coinsnap'|'btcpay').
+	 * @param array  $parsed   { invoice_id: string, paid: bool, type: string, metadata: array }
 	 * @return array Response data.
 	 */
-	public static function handle_webhook( string $provider, array $data ): array {
+	public static function handle_webhook( string $provider, array $parsed ): array {
 		global $wpdb;
 
 		try {
-			// Create payment provider
-			$payment_provider = BIF_Util_Provider_Factory::payment_for_form( 0 );
-			if ( $provider === 'btcpay' ) {
-				$payment_provider = new \BitcoinInvoiceForm\Providers\Payment\BTCPayProvider();
-			} else {
-				$payment_provider = new \BitcoinInvoiceForm\Providers\Payment\CoinsnapProvider();
-			}
+			$invoice_id = isset( $parsed['invoice_id'] ) ? (string) $parsed['invoice_id'] : '';
+			$paid       = ! empty( $parsed['paid'] );
 
-			// Handle webhook
-			$webhook_result = $payment_provider->handle_webhook( $data );
-
-			if ( empty( $webhook_result ) || empty( $webhook_result['invoice_id'] ) ) {
+			if ( '' === $invoice_id ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Invalid webhook data.', 'coinsnap-bitcoin-invoice-form' ),
+					'message' => __( 'Invalid webhook data.', 'Coinsnap-Bitcoin-Invoice-form' ),
 				);
 			}
-
-			$invoice_id = $webhook_result['invoice_id'];
-			$paid = $webhook_result['paid'] ?? false;
 
 			// Update transaction status
 			$table_name = Installer::table_name();
@@ -362,7 +354,7 @@ class BIF_Services_Payment_Service {
 
 			return array(
 				'success' => true,
-				'message' => __( 'Webhook processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
+				'message' => __( 'Webhook processed successfully.', 'Coinsnap-Bitcoin-Invoice-form' ),
 			);
 
 		} catch ( \Exception $e ) {
@@ -373,7 +365,7 @@ class BIF_Services_Payment_Service {
 			) );
 			return array(
 				'success' => false,
-				'message' => __( 'An error occurred while processing the webhook.', 'coinsnap-bitcoin-invoice-form' ),
+				'message' => __( 'An error occurred while processing the webhook.', 'Coinsnap-Bitcoin-Invoice-form' ),
 			);
 		}
 	}
@@ -391,11 +383,11 @@ class BIF_Services_Payment_Service {
 			// Get transaction from database
 			$table_name = Installer::table_name();
 
-			// Properly prepare query inline
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnsupportedIdentifierPlaceholder -- Single-row lookup by unique invoice_id; caching not appropriate here. Plugin requires WP 6.2+ where %i is supported.
 			$transaction = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT * FROM %s WHERE payment_invoice_id = %s",
-                                        $table_name,
+					'SELECT * FROM %i WHERE payment_invoice_id = %s',
+					$table_name,
 					$invoice_id
 				)
 			);
@@ -404,7 +396,7 @@ class BIF_Services_Payment_Service {
 			if ( ! $transaction ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Transaction not found.', 'coinsnap-bitcoin-invoice-form' ),
+					'message' => __( 'Transaction not found.', 'Coinsnap-Bitcoin-Invoice-form' ),
 				);
 			}
 
@@ -461,7 +453,7 @@ class BIF_Services_Payment_Service {
 			) );
 			return array(
 				'success' => false,
-				'message' => __( 'An error occurred while checking payment status.', 'coinsnap-bitcoin-invoice-form' ),
+				'message' => __( 'An error occurred while checking payment status.', 'Coinsnap-Bitcoin-Invoice-form' ),
 			);
 		}
 	}
@@ -477,11 +469,11 @@ class BIF_Services_Payment_Service {
 		// Get transaction details
 		$table_name = Installer::table_name();
 
-		// Properly prepare query inline
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQLPlaceholders.UnsupportedIdentifierPlaceholder -- Single-row lookup by unique invoice_id; caching not appropriate here. Plugin requires WP 6.2+ where %i is supported.
 		$transaction = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM %s WHERE payment_invoice_id = %s",
-                                $table_name,
+				'SELECT * FROM %i WHERE payment_invoice_id = %s',
+				$table_name,
 				$invoice_id
 			)
 		);
@@ -494,7 +486,7 @@ class BIF_Services_Payment_Service {
 		// Get form email configuration (admin and customer in separate metaboxes; support legacy combined storage)
 		$admin_defaults = array(
 			'admin_email'     => get_option( 'admin_email' ),
-			'email_subject'   => __( 'New Invoice Payment Received', 'coinsnap-bitcoin-invoice-form' ),
+			'email_subject'   => __( 'New Invoice Payment Received', 'Coinsnap-Bitcoin-Invoice-form' ),
 			'email_template'  => __( 'A new invoice payment has been received:
 
 Invoice Number: {invoice_number}
@@ -507,12 +499,12 @@ Payment Details:
 Transaction ID: {transaction_id}
 Payment Provider: {payment_provider}
 
-Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
+Description: {description}', 'Coinsnap-Bitcoin-Invoice-form' ),
 		);
 		$customer_defaults = array(
 			'customer_email_enabled' => '1',
-			'customer_email_subject' => __( 'Your payment receipt for invoice {invoice_number}', 'coinsnap-bitcoin-invoice-form' ),
-			'customer_email_template' => __( "Hello {customer_name},\n\nThank you for your payment. Here are the details of your receipt:\n\nInvoice Number: {invoice_number}\nAmount Paid: {amount} {currency}\nPayment Status: {payment_status}\n\nDescription: {description}\n\nTransaction ID: {transaction_id}\nPayment Provider: {payment_provider}\n\nIf you have any questions, reply to this email.\n\nBest regards,\n{site_name}", 'coinsnap-bitcoin-invoice-form' ),
+			'customer_email_subject' => __( 'Your payment receipt for invoice {invoice_number}', 'Coinsnap-Bitcoin-Invoice-form' ),
+			'customer_email_template' => __( "Hello {customer_name},\n\nThank you for your payment. Here are the details of your receipt:\n\nInvoice Number: {invoice_number}\nAmount Paid: {amount} {currency}\nPayment Status: {payment_status}\n\nDescription: {description}\n\nTransaction ID: {transaction_id}\nPayment Provider: {payment_provider}\n\nIf you have any questions, reply to this email.\n\nBest regards,\n{site_name}", 'Coinsnap-Bitcoin-Invoice-form' ),
 		);
 
 		$admin_config    = get_post_meta( $transaction->form_id, '_bif_email', true );

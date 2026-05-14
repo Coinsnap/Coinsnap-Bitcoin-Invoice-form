@@ -8,8 +8,8 @@
  * Author URI:         https://coinsnap.io/
  * Text Domain:        coinsnap-bitcoin-invoice-form
  * Domain Path:         /languages
- * Tested up to:        6.8
- * Requires at least:   5.8
+ * Tested up to:        6.9
+ * Requires at least:   6.2
  * Requires PHP:        7.4
  * License:             GPL2
  * License URI:         https://www.gnu.org/licenses/gpl-2.0.html
@@ -32,6 +32,10 @@ if(!defined('COINSNAP_SERVER_URL')){define( 'COINSNAP_SERVER_URL', 'https://app.
 if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_FILE')) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_FILE', __FILE__ ); }
 if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR' )) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) ); }
 if(!defined('COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL' )) { define( 'COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_URL', plugin_dir_url( __FILE__ ) ); }
+
+// Load coinsnap-core shared library (defines CoinsnapCore\ namespace + autoloader).
+require_once COINSNAP_BITCOIN_INVOICE_FORM_PLUGIN_DIR . 'vendor/coinsnap-core.php';
+
 /**
  * Register a PSR-4 autoloader for this plugin namespace with WordPress class name mapping.
  */
@@ -75,10 +79,7 @@ spl_autoload_register(
 			'Util\\BIF_Log_Levels'                        => 'Util/class-bif-log-levels',
 			'Util\\BIF_Util_Provider_Factory'             => 'Util/class-bif-util-provider-factory',
 
-			// Payment Provider classes.
-			'Providers\\Payment\\BTCPayProvider'          => 'Providers/Payment/class-btcpayprovider',
-			'Providers\\Payment\\CoinsnapProvider'        => 'Providers/Payment/class-coinsnapprovider',
-			'Providers\\Payment\\PaymentProviderInterface' => 'Providers/Payment/class-paymentproviderinterface',
+			// Payment providers are supplied by vendor/coinsnap-core.php (CoinsnapCore\\).
 		);
 
 		// Check if this is a WordPress-style class name.

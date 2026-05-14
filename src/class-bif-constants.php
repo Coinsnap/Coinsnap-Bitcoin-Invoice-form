@@ -13,6 +13,15 @@ namespace BitcoinInvoiceForm;
  * Shared constants for endpoints and namespaces.
  */
 class BIF_Constants {
+	/** WordPress option key for plugin settings. */
+	public const OPTION_KEY = 'bif_settings';
+
+	/** WordPress option key for stored webhook data. */
+	public const WEBHOOK_KEY = 'bif_webhook';
+
+	/** Admin menu slug. */
+	public const MENU_SLUG = 'bif-transactions';
+
 	/** REST namespace for the plugin. */
 	public const REST_NAMESPACE              = 'bif/v1';
 	public const REST_ROUTE_PAYMENT_COINSNAP = '/payment/coinsnap';
