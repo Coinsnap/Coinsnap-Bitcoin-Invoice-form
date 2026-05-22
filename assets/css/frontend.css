@@ -1,0 +1,369 @@
+/**
+ * Coinsnap Bitcoin Invoice Form � frontend styles.
+ * Visual language matches coinsnap-bitcoin-booking-form and coinsnap-bitcoin-donation.
+ *
+ * @package coinsnap-bitcoin-invoice-form
+ */
+
+/* ==========================================================================
+   Design Tokens
+   ========================================================================== */
+:root {
+--bif-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+--bif-color-bitcoin:         #f7931a;
+--bif-color-bitcoin-hover:   #e8860f;
+--bif-color-bitcoin-active:  #d67a0d;
+--bif-color-text-primary:    #1e1e1e;
+--bif-color-text-secondary:  #757575;
+--bif-color-text-muted:      #a7a7a7;
+--bif-color-border:          #e0e0e0;
+--bif-color-border-hover:    #c0c0c0;
+--bif-color-border-focus:    #f7931a;
+--bif-color-bg-card:         #ffffff;
+--bif-color-bg-input:        #ffffff;
+--bif-color-bg-input-hover:  #fafafa;
+--bif-color-error:           #cc1818;
+--bif-color-success:         #1a7a3c;
+--bif-color-success-bg:      #f0faf3;
+--bif-color-success-border:  #b8dfc7;
+--bif-color-focus-ring:      rgba(247, 147, 26, 0.25);
+--bif-radius-sm:  4px;
+--bif-radius-md:  8px;
+--bif-radius-lg:  12px;
+--bif-shadow:     0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+--bif-transition: 200ms ease;
+}
+
+/* ==========================================================================
+   Form wrapper
+   ========================================================================== */
+
+.bif-form {
+max-width: 480px;
+margin: 20px 0;
+padding: 28px;
+background: var(--bif-color-bg-card);
+border: 1px solid var(--bif-color-border);
+border-radius: var(--bif-radius-lg);
+box-shadow: var(--bif-shadow);
+font-family: var(--bif-font-family);
+font-size: 14px;
+line-height: 1.5;
+box-sizing: border-box;
+}
+
+.bif-form *,
+.bif-form *::before,
+.bif-form *::after {
+box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Fields
+   ========================================================================== */
+
+.bif-form-fields {
+display: flex;
+flex-direction: column;
+}
+
+.bif-field {
+display: flex;
+flex-direction: column;
+gap: 6px;
+margin-bottom: 14px;
+}
+
+.bif-field label {
+display: block;
+font-weight: 600;
+font-size: 13px;
+color: var(--bif-color-text-primary);
+letter-spacing: 0.01em;
+}
+
+.bif-field .required {
+color: var(--bif-color-error);
+margin-left: 2px;
+}
+
+.bif-field input[type="text"],
+.bif-field input[type="email"],
+.bif-field input[type="number"],
+.bif-field textarea {
+width: 100%;
+padding: 10px 12px;
+border: 1px solid var(--bif-color-border);
+border-radius: var(--bif-radius-md);
+font-family: var(--bif-font-family);
+font-size: 14px;
+line-height: 1.5;
+color: var(--bif-color-text-primary);
+background: var(--bif-color-bg-input);
+outline: none;
+transition: border-color var(--bif-transition), box-shadow var(--bif-transition);
+}
+
+.bif-field input[type="text"]:hover,
+.bif-field input[type="email"]:hover,
+.bif-field input[type="number"]:hover,
+.bif-field textarea:hover {
+border-color: var(--bif-color-border-hover);
+background: var(--bif-color-bg-input-hover);
+}
+
+.bif-field input[type="text"]:focus,
+.bif-field input[type="email"]:focus,
+.bif-field input[type="number"]:focus,
+.bif-field textarea:focus {
+border-color: var(--bif-color-border-focus);
+box-shadow: 0 0 0 3px var(--bif-color-focus-ring);
+background: var(--bif-color-bg-input);
+}
+
+.bif-field input.error,
+.bif-field textarea.error {
+border-color: var(--bif-color-error);
+}
+
+.bif-field textarea {
+resize: vertical;
+min-height: 80px;
+}
+
+.bif-field input[readonly],
+.bif-field input[disabled] {
+background: var(--bif-color-bg-input-hover);
+color: var(--bif-color-text-secondary);
+cursor: default;
+}
+
+/* Amount + currency side-by-side */
+.bif-field-amount,
+.bif-field-currency {
+display: inline-flex;
+flex-direction: column;
+gap: 6px;
+vertical-align: top;
+}
+
+.bif-field-amount {
+width: calc(75% - 8px);
+}
+
+.bif-field-currency {
+width: calc(25% - 8px);
+}
+
+/* ==========================================================================
+   Discount badge
+   ========================================================================== */
+
+.bif-discount-badge {
+display: inline-block;
+padding: 6px 12px;
+background: var(--bif-color-bitcoin);
+color: #fff;
+font-size: 13px;
+font-weight: 700;
+border-radius: var(--bif-radius-md);
+margin-bottom: 12px;
+letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
+   Discount totals box
+   ========================================================================== */
+
+.bif-discount-totals {
+margin: 4px 0 14px;
+padding: 10px 14px;
+border: 1px solid var(--bif-color-success-border);
+border-radius: var(--bif-radius-md);
+background: var(--bif-color-success-bg);
+font-size: 14px;
+}
+
+.bif-totals-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 8px;
+}
+
+.bif-totals-row + .bif-totals-row {
+margin-top: 6px;
+}
+
+.bif-totals-label {
+font-weight: 600;
+color: var(--bif-color-text-secondary);
+}
+
+.bif-totals-original {
+text-decoration: line-through;
+color: var(--bif-color-text-muted);
+}
+
+.bif-totals-discount {
+color: var(--bif-color-error);
+font-weight: 600;
+}
+
+.bif-totals-final-row {
+margin-top: 8px;
+padding-top: 8px;
+border-top: 1px solid var(--bif-color-success-border);
+}
+
+.bif-totals-final-row .bif-totals-label {
+color: var(--bif-color-text-primary);
+font-size: 15px;
+}
+
+.bif-totals-final {
+font-size: 17px;
+font-weight: 700;
+color: var(--bif-color-success);
+}
+
+/* ==========================================================================
+   Discount notice
+   ========================================================================== */
+
+.bif-discount-notice {
+margin: 0 0 14px;
+padding: 10px 14px;
+border: 1px solid var(--bif-color-success-border);
+border-radius: var(--bif-radius-md);
+background: var(--bif-color-success-bg);
+font-size: 13px;
+color: var(--bif-color-success);
+}
+
+/* ==========================================================================
+   Submit button
+   ========================================================================== */
+
+.bif-form-actions {
+margin-top: 20px;
+}
+
+.bif-button {
+display: flex;
+justify-content: center;
+align-items: center;
+width: 100%;
+padding: 12px 20px;
+font-family: var(--bif-font-family);
+font-size: 15px;
+font-weight: 600;
+letter-spacing: 0.02em;
+line-height: 1.4;
+color: #fff;
+background: var(--bif-color-bitcoin);
+border: none;
+border-radius: var(--bif-radius-md);
+cursor: pointer;
+transition: background-color var(--bif-transition),
+            box-shadow var(--bif-transition),
+            transform var(--bif-transition);
+}
+
+.bif-button:hover {
+background: var(--bif-color-bitcoin-hover);
+box-shadow: 0 2px 8px rgba(247, 147, 26, 0.35);
+transform: translateY(-1px);
+}
+
+.bif-button:active {
+background: var(--bif-color-bitcoin-active);
+box-shadow: none;
+transform: translateY(0);
+}
+
+.bif-button:focus-visible {
+outline: 2px solid var(--bif-color-bitcoin);
+outline-offset: 2px;
+}
+
+.bif-button:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+transform: none;
+box-shadow: none;
+}
+
+/* ==========================================================================
+   Messages
+   ========================================================================== */
+
+.bif-form-messages {
+margin-top: 14px;
+}
+
+.bif-message {
+padding: 10px 14px;
+border-radius: var(--bif-radius-md);
+font-size: 13px;
+font-weight: 500;
+}
+
+.bif-message-success {
+color: var(--bif-color-success);
+background: var(--bif-color-success-bg);
+border: 1px solid var(--bif-color-success-border);
+}
+
+.bif-message-error {
+color: var(--bif-color-error);
+background: #fff4f4;
+border: 1px solid #f5c0c0;
+}
+
+/* ==========================================================================
+   Payment modal (iframe overlay)
+   ========================================================================== */
+
+.bif-modal-backdrop {
+display: none;
+position: fixed;
+inset: 0;
+z-index: 999999;
+background: rgba(0, 0, 0, 0.65);
+align-items: center;
+justify-content: center;
+}
+
+.bif-modal {
+position: relative;
+width: 100vw;
+height: 100vh;
+background: #fff;
+overflow: hidden;
+}
+
+.bif-payment-iframe {
+width: 100%;
+height: 100%;
+border: none;
+background: #fff;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media ( max-width: 520px ) {
+.bif-form {
+padding: 20px 16px;
+}
+
+.bif-field-amount,
+.bif-field-currency {
+display: flex;
+width: 100%;
+margin-left: 0;
+}
+}
