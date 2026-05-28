@@ -413,7 +413,7 @@ add_action( 'template_redirect', function(){
             if($code >= 200 && $code < 300 && is_array($getstores)){
                 if (count($getstores) < 1) {
                     //$messageAbort = __('Error on verifiying redirected API Key with stored BTCPay Server url. Aborting API wizard. Please try again or continue with manual setup.', 'coinsnap-bitcoin-invoice-form');
-                    wp_redirect($CoinsnapBTCPaySettingsUrl);
+                    wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
                 }
             }
                         
@@ -473,15 +473,15 @@ add_action( 'template_redirect', function(){
                         'payment_provider' => 'btcpay'
                         ]);
                     
-                    wp_redirect($CoinsnapBTCPaySettingsUrl);
+                    wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
                     exit();
                 }
                 else {
-                    wp_redirect($CoinsnapBTCPaySettingsUrl);
+                    wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
                     exit();
                 }
             }
 
-    wp_redirect($CoinsnapBTCPaySettingsUrl);
+    wp_safe_redirect($CoinsnapBTCPaySettingsUrl);
     exit();
 });

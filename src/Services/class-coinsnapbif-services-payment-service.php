@@ -406,17 +406,25 @@ class CoinsnapBIF_Services_Payment_Service {
 		global $wpdb;
 
 		try {
-			// Get transaction from database
-			$table_name = Installer::table_name();
 
-			// Properly prepare query inline
-			$transaction = $wpdb->get_row(
-				$wpdb->prepare(
-                                        "SELECT * FROM %i WHERE payment_invoice_id = %s",
-                                        $table_name,
-                                        $invoice_id
-				)
-			);
+			       // Dohvati transakciju iz keša ili baze
+			       $table_name = Installer::table_name();
+			       $cache_key = 'coinsnapbif_transaction_' . $invoice_id;
+			       $transaction = wp_cache_get( $cache_key, 'coinsnapbif' );
+				       if ( false === $transaction ) {
+								   // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+								   $transaction = $wpdb->get_row(
+									       $transaction = $wpdb->get_row(
+										       $wpdb->prepare(
+											       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+											       "SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
+											       $invoice_id
+										       )
+							       );
+					       if ( $transaction ) {
+						       wp_cache_set( $cache_key, $transaction, 'coinsnapbif', 300 ); // keširaj 5 minuta
+					       }
+				       }
 
 
 			if ( ! $transaction ) {
@@ -492,17 +500,25 @@ class CoinsnapBIF_Services_Payment_Service {
 	private static function send_payment_notification( string $invoice_id ): void {
 		global $wpdb;
 
-		// Get transaction details
-		$table_name = Installer::table_name();
 
-		// Properly prepare query inline
-		$transaction = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM %i WHERE payment_invoice_id = %s",
-                                $table_name,
-				$invoice_id
-			)
-		);
+		       // Dohvati transakciju iz keša ili baze
+		       $table_name = Installer::table_name();
+		       $cache_key = 'coinsnapbif_transaction_' . $invoice_id;
+		       $transaction = wp_cache_get( $cache_key, 'coinsnapbif' );
+			       if ( false === $transaction ) {
+							   // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+							   $transaction = $wpdb->get_row(
+								       $transaction = $wpdb->get_row(
+									       $wpdb->prepare(
+										       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+										       "SELECT * FROM {$table_name} WHERE payment_invoice_id = %s",
+										       $invoice_id
+									       )
+						       );
+				       if ( $transaction ) {
+					       wp_cache_set( $cache_key, $transaction, 'coinsnapbif', 300 ); // keširaj 5 minuta
+				       }
+			       }
 
 
 		if ( ! $transaction ) {

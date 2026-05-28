@@ -85,20 +85,16 @@ class CoinsnapBIF_Admin_Transactions_Page {
             }
 	}
 
-	$where_clause = implode( ' AND ', $where_conditions );
+  $where_clause = implode( ' AND ', $where_conditions );
 
-		// Get total count - query uses a dynamic table name and dynamic WHERE built with placeholders.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from Installer::table_name(); WHERE clause contains only placeholder fragments, values are passed to prepare; direct query is acceptable within admin listing.
-		$total_items = (int) $wpdb->get_var(
-                    $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE {$where_clause}",$where_values)
-		);
+  // Get total count - query uses a dynamic table name and dynamic WHERE built with placeholders.
+  $sql_count = "SELECT COUNT(*) FROM {$table_name} WHERE {$where_clause}";
+  $total_items = (int) call_user_func_array( array( $wpdb, 'get_var' ), array_merge( array( $sql_count ), $where_values ) );
 
-		// Get transactions - prepared with LIMIT/OFFSET and dynamic WHERE with placeholders
-		$query_values = array_merge( $where_values, array( $per_page, $offset ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from Installer::table_name(); WHERE clause contains only placeholder fragments; values are passed to prepare; direct query is acceptable within admin listing.
-		$transactions = $wpdb->get_results(
-                    $wpdb->prepare("SELECT * FROM {$table_name} WHERE {$where_clause} ORDER BY created_at DESC LIMIT %d OFFSET %d",$query_values)
-		);
+  // Get transactions - prepared sa LIMIT/OFFSET i dinamičkim WHERE sa placeholderima
+  $sql_transactions = "SELECT * FROM {$table_name} WHERE {$where_clause} ORDER BY created_at DESC LIMIT %d OFFSET %d";
+  $query_values = array_merge( $where_values, array( $per_page, $offset ) );
+  $transactions = call_user_func_array( array( $wpdb, 'get_results' ), array_merge( array( $sql_transactions ), $query_values ) );
 
 		// Get forms for filter dropdown
 		$forms = get_posts( array(

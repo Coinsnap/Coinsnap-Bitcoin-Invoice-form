@@ -8,7 +8,7 @@
  * Author URI:         https://coinsnap.io/
  * Text Domain:        coinsnap-bitcoin-invoice-form
  * Domain Path:         /languages
- * Tested up to:        6.9
+ * Tested up to:        7.0
  * Requires at least:   6.2
  * Requires PHP:        7.4
  * License:             GPL2

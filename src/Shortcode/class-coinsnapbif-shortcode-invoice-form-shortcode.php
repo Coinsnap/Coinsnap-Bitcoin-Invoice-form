@@ -389,8 +389,7 @@ class CoinsnapBIF_Shortcode_Invoice_Form_Shortcode {
 					$disc_enabled = ( '1' === $disc_enabled_val || 'on' === $disc_enabled_val || true === $disc_enabled_val );
 					$disc_type = $fields['discount_type'] ?? 'fixed';
 					$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
-					
-					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' step="0.01" min="0"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
+					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' step="0.01" min="0" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
 					break;
 				case 'currency':
 					$selected_currency = $fields['_currency_default'] ?? 'USD';
