@@ -463,26 +463,25 @@ if ( ! function_exists( 'coinsnapbif_fetch_btcpay_store_id' ) ) {
 	function coinsnapbif_fetch_btcpay_store_id( string $btcpay_host, string $api_key ): ?array {
 		$url = rtrim( $btcpay_host, '/' ) . '/api/v1/stores';
 
-		$ch = curl_init();
-		curl_setopt_array(
-			$ch,
+		$response = wp_remote_get(
+			$url,
 			array(
-				CURLOPT_URL            => $url,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_HTTPHEADER     => array(
-					'Authorization: token ' . $api_key,
-					'Content-Type: application/json',
+				'headers' => array(
+					'Authorization' => 'token ' . $api_key,
+					'Content-Type'  => 'application/json',
 				),
-				CURLOPT_TIMEOUT        => 20,
-				CURLOPT_SSL_VERIFYPEER => true,
+				'timeout' => 20,
 			)
 		);
 
-		$body   = curl_exec( $ch );
-		$status = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-		curl_close( $ch );
+		if ( is_wp_error( $response ) ) {
+			return null;
+		}
 
-		if ( false === $body || $status < 200 || $status >= 300 ) {
+		$status = wp_remote_retrieve_response_code( $response );
+		$body   = wp_remote_retrieve_body( $response );
+
+		if ( $status < 200 || $status >= 300 ) {
 			return null;
 		}
 
@@ -526,10 +525,10 @@ add_action( 'template_redirect', function () {
 		exit();
 	}
 
-	// Task 2: Read permissions array from POST body.
+	// Task 2: Read and sanitize permissions array from POST body.
 	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above via query_vars.
 	$raw_permissions = isset( $_POST['permissions'] ) && is_array( $_POST['permissions'] )
-		? wp_unslash( $_POST['permissions'] )
+		? array_map( 'sanitize_text_field', wp_unslash( $_POST['permissions'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		: array();
 
 	if ( empty( $raw_permissions ) ) {
@@ -537,7 +536,7 @@ add_action( 'template_redirect', function () {
 		exit();
 	}
 
-	$btcpay_server_permissions = array_map( 'sanitize_text_field', $raw_permissions );
+	$btcpay_server_permissions = $raw_permissions;
 
 	// Task 2: Check whether the user granted the btcpay.store.canmodifyofferings permission
 	// (required for Crowdfund app types; informational for invoice forms).
@@ -629,6 +628,9 @@ add_action( 'template_redirect', function () {
 		// Popup mode: send credentials back to opener via postMessage, then close.
 		// Security: postMessage target is restricted to home_url() — same origin.
 		if ( '1' === filter_input( INPUT_GET, 'popup', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) {
+			// wp_json_encode() is the correct escaping function for embedding data
+			// in a <script> block; phpcs:ignore is required because PHPCS does not
+			// recognise it as an escaping function for OutputNotEscaped.
 			$js_data     = wp_json_encode( array(
 				'type'    => 'coinsnapbif_btcpay_auth',
 				'apiKey'  => $clean_api_key,
@@ -639,11 +641,11 @@ add_action( 'template_redirect', function () {
 			header( 'Content-Type: text/html; charset=utf-8' );
 			echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Authorizing...</title>';
 			echo '<script>(function(){';
-			echo 'var d=' . $js_data . ';';
+			echo 'var d=' . $js_data . ';'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo 'if(window.opener&&!window.opener.closed){';
-			echo 'window.opener.postMessage(d,' . $js_origin . ');';
+			echo 'window.opener.postMessage(d,' . $js_origin . ');'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo 'window.close();';
-			echo '}else{window.location.href=' . $js_fallback . ';}';
+			echo '}else{window.location.href=' . $js_fallback . ';}'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '})();</script></head><body></body></html>';
 			exit();
 		}
