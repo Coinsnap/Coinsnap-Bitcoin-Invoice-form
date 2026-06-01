@@ -389,7 +389,13 @@ class CoinsnapBIF_Admin_Settings {
 										<?php esc_html_e( 'Generate API Key', 'coinsnap-bitcoin-invoice-form' ); ?>
 									</button>
 								</div>
-								<p class="csc-field-description"><?php esc_html_e( 'Enter your BTCPay Server URL, then click "Generate API Key" to authorize automatically.', 'coinsnap-bitcoin-invoice-form' ); ?></p>
+								<p class="csc-field-description">
+									<?php if ( ! is_ssl() && empty( $s['ngrok_url'] ) ) : ?>
+									<?php esc_html_e( 'Enter your BTCPay Server URL, then click "Generate API Key". BTCPay opens in a popup — approve the permissions, confirm the browser prompt, and the API key will be filled in automatically.', 'coinsnap-bitcoin-invoice-form' ); ?>
+									<?php else : ?>
+										<?php esc_html_e( 'Enter your BTCPay Server URL, then click "Generate API Key" to authorize automatically.', 'coinsnap-bitcoin-invoice-form' ); ?>
+									<?php endif; ?>
+								</p>
 							</div>
 							<div class="csc-field-row">
 								<label for="csc-btcpay-api-key"><?php esc_html_e( 'API Key', 'coinsnap-bitcoin-invoice-form' ); ?></label>
@@ -456,7 +462,7 @@ class CoinsnapBIF_Admin_Settings {
 				</div>
 
 				<!-- Advanced Settings Card -->
-				<div class="csc-card csc-card--compact">
+				<div id="csc-advanced" class="csc-card csc-card--compact">
 					<div class="csc-card-header">
 						<h2><?php esc_html_e( 'Advanced', 'coinsnap-bitcoin-invoice-form' ); ?></h2>
 					</div>

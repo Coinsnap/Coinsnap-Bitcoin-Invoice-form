@@ -54,23 +54,56 @@
     $('#coinsnapbif_btcpay_wizard_button').click(function(e) {
         e.preventDefault();
         const host = $('#coinsnapbif_btcpay_url').val();
-	if (isCoinsnapBIFValidUrl(host)) {
+        if (isCoinsnapBIFValidUrl(host)) {
             let data = {
                 'action': 'coinsnapbif_btcpay_apiurl_handler',
                 'host': host,
                 'apiNonce': coinsnapbif_ajax.nonce
             };
-            
+
             $.post(coinsnapbif_ajax.ajax_url, data, function(response) {
-                if (response.data.url) {
-                    window.location = response.data.url;
-		}
-            }).fail( function() {
-		alert('Error processing your request. Please make sure to enter a valid BTCPay Server instance URL.')
+                if (response.data && response.data.url) {
+                    if (response.data.popup) {
+                        // HTTP local dev: open BTCPay in a small popup.
+                        // After the user approves (and clicks "Send anyway" inside
+                        // the popup), our callback sends the key back via postMessage
+                        // and closes the popup — fields are auto-filled here.
+                        var popup = window.open(
+                            response.data.url,
+                            'btcpay_apikey_auth',
+                            'width=760,height=640,scrollbars=yes,resizable=yes'
+                        );
+
+                        var onBtcPayMessage = function(e) {
+                            if (e.origin !== window.location.origin) return;
+                            if (!e.data || e.data.type !== 'coinsnapbif_btcpay_auth') return;
+
+                            window.removeEventListener('message', onBtcPayMessage);
+
+                            if (e.data.apiKey) {
+                                $('#csc-btcpay-api-key').val(e.data.apiKey);
+                            }
+                            if (e.data.storeId) {
+                                $('#csc-btcpay-store-id').val(e.data.storeId);
+                            }
+
+                            // Highlight saved fields.
+                            $('#csc-btcpay-api-key, #csc-btcpay-store-id')
+                                .css({'border-color': '#00a32a', 'box-shadow': '0 0 0 1px #00a32a'});
+
+                            if (popup && !popup.closed) { popup.close(); }
+                        };
+
+                        window.addEventListener('message', onBtcPayMessage);
+                    } else {
+                        window.location = response.data.url;
+                    }
+                }
+            }).fail(function() {
+                alert('Error processing your request. Please make sure to enter a valid BTCPay Server instance URL.');
             });
-	}
-        else {
-            alert('Please enter a valid url including https:// in the BTCPay Server URL input field.')
+        } else {
+            alert('Please enter a valid url including https:// in the BTCPay Server URL input field.');
         }
     });
     
