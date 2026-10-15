@@ -1,218 +1,210 @@
 === Bitcoin Invoice Form ===
 
 Contributors: coinsnap
-Tags: Lightning, bitcoin, invoice form, BTCPay
-Tested up to: 6.8
-Stable tag: 1.0.0
+Tags: bitcoin, lightning, invoice payments, bitcoin invoice, btcpay server
+Requires at least: 6.2
+Tested up to: 6.9.9
+Requires PHP: 7.4
+Stable tag: 1.1.0
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Generate and embed customizable Bitcoin Invoice Forms on your website (Coinsnap & BTCPay server Integration).
+Let customers pay existing invoices with Bitcoin and Lightning directly on your WordPress site using Coinsnap or your own BTCPay Server.
 
 == Description ==
 
-= Accept Bitcoin invoice payments on your own website—fast, simple, and professional =
+= Accept Bitcoin invoice payments directly on WordPress =
 
-Are you a business owner, entrepreneur, shop operator, or contractor who sends lots of invoices—and increasingly hears, “**Can I pay this in Bitcoin?**” 
+Coinsnap Bitcoin Invoice Form adds a professional Bitcoin payment form to your WordPress website without changing how you create, send or manage invoices.
 
-With the **Coinsnap Bitcoin Invoice Form** you can add a “Pay with Bitcoin” link to any invoice and let customers settle in seconds, right on your site.
+Your customer opens a dedicated payment page, enters the **invoice number** and **invoice amount**, and pays by scanning a QR code. Payments can be made via **Lightning or Bitcoin on-chain**.
 
-Here’s how it works: your customer opens the link, enters the **invoice amount**, the **invoice number** for matching, and an **optional name/message**, then clicks “**Pay invoice with Bitcoin**”. A payment screen with a **QR code** appears that can be paid via **Bitcoin Lightning** (or **on-chain**, if preferred). 
+The plugin is designed for freelancers, consultants, contractors, agencies, hotels, medical practices and other businesses that issue invoices and want to offer Bitcoin as an additional payment option.
 
-That’s it—no redirects, no confusion.
+Coinsnap is **Bitcoin payment software for merchants** and a brand of **Onlineshop24 d.o.o., Serbia**.
 
-= Why merchants love it =
+= Key features =
 
-* **Frictionless invoice payments**: A clean, trust-building form that lives on your domain.
-* **Lightning-fast checkout**: Accept **Lightning** (ideal for small/medium invoices) and optionally **on-chain** for higher amounts.
-* **Fair, real-time pricing**: Automatic rate lock at the moment of payment—no volatility guesswork.
-* **Works with your stack**: Use with a **Coinsnap** account—or connect to **your own BTCPay Server**.
-* **Optional fiat settlement**: Prefer EUR on your bank account? Pair Coinsnap with Bringin/DFX.
-* **Conversion booster**: Offer an optional **Bitcoin discount** (e.g., 5%) to nudge faster payments.
+* Accept **Bitcoin and Lightning payments for existing invoices**
+* Support for **Lightning and Bitcoin on-chain**
+* Keep your existing invoicing and accounting workflow
+* Create multiple invoice payment forms
+* Place forms anywhere with a shortcode
+* Configurable customer and invoice fields
+* Invoice number and amount for clear reconciliation
+* Per-form currency and payment settings
+* Support for **Coinsnap** and **BTCPay Server**
+* BTCPay Server setup wizard
+* Optional **Bitcoin discount** as a fixed amount or percentage
+* Optional customer-facing discount notice
+* Transactions overview in WordPress
+* Payment status and provider transaction details
+* Email notification settings
+* Success/error redirects and thank-you message
+* Automatic webhook handling
+* **Non-custodial / self-custody** payment model
+* Optional fiat settlement through supported Coinsnap partners
 
-= Get started in minutes =
+= How it works =
 
 1. Install and activate the plugin.
-2. Connect to Coinsnap (or your BTCPay Server).
-3. Add the Invoice Form via shortcode to a page like /bitcoin.
-4. Put a “**Pay with Bitcoin**” link on your invoices.
+2. Connect Coinsnap or your own BTCPay Server.
+3. Create an invoice payment form.
+4. Configure its fields, currency and optional Bitcoin discount.
+5. Add the generated shortcode to a WordPress page.
+6. Add a “Pay with Bitcoin” link to your invoices.
+7. The customer enters the invoice number and amount and pays via Lightning or on-chain Bitcoin.
+8. The payment is recorded with the invoice reference for reconciliation.
 
-Give your clients the modern payment option they’re asking for—and get paid faster with Bitcoin and Lightning, directly on your website.
+= Invoice form fields =
 
+Forms can include configurable fields such as:
 
-= More information: =
+* Customer name
+* Email address
+* Company
+* Invoice number
+* Invoice amount
+* Description or message
+* Custom payment button text
 
-* Demo Store: [https://invoice.coinsnap.org/](https://invoice.coinsnap.org/)
-* Product page: [https://coinsnap.io/coinsnap-bitcoin-invoice-form-plugin/](https://coinsnap.io/coinsnap-bitcoin-invoice-form-plugin/)
-* Installation Guide: [https://coinsnap.io/coinsnap-bitcoin-invoice-form-installation-guide/](https://coinsnap.io/coinsnap-bitcoin-invoice-form-installation-guide/)
-* GitHub: [https://github.com/Coinsnap/Coinsnap-Bitcoin-Invoice-Form](https://github.com/Coinsnap/Coinsnap-Bitcoin-Invoice-Form)
+Fields can be enabled, disabled, required, renamed and reordered.
 
+= Shortcode =
 
-= Documentation: =
+The current shortcode is:
 
-* [Coinsnap API (1.0) documentation](https://docs.coinsnap.io/)
-* [Frequently Asked Questions](https://coinsnap.io/en/faq/)
-* [Terms and Conditions](https://coinsnap.io/en/general-terms-and-conditions/)
-* [Privacy Policy](https://coinsnap.io/en/privacy/)
+[coinsnap_invoice_form id="123"]
 
+Replace 123 with the ID of your invoice form.
+
+The legacy shortcode [bif_invoice_form id="123"] remains supported for backward compatibility.
+
+= Coinsnap or BTCPay Server =
+
+The plugin supports two payment-provider modes:
+
+* **Coinsnap** — accept Bitcoin and Lightning without operating your own payment infrastructure.
+* **BTCPay Server** — connect your own self-hosted BTCPay Server.
+
+= Bitcoin discount =
+
+Each invoice form can optionally apply either:
+
+* a **fixed discount**, or
+* a **percentage discount**
+
+The discount is applied before the payment invoice is created and can be shown to the customer with a custom notice.
+
+= Settlement =
+
+With Coinsnap, payments can be settled to a compatible Bitcoin or Lightning wallet.
+
+One option is the [Coinsnap Wallet](https://coinsnap.io/wallet/).
+
+Depending on the merchant setup and supported partner integrations, Bitcoin payments can also be converted and settled to a bank account.
+
+Coinsnap follows a non-custodial approach and does not hold merchant Bitcoin.
+
+= More information =
+
+* Product page: https://coinsnap.io/wp-plugins/bitcoin-invoice/
+* WordPress Plugin Directory: https://wordpress.org/plugins/coinsnap-bitcoin-invoice-form/
+* Live demo: https://invoice.coinsnap.org/
+* GitHub: https://github.com/Coinsnap/Coinsnap-Bitcoin-Invoice-form
+* Coinsnap Wallet: https://coinsnap.io/wallet/
+* Coinsnap API: https://docs.coinsnap.io/
+* Coinsnap account: https://app.coinsnap.io/register
 
 == Installation ==
 
-= Initial Setup =
+1. In WordPress, go to **Plugins → Add New**.
+2. Search for **Bitcoin Invoice Form**.
+3. Click **Install Now** and activate the plugin.
+4. Go to **Bitcoin Invoice Forms → Settings**.
+5. Select Coinsnap or BTCPay Server and connect the payment provider.
+6. Go to **Bitcoin Invoice Forms → Invoice Forms** and create a form.
+7. Configure the form fields, currency and optional Bitcoin discount.
+8. Copy the generated shortcode to a WordPress page.
+9. Make a test payment.
+10. Add the payment page URL to your invoices.
 
-1. **Access Settings**
-   * Go to WordPress Admin → Bitcoin Invoice Forms → Settings
+== Frequently Asked Questions ==
 
-2. **General Settings**
-   * **Default Payment Gateway**: Choose between CoinSnap or BTCPay Server
-   * **Default Amount**: Set default invoice amount
-   * [Removed] Default Currency: Currency is now configured per form in each Invoice Form’s Payment settings.
+= Does this plugin create or issue invoices? =
 
-= Payment Gateway Setup =
+No. It lets customers pay invoices that already exist. You continue using your normal accounting or invoicing workflow.
 
-= CoinSnap Configuration =
+= Can customers pay with both Lightning and Bitcoin on-chain? =
 
-1. **Get API Key**
-   * Sign up at [CoinSnap.io](https://coinsnap.io)
-   * Generate an API key from your dashboard
+Yes. The plugin supports both Lightning and Bitcoin on-chain.
 
-2. **Configure in WordPress**
-   * Go to Bitcoin Invoice Forms → Settings
-   * Enter your CoinSnap API key
-   * Set webhook URL (automatically configured)
+= Can I use my own BTCPay Server? =
 
-= BTCPay Server Configuration =
+Yes. BTCPay Server is supported as an alternative to Coinsnap.
 
-1. **Set Up BTCPay Server**
-   * Install BTCPay Server or use a hosted service
-   * Create a store and generate API credentials
+= Can I create multiple invoice forms? =
 
-2. **Configure in WordPress**
-   * Go to Bitcoin Invoice Forms → Settings
-   * Enter BTCPay Server URL
-   * Add API key and store ID
-   * Configure webhook URL
+Yes. You can create multiple forms for different languages, brands or business use cases.
 
-= Creating Invoice Forms =
+= Can I offer a Bitcoin discount? =
 
-= Basic Form Creation =
+Yes. Each form can use either a fixed or percentage-based discount.
 
-1. **Create New Form**
-   * Go to Bitcoin Invoice Forms → Invoice Forms
-   * Click "Add New"
+= How is the payment matched to the invoice? =
 
-2. **Configure Form Fields**
-   * **Name Field**: Customer name (required by default)
-   * **Email Field**: Customer email (required by default)
-   * **Company Field**: Company name (optional)
-   * **Invoice Number Field**: Invoice reference (required by default)
-   * **Amount Field**: Payment amount (required by default)
-   * **Description Field**: Additional notes (optional)
-   * **Button Text**: Set submit button text (default: "Pay with Bitcoin")
+The customer enters the invoice number or reference in the form. This information is stored with the payment for reconciliation.
 
-3. **Field Configuration Options**
-   * **Enabled**: Toggle field visibility
-   * **Required**: Make field mandatory
-   * **Label**: Customize field label
-   * **Order**: Set field display order
+= Do I need my own Lightning node? =
 
-= Discounts =
+No. When using Coinsnap, no own Lightning node or Bitcoin payment server is required.
 
-1. Enable Discounts
-   * Go to Bitcoin Invoice Forms → Invoice Forms → Add New (or edit an existing form)
-   * In the Fields metabox, open the “Discount” section
-   * Check “Enable Discount”
+= Does Coinsnap hold my Bitcoin? =
 
-2. Choose Discount Type
-   * Fixed amount: subtracts an absolute value (e.g., 5.00) from the total
-   * Percentage: subtracts a percentage of the amount (e.g., 10%)
+No. Coinsnap follows a non-custodial / self-custody approach and does not hold merchant Bitcoin.
 
-3. Set Discount Amount
-   * Enter a positive value for the selected type
-   * The plugin guarantees the total never goes below zero
+= Can I receive settlement in euros? =
 
-4. Customer-facing Notice (Optional)
-   * Add your own message to be shown on the form when a discount is active
-   * If left empty, a friendly default message is auto-generated based on your type and amount
-   * The notice is sanitized and shown above the submit button
+Depending on the merchant setup and supported partner integrations, Bitcoin payments can be converted and settled to a bank account.
 
-5. How It’s Applied
-   * The discount is applied server-side before creating the invoice with your payment provider (CoinSnap/BTCPay)
-   * Currency handling follows the form/default settings; fixed discounts are in the selected currency
+== Screenshots ==
 
-=  Payment Settings =
+1. Install Bitcoin Invoice Form from the WordPress Plugin Directory
+2. Coinsnap payment-provider settings
+3. BTCPay Server payment-provider settings
+4. BTCPay Server setup wizard
+5. Invoice Forms list
+6. Invoice Form configuration
+7. Bitcoin discount configuration
+8. Transactions overview
+9. Bitcoin Invoice Form on the website
+10. Bitcoin and Lightning payment QR code
 
-1. **Payment Configuration**
-   * **Payment Gateway**: Override default gateway for this form
-   * **Default Amount**: Set default invoice amount
-   * **Currency**: Choose display currency
-   * **Description**: Default payment description
+== Changelog ==
 
-=  Email Settings =
+= 1.1.0 :: 2026-03-01 =
+* Added BTCPay Server connection wizard on the Settings page.
+* Removed the Disable Webhook Verification setting.
 
-1. **Email Configuration**
-   * **Admin Email**: Email address for notifications
-   * **Email Subject**: Subject line for payment notifications
-   * **Email Template**: Customize notification content with placeholders
+= 1.0.3.2 :: 2026-02-11 =
+* Updated Coinsnap and BTCPay Server error handling.
 
-2. **Available Placeholders**
-   * `{invoice_number}`: Invoice number
-   * `{customer_name}`: Customer name
-   * `{customer_email}`: Customer email
-   * `{amount}`: Payment amount
-   * `{currency}`: Currency
-   * `{payment_status}`: Payment status
-   * `{transaction_id}`: Transaction ID
-   * `{payment_provider}`: Payment provider
-   * `{description}`: Invoice description
+= 1.0.3.1 :: 2026-02-10 =
+* Fixed the form ID variable in the main plugin class.
 
-= Redirect Settings =
+= 1.0.3 :: 2026-02-10 =
+* Added Coinsnap and BTCPay Server AJAX connection checks.
+* Added webhook AJAX check and registration functionality.
 
-1. **Redirect Configuration**
-   * **Success Page**: Redirect after successful payment
-   * **Error Page**: Redirect on payment failure
-   * **Thank You Message**: Custom success message
+= 1.0.2 :: 2026-02-09 =
+* Added Coinsnap and BTCPay Server connection checks in WordPress admin.
+* Added webhook check and registration functionality.
+* Fixed payment-provider override for individual forms.
 
-= Managing Transactions =
+= 1.0.1 :: 2026-01-23 =
+* Added all currencies supported by Coinsnap.
+* Updated plugin URI.
+* Updated default field labels.
 
-= Transaction Dashboard =
-
-1. **Access Transactions**
-   * Go to Bitcoin Invoice Forms → Transactions
-   * View all invoice transactions
-
-2. **Transaction Information**
-   * Transaction ID
-   * Form name
-   * Invoice number
-   * Customer details
-   * Payment status
-   * Amount and currency
-   * Payment date
-
-3. **Filtering Options**
-   * Filter by form
-   * Filter by payment status (Paid/Unpaid/Failed/Refunded)
-   * Filter by date range
-
-4. **Transaction Actions**
-   * View payment details
-   * Access payment provider transaction page
-
-== Upgrade Notice ==
-
-Follow updates on plugin's GitHub page:
-
-[https://github.com/Coinsnap/Coinsnap-Bitcoin-Invoice-Form](https://github.com/Coinsnap/Coinsnap-Bitcoin-Invoice-Form)
-
-=== Frequently Asked Questions ===
-
-Plugin's page on Coinsnap website: [https://coinsnap.io/coinsnap-bitcoin-invoice-form-plugin/](https://coinsnap.io/coinsnap-bitcoin-invoice-form-plugin/)
-
-=== Screenshots ===
-
-
-=== Changelog ===
-
-= 1.0.0 :: 2025-09-26 =
-* First tests.
+= 1.0.0 :: 2026-01-14 =
+* First public WordPress.org release.
