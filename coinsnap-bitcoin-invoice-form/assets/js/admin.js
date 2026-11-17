@@ -91,7 +91,6 @@
    
     if($('.coinsnapConnectionStatus').length){
         
-        console.log('Connection check is activated');
         
         let ajaxurl = coinsnapbif_ajax.ajax_url;
         let data = {

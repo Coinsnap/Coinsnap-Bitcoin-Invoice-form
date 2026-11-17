@@ -117,7 +117,6 @@
         var emailField = form.find('input[type="email"]');
         if (emailField.length) {
             var email = (emailField.val() || '').toString().trim();
-            console.log(email + ': ' + email.length);
             if (email !== '' && email.length > 0) {
                 var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
@@ -207,8 +206,6 @@
      * Show payment modal
      */
     function showPaymentModal(formId, paymentData) {
-        console.log('Invoice created:', paymentData.invoice_id);
-        console.log('Payment URL:', paymentData.payment_url);
 
         // Try inline modal for Coinsnap-compatible checkout link; otherwise redirect
         try {
@@ -227,7 +224,6 @@
             }
 
             modal.backdrop.style.display = 'flex';
-            console.log('Modal created, starting status polling...');
             startPaymentPolling(paymentData.invoice_id, modal);
         } catch (e) {
             console.error('Modal creation failed, redirecting:', e);
@@ -247,14 +243,12 @@
         function step() {
             // Check if modal is still open and polling should continue
             if (!modal.backdrop.pollingActive) {
-                console.log('Polling stopped - modal closed');
                 return;
             }
 
             tries++;
             var statusUrl = CoinsnapBIF.restUrl + 'status/' + encodeURIComponent(invoiceId);
 
-            console.log('Polling status for invoice:', invoiceId, 'attempt:', tries);
 
             $.ajax({
                 url: statusUrl,
@@ -264,10 +258,8 @@
                 }
             })
             .done(function(response) {
-                console.log('Status response:', response);
 
                 if (response && response.success && response.data && response.data.paid) {
-                    console.log('Payment confirmed');
                     showPaymentSuccess(modal);
                     return;
                 }
@@ -275,22 +267,18 @@
                 // If we've been polling for a while and still not paid, try manual verification
                 if (tries > 30 && verifyTries < maxVerifyTries) {
                     verifyTries++;
-                    console.log('Trying manual payment verification, attempt:', verifyTries);
                     return verifyPayment();
                 }
 
                 if (tries < maxTries) {
-                    console.log('Payment not yet confirmed, retrying in 1s...');
                     setTimeout(step, 1000);
                 } else {
-                    console.log('Max polling attempts reached, payment may still be processing');
                     // Don't show error - just stop polling silently
                 }
             })
             .fail(function(xhr) {
                 console.error('Status check failed:', xhr);
                 if (tries < maxTries) {
-                    console.log('Retrying status check in 1.5s...');
                     setTimeout(step, 1500);
                 } else {
                     console.error('Max polling attempts reached with errors');
@@ -302,13 +290,11 @@
         function verifyPayment() {
             // Check if modal is still open and polling should continue
             if (!modal.backdrop.pollingActive) {
-                console.log('Verification stopped - modal closed');
                 return;
             }
 
             var verifyUrl = CoinsnapBIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
 
-            console.log('Attempting manual payment verification...');
 
             $.ajax({
                 url: verifyUrl,
@@ -318,10 +304,8 @@
                 }
             })
             .done(function(response) {
-                console.log('Verification response:', response);
 
                 if (response && response.success && response.data && response.data.paid) {
-                    console.log('Payment verified manually');
                     showPaymentSuccess(modal);
                 } else {
                     // Continue polling after verification attempt
@@ -348,7 +332,6 @@
      * Show payment success
      */
     function showPaymentSuccess(modal) {
-        console.log('Payment successful, closing modal');
         modal.backdrop.style.display = 'none';
 
         // Redirect after 2 seconds or show inline success
