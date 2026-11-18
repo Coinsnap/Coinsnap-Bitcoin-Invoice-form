@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Shortcode;
+namespace CoinsnapBIF\Shortcode;
 
-use BitcoinInvoiceForm\BIF_Constants;
+use CoinsnapBIF\CoinsnapBIF_Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,16 +18,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Invoice form shortcode implementation.
  */
-class BIF_Shortcode_Invoice_Form_Shortcode {
+class CoinsnapBIF_Shortcode_Invoice_Form_Shortcode {
 	/**
 	 * Register the shortcode.
 	 */
+    
+    public static function passwordGenerator($length,$type=''){  
+        switch($type){
+            case 'letters': $arr = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','r','s','t','u','v','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','X','Y','Z'); break;
+            case 'numbers': $arr = array('1','2','3','4','5','6','7','8','9','0'); break;
+            default: $arr = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','r','s','t','u','v','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','X','Y','Z','1','2','3','4','5','6','7','8','9','0'); break;
+        }
+        $pass = "";  
+        for($i = 0; $i < $length; $i++){
+            $index = wp_rand(0, count($arr) - 1);  
+            $pass .= $arr[$index];  
+        }  
+        return $pass;  
+    }
+    
 	public static function register(): void {
 		// Register the main shortcode name
-		add_shortcode( BIF_Constants::SHORTCODE_INVOICE_FORM, array( __CLASS__, 'render' ) );
+		add_shortcode( CoinsnapBIF_Constants::SHORTCODE_INVOICE_FORM, array( __CLASS__, 'render' ) );
 
 		// Register the old shortcode name for backward compatibility
-		add_shortcode( 'bif_invoice_form', array( __CLASS__, 'render' ) );
+		add_shortcode( 'coinsnapbif_invoice_form', array( __CLASS__, 'render' ) );
 	}
 
 	/**
@@ -42,7 +57,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			'id'    => 0,
 			'class' => '',
 			'style' => '',
-		), $atts, BIF_Constants::SHORTCODE_INVOICE_FORM );
+		), $atts, CoinsnapBIF_Constants::SHORTCODE_INVOICE_FORM );
 
 		$form_id = intval( $atts['id'] );
 		if ( ! $form_id ) {
@@ -50,15 +65,17 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 		}
 
 		$form = get_post( $form_id );
-		$valid_post_types = array( BIF_Constants::CPT_INVOICE_FORM, 'coinsnap_invoice_form' );
+		$valid_post_types = array( CoinsnapBIF_Constants::CPT_INVOICE_FORM, 'coinsnap_invoice_form' );
 		if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
 			return '<p>' . esc_html__( 'Form not found.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
 		}
 
 		// Get form configuration
-		$fields = get_post_meta( $form_id, '_bif_fields', true );
-		$payment = get_post_meta( $form_id, '_bif_payment', true );
-		$redirect = get_post_meta( $form_id, '_bif_redirect', true );
+		$fields = get_post_meta( $form_id, '_coinsnapbif_fields', true );
+		$payment = get_post_meta( $form_id, '_coinsnapbif_payment', true );
+		$redirect = get_post_meta( $form_id, '_coinsnapbif_redirect', true );
+                
+                $form_inline_id = self::passwordGenerator(6);
 
 		// Set defaults - only if fields array is empty
 		if ( empty( $fields ) || ! is_array( $fields ) ) {
@@ -77,7 +94,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				'amount_order'        => '30',
 				'currency_enabled'    => '1',
 				'currency_required'   => '1',
-				'currency_label'      => __( 'Currency Selection', 'coinsnap-bitcoin-invoice-form' ),
+				'currency_label'      => __( 'Currency', 'coinsnap-bitcoin-invoice-form' ),
 				'currency_order'      => '40',
 				'email_enabled'       => '1',
 				'email_required'      => '1',
@@ -205,14 +222,14 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 		$fields['_currency_default'] = $current_currency;
 
 		// Build form HTML
-		$form_classes = array( 'bif-form', 'bif-form-' . $form_id );
+		$form_classes = array( 'bif-form', 'bif-form-' . $form_inline_id );
 		if ( ! empty( $atts['class'] ) ) {
 			$form_classes[] = $atts['class'];
 		}
 
 		ob_start();
 		?>
-		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php if ( ! empty( $atts['style'] ) ) { echo ' style="' . esc_attr( $atts['style'] ) . '"'; } ?> data-form-id="<?php echo esc_attr( $form_id ); ?>" data-currency="<?php echo esc_attr( $current_currency ); ?>"<?php
+		<form class="<?php echo esc_attr( implode( ' ', $form_classes ) ); ?>"<?php if ( ! empty( $atts['style'] ) ) { echo ' style="' . esc_attr( $atts['style'] ) . '"'; } ?> data-form-id="<?php echo esc_attr( $form_id ); ?>" data-form-inline-id="<?php echo esc_attr( $form_inline_id ); ?>" data-currency="<?php echo esc_attr( $current_currency ); ?>"<?php
 			$disc_enabled_val = $fields['discount_enabled'] ?? '0';
 			$disc_enabled = ( '1' === $disc_enabled_val || 'on' === $disc_enabled_val || true === $disc_enabled_val );
 			$disc_type = $fields['discount_type'] ?? 'fixed';
@@ -221,7 +238,7 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 				echo ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"';
 			}
 		?>>
-			<?php wp_nonce_field( 'bif_invoice_form_' . $form_id, 'bif_form_nonce' ); ?>
+			<?php wp_nonce_field( 'coinsnapbif_invoice_form_' . $form_inline_id, 'bif_form_nonce' ); ?>
 			<input type="hidden" name="form_id" value="<?php echo esc_attr( $form_id ); ?>" />
 
 			<?php if ( $disc_enabled && $disc_value > 0 ) : ?>
@@ -258,20 +275,35 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			</div>
 
 			<?php if ( $disc_enabled && $disc_value > 0 ) : ?>
-				<div class="bif-discount-totals" role="status" aria-live="polite">
-					<div class="bif-totals-row">
-						<span class="bif-totals-label"><?php esc_html_e( 'Original', 'coinsnap-bitcoin-invoice-form' ); ?></span>
-						<span class="bif-totals-original" data-value="0">—</span>
-					</div>
-					<div class="bif-totals-row">
-						<span class="bif-totals-label"><?php esc_html_e( 'Discount', 'coinsnap-bitcoin-invoice-form' ); ?></span>
-						<span class="bif-totals-discount" data-value="0">—</span>
-					</div>
-					<div class="bif-totals-row bif-totals-final-row">
-						<span class="bif-totals-label"><?php esc_html_e( 'You pay', 'coinsnap-bitcoin-invoice-form' ); ?></span>
-						<span class="bif-totals-final" data-value="0">—</span>
-					</div>
-				</div>
+			<div class="bif-discount-totals" role="status" aria-live="polite">
+                            <div class="bif-totals-row">
+                                <span class="bif-totals-label"><?php
+                                if(isset($fields['discount_original_text']) && !empty($fields['discount_original_text'])){
+                                    echo esc_html($fields['discount_original_text']);
+                                } else { 
+                                    esc_html_e( 'Original', 'coinsnap-bitcoin-invoice-form' ); 
+                                }?></span>
+				<span class="bif-totals-original" data-value="0">—</span>
+                            </div>
+                            <div class="bif-totals-row">
+                                <span class="bif-totals-label"><?php 
+                                if(isset($fields['discount_discount_text']) && !empty($fields['discount_discount_text'])){
+                                    echo esc_html($fields['discount_discount_text']);
+                                } else { 
+                                    esc_html_e( 'Discount', 'coinsnap-bitcoin-invoice-form' ); 
+                                }?></span>
+                                <span class="bif-totals-discount" data-value="0">—</span>
+                            </div>
+                            <div class="bif-totals-row bif-totals-final-row">
+                                <span class="bif-totals-label"><?php
+                                if(isset($fields['discount_youpay_text']) && !empty($fields['discount_youpay_text'])){
+                                    echo esc_html($fields['discount_youpay_text']);
+                                } else { 
+                                    esc_html_e( 'You pay', 'coinsnap-bitcoin-invoice-form' );
+                                }?></span>
+				<span class="bif-totals-final" data-value="0">—</span>
+                            </div>
+			</div>
 			<?php endif; ?>
 
 			<?php
@@ -309,46 +341,11 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 			</div>
 		</form>
 
-		<?php if ( $disc_enabled && $disc_value > 0 ) : ?>
-			<script>
-			(function(){
-				var form = document.querySelector('.bif-form-<?php echo esc_js( $form_id ); ?>');
-				if(!form) return;
-				var amountInput = form.querySelector('#bif_amount');
-				var originalEl = form.querySelector('.bif-totals-original');
-				var discountEl = form.querySelector('.bif-totals-discount');
-				var finalEl = form.querySelector('.bif-totals-final');
-				var currency = form.getAttribute('data-currency') || '';
-				var type = form.getAttribute('data-discount-type') || 'fixed';
-				var value = parseFloat(form.getAttribute('data-discount-value') || '0') || 0;
-				function fmt(n){
-					if(isNaN(n)) return '—';
-					return currency + ' ' + (Math.round(n * 100) / 100).toFixed(2);
-				}
-				function update(){
-					var amt = parseFloat(amountInput && amountInput.value ? amountInput.value : '0');
-					if(isNaN(amt)) amt = 0;
-					var disc = 0;
-					if(type === 'percent'){
-						disc = amt * (value/100);
-					}else{
-						disc = Math.min(value, amt);
-					}
-					var finalVal = Math.max(0, amt - disc);
-					if(originalEl) originalEl.textContent = fmt(amt);
-					if(discountEl) discountEl.textContent = '-' + fmt(disc);
-					if(finalEl) finalEl.textContent = fmt(finalVal);
-				}
-				if(amountInput){ amountInput.addEventListener('input', update); }
-				update();
-			})();
-			</script>
-		<?php endif; ?>
-
-
 		<?php
 		return ob_get_clean();
 	}
+        
+        public function enqueue_scripts(){}
 
 	/**
 	 * Render a form field.
@@ -392,8 +389,8 @@ class BIF_Shortcode_Invoice_Form_Shortcode {
 					$disc_enabled = ( '1' === $disc_enabled_val || 'on' === $disc_enabled_val || true === $disc_enabled_val );
 					$disc_type = $fields['discount_type'] ?? 'fixed';
 					$disc_value = isset( $fields['discount_value'] ) ? floatval( $fields['discount_value'] ) : 0.0;
-					$step_attr = ' step="0.01"';
-					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . esc_attr($step_attr) . ' min="0"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
+					
+					echo '<input type="number" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '"' . ( $required ? ' required' : '' ) . ' step="0.01" min="0"' . ( $disc_enabled && $disc_value > 0 ? ' data-discount-enabled="1" data-discount-type="' . esc_attr( $disc_type ) . '" data-discount-value="' . esc_attr( (string) $disc_value ) . '"' : '' ) . ' />';
 					break;
 				case 'currency':
 					$selected_currency = $fields['_currency_default'] ?? 'USD';

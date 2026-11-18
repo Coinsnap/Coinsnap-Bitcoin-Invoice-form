@@ -7,17 +7,17 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Util;
+namespace CoinsnapBIF\Util;
 
-use BitcoinInvoiceForm\Admin\BIF_Admin_Settings as Settings;
-use BitcoinInvoiceForm\Providers\Payment\PaymentProviderInterface;
-use BitcoinInvoiceForm\Providers\Payment\CoinsnapProvider;
-use BitcoinInvoiceForm\Providers\Payment\BTCPayProvider;
+use CoinsnapBIF\Admin\CoinsnapBIF_Admin_Settings as Settings;
+use CoinsnapBIF\Providers\Payment\PaymentProviderInterface;
+use CoinsnapBIF\Providers\Payment\CoinsnapProvider;
+use CoinsnapBIF\Providers\Payment\BTCPayProvider;
 
 /**
  * Factory to resolve payment provider implementations.
  */
-class BIF_Util_Provider_Factory {
+class CoinsnapBIF_Util_Provider_Factory {
 	/**
 	 * Resolve payment provider for a given form.
 	 *
@@ -28,14 +28,18 @@ class BIF_Util_Provider_Factory {
 	 * @param int|string $form_id Form ID.
 	 * @return PaymentProviderInterface Provider instance.
 	 */
-	public static function payment_for_form( $form_id ): PaymentProviderInterface {
+	public static function payment_for_form( $form_id = 0 ): PaymentProviderInterface {
 		// Ensure we always work with an integer ID.
 		$form_id = (int) $form_id;
 
 		$settings = Settings::get_settings();
-		$payment  = get_post_meta( $form_id, '_bif_payment', true );
-		$override = is_array( $payment ) && ! empty( $payment['provider_override'] ) ? $payment['provider_override'] : '';
-		$key      = $override ? $override : $settings['payment_provider'];
+                
+                if($form_id > 0){
+                    $payment  = get_post_meta( $form_id, '_coinsnapbif_payment', true );
+                    $override = (is_array( $payment ) && ! empty( $payment['provider_override'] )) ? $payment['provider_override'] : '';
+                }
+		
+		$key      = (isset($override) && !empty($override)) ? $override : $settings['payment_provider'];
 		switch ( $key ) {
 			case 'btcpay':
 				return new BTCPayProvider();

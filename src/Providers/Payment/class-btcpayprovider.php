@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Providers\Payment;
+namespace CoinsnapBIF\Providers\Payment;
 
-use BitcoinInvoiceForm\Admin\BIF_Admin_Settings as Settings;
-use BitcoinInvoiceForm\BIF_Constants;
+use CoinsnapBIF\Admin\CoinsnapBIF_Admin_Settings as Settings;
+use CoinsnapBIF\CoinsnapBIF_Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -20,7 +20,53 @@ if ( ! defined( 'ABSPATH' ) ) {
  * BTCPay Server payment provider implementation.
  */
 class BTCPayProvider implements PaymentProviderInterface {
-	/**
+	
+    /**
+     * Get store data from BTCPay server
+     *
+     * @param void.
+     * @return array().
+     */
+    public function get_store(): array {
+        //  BTCPay server connection credentials check
+        
+        $s = Settings::get_settings();
+        $host = rtrim( (string) $s['btcpay_host'], '/' );
+	$api_key = (string) $s['btcpay_api_key'];
+	$store   = (string) $s['btcpay_store_id'];
+	
+        if ( ! $host || ! $api_key || ! $store ) {
+            return array('error' => true,'message'=>__('Connection credentials error','coinsnap-bitcoin-invoice-form'));
+        }
+        
+        $url = $host . sprintf( CoinsnapBIF_Constants::BTCPAY_STORE_ENDPOINT, rawurlencode( $store ) );
+                
+        $args = array(
+            'method'  => 'GET',
+            'headers' => array(
+                'Authorization' => 'token ' . $api_key,
+                'Content-Type'  => 'application/json',
+            ),
+            'timeout' => 20
+        );
+		
+        $res = wp_remote_request( $url, $args );
+                
+        if ( is_wp_error( $res ) ) {
+            return array('error' => true,'message'=>__('Store data error','coinsnap-bitcoin-invoice-form'));
+        }
+                
+        $code = wp_remote_retrieve_response_code( $res );
+        $result = json_decode( wp_remote_retrieve_body( $res ), true );
+        if ( $code >= 200 && $code < 300 && is_array($result) ) {
+            return ['code' => $code, 'result' => $result];
+        }
+        else {
+            return array('error' => true,'message'=>__('BTCPay server request error','coinsnap-bitcoin-invoice-form'),'code' => $code, 'result' => $result);
+        }
+    }    
+    
+        /**
 	 * Create a payment invoice.
 	 *
 	 * @param int    $form_id         Form ID.
@@ -37,7 +83,7 @@ class BTCPayProvider implements PaymentProviderInterface {
 		if ( ! $host || ! $api_key || ! $store ) {
 			return array();
 		}
-		$url     = $host . sprintf( BIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
+		$url     = $host . sprintf( CoinsnapBIF_Constants::BTCPAY_INVOICES_ENDPOINT, rawurlencode( $store ) );
 		// Convert from minor units to BTCPay expected units.
 		// Our service stores amounts in minor units (e.g., cents for fiat, centisats for SATS).
 		// BTCPay expects major units for fiat (e.g., USD) and whole sats for SATS.
@@ -47,7 +93,14 @@ class BTCPayProvider implements PaymentProviderInterface {
 			'currency' => $currency,
 			'metadata' => array(
 				'form_id' => $form_id,
+				'transaction_id' => (string) ( $invoice_data['transaction_id'] ?? '' ),
 				'email'   => (string) $invoice_data['email'],
+				'name'    => (string) ( $invoice_data['name'] ?? '' ),
+				'company' => (string) ( $invoice_data['company'] ?? '' ),
+				'invoice_number' => (string) ( $invoice_data['invoice_number'] ?? '' ),
+				'description' => (string) ( $invoice_data['description'] ?? '' ),
+				'wp_version' => (string) ( $invoice_data['wp_version'] ?? '' ),
+				'plugin_version' => (string) ( $invoice_data['plugin_version'] ?? '' ),
 			),
 		);
 		$args    = array(
@@ -59,7 +112,7 @@ class BTCPayProvider implements PaymentProviderInterface {
 			'timeout' => 20,
 			'body'    => wp_json_encode( $payload ),
 		);
-		$args    = apply_filters( 'wpbn_btcpay_request_args', $args, $form_id );
+		//$args    = apply_filters( 'wpbn_btcpay_request_args', $args, $form_id );
 		$res     = wp_remote_request( $url, $args );
 		do_action( 'wpbn_btcpay_response', $res, $form_id );
 		if ( is_wp_error( $res ) ) {
@@ -78,110 +131,4 @@ class BTCPayProvider implements PaymentProviderInterface {
 		return array();
 	}
 
-	/**
-	 * Validate webhook or callback.
-	 *
-	 * @param array $request Parsed request body.
-	 * @return array { invoice_id: string, paid: bool, metadata: array }
-	 */
-	public function handle_webhook( array $request ): array {
-		do_action( 'wpbn_btcpay_webhook_received', $request );
-		$invoice_id = isset( $request['invoiceId'] ) ? (string) $request['invoiceId'] : '';
-		$type       = isset( $request['type'] ) ? (string) $request['type'] : '';
-		$paid       = in_array( $type, array( 'InvoiceSettled', 'PaymentReceived', 'InvoicePaid', 'Settled' ), true );
-		return array(
-			'invoice_id' => $invoice_id,
-			'paid'       => $paid,
-			'metadata'   => $request,
-		);
-	}
-
-	/**
-	 * Check invoice payment status with BTCPay API.
-	 *
-	 * @param string $invoice_id Invoice ID to check.
-	 * @return array { invoice_id: string, paid: bool, status: string, metadata: array }
-	 */
-	public function check_invoice_status( string $invoice_id ): array {
-		$s       = Settings::get_settings();
-		$host    = rtrim( (string) $s['btcpay_host'], '/' );
-		$api_key = (string) $s['btcpay_api_key'];
-		$store   = (string) $s['btcpay_store_id'];
-
-		if ( ! $host || ! $api_key || ! $store ) {
-			return array(
-				'invoice_id' => $invoice_id,
-				'paid'       => false,
-				'status'     => 'error',
-				'metadata'   => array( 'error' => 'Missing API credentials' ),
-			);
-		}
-
-		$url = $host . sprintf( '/api/v1/stores/%s/invoices/%s', rawurlencode( $store ), rawurlencode( $invoice_id ) );
-		$args = array(
-			'method'  => 'GET',
-			'headers' => array(
-				'Authorization' => 'token ' . $api_key,
-				'Content-Type'  => 'application/json',
-			),
-			'timeout' => 20,
-		);
-
-		$res = wp_remote_request( $url, $args );
-		do_action( 'wpbn_btcpay_response', $res, 0 );
-
-		if ( is_wp_error( $res ) ) {
-			return array(
-				'invoice_id' => $invoice_id,
-				'paid'       => false,
-				'status'     => 'error',
-				'metadata'   => array( 'error' => $res->get_error_message() ),
-			);
-		}
-
-		$code = wp_remote_retrieve_response_code( $res );
-		$body = json_decode( wp_remote_retrieve_body( $res ), true );
-
-		if ( $code >= 200 && $code < 300 && is_array( $body ) ) {
-			$status = isset( $body['status'] ) ? (string) $body['status'] : 'unknown';
-			$paid   = in_array( $status, array( 'Settled', 'Paid', 'Complete' ), true );
-
-			return array(
-				'invoice_id' => $invoice_id,
-				'paid'       => $paid,
-				'status'     => $status,
-				'metadata'   => $body,
-			);
-		}
-
-		return array(
-			'invoice_id' => $invoice_id,
-			'paid'       => false,
-			'status'     => 'error',
-			'metadata'   => array( 'error' => 'Invalid API response' ),
-		);
-	}
-
-	/**
-	 * Verify BTCPay webhook signature.
-	 *
-	 * @return bool True if valid.
-	 */
-	public static function verify_signature(): bool {
-		$s      = Settings::get_settings();
-		$secret = (string) $s['btcpay_webhook_secret'];
-		if ( ! $secret ) {
-			return false;
-		}
-		$sig     = isset( $_SERVER['HTTP_BTCPAY_SIGNATURE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_BTCPAY_SIGNATURE'] ) ) : '';
-		$payload = file_get_contents( 'php://input' );
-		if ( ! $payload ) {
-			$payload = '';
-		}
-		if ( ! $sig || ! $payload ) {
-			return false;
-		}
-		$calc = 'sha256=' . hash_hmac( 'sha256', $payload, $secret );
-		return hash_equals( $calc, $sig );
-	}
 }

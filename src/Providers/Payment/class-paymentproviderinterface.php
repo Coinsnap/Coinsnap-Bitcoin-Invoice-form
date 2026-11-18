@@ -7,10 +7,11 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Providers\Payment;
+namespace CoinsnapBIF\Providers\Payment;
 
 /**
- * Payment providers must implement invoice creation and webhook handling.
+ * Payment providers create invoices and read store data. Webhooks and invoice
+ * checks are handled by CoinsnapBIF_Security.
  */
 interface PaymentProviderInterface {
 	/**
@@ -25,18 +26,9 @@ interface PaymentProviderInterface {
 	public function create_invoice( int $form_id, int $amount, string $currency, array $invoice_data ): array;
 
 	/**
-	 * Validate webhook or callback.
+	 * Getting Store data.
 	 *
-	 * @param array $request Parsed request body.
-	 * @return array { invoice_id: string, paid: bool, metadata: array }
+	 * @return array
 	 */
-	public function handle_webhook( array $request ): array;
-
-	/**
-	 * Check invoice payment status.
-	 *
-	 * @param string $invoice_id Invoice ID to check.
-	 * @return array { invoice_id: string, paid: bool, status: string, metadata: array }
-	 */
-	public function check_invoice_status( string $invoice_id ): array;
+	public function get_store(): array;
 }

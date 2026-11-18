@@ -7,12 +7,12 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Services;
+namespace CoinsnapBIF\Services;
 
-use BitcoinInvoiceForm\Database\Installer;
-use BitcoinInvoiceForm\Util\BIF_Logger;
-use BitcoinInvoiceForm\Util\BIF_Util_Provider_Factory;
-use BitcoinInvoiceForm\Admin\BIF_Admin_Settings;
+use CoinsnapBIF\Database\Installer;
+use CoinsnapBIF\Util\CoinsnapBIF_Logger;
+use CoinsnapBIF\Util\CoinsnapBIF_Util_Provider_Factory;
+use CoinsnapBIF\Services\CoinsnapBIF_Security as Security;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Payment service for handling invoice payments.
  */
-class BIF_Services_Payment_Service {
+class CoinsnapBIF_Services_Payment_Service {
 	/**
 	 * Create a new invoice payment.
 	 *
@@ -35,8 +35,9 @@ class BIF_Services_Payment_Service {
 		try {
 			// Validate form exists
 			$form = get_post( $form_id );
-			$valid_post_types = array( 'bif_invoice_form', 'coinsnap_invoice_form' );
-			if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
+			$valid_post_types = array( 'coinsnapbif', 'coinsnap_invoice_form' );
+                        
+                        if ( ! $form || ! in_array( $form->post_type, $valid_post_types, true ) ) {
 				return array(
 					'success' => false,
 					'message' => __( 'Invalid form ID.', 'coinsnap-bitcoin-invoice-form' ),
@@ -44,9 +45,9 @@ class BIF_Services_Payment_Service {
 			}
 
 			// Get form configuration
-			$fields = get_post_meta( $form_id, '_bif_fields', true );
-			$payment_config = get_post_meta( $form_id, '_bif_payment', true );
-			$email_config = get_post_meta( $form_id, '_bif_email', true );
+			$fields = get_post_meta( $form_id, '_coinsnapbif_fields', true );
+			$payment_config = get_post_meta( $form_id, '_coinsnapbif_payment', true );
+			$email_config = get_post_meta( $form_id, '_coinsnapbif_email', true );
 
 			// Set defaults
 			$fields = wp_parse_args( $fields, array() );
@@ -130,7 +131,7 @@ class BIF_Services_Payment_Service {
                                     if ( '' === $val ) {
 					$errors[] = sprintf(
                                             /* translators: 1: Required value */
-                                            __( '%s is required.', 'coinsnap-bitcoin-invoice-form' ), $label );
+                                            __( '%s is required', 'coinsnap-bitcoin-invoice-form' ), $label );
                                     } elseif ( 'email' === $f && ! is_email( $val ) ) {
 					$errors[] = __( 'Please enter a valid email address.', 'coinsnap-bitcoin-invoice-form' );
                                     }
@@ -163,6 +164,14 @@ class BIF_Services_Payment_Service {
 
 			// Convert amount to smallest currency unit (e.g., cents for USD)
 			$amount_cents = intval( round( $amount * 100 ) );
+			if ( $amount_cents <= 0 ) {
+				return array(
+					'success' => false,
+					'message' => __( 'Invalid amount.', 'coinsnap-bitcoin-invoice-form' ),
+				);
+			}
+			// Record exactly the amount the invoice asks for; the payment check compares against it.
+			$amount = $amount_cents / 100;
 
 			// Get currency strictly from form configuration (end user cannot change it)
 			if ( ! empty( $payment_config['currency'] ) ) {
@@ -172,10 +181,13 @@ class BIF_Services_Payment_Service {
 			}
 
 			// Generate transaction ID
-			$transaction_id = 'bif_' . time() . '_' . wp_generate_password( 8, false );
+			$transaction_id = 'coinsnapbif_' . time() . '_' . wp_generate_password( 8, false );
 
 			// Prepare invoice data
 			$invoice_data = array(
+				'transaction_id'  => $transaction_id,
+				'wp_version'      => get_bloginfo( 'version' ),
+				'plugin_version'  => COINSNAPBIF_VERSION,
 				'name'            => sanitize_text_field( ( $data['bif_invoice_recipient'] ?? '' ) !== '' ? $data['bif_invoice_recipient'] : ( $data['bif_name'] ?? '' ) ),
 				'email'           => sanitize_email( $data['bif_email'] ?? '' ),
 				'company'         => sanitize_text_field( $data['bif_company'] ?? '' ),
@@ -184,14 +196,14 @@ class BIF_Services_Payment_Service {
 			);
 
 			// Create payment provider
-			$payment_provider = BIF_Util_Provider_Factory::payment_for_form( $form_id );
+			$payment_provider = CoinsnapBIF_Util_Provider_Factory::payment_for_form( $form_id );
 
 
 			// Create invoice with payment provider
 			$payment_result = $payment_provider->create_invoice( $form_id, $amount_cents, $currency, $invoice_data );
-
-			if ( empty( $payment_result ) || empty( $payment_result['invoice_id'] ) ) {
-				BIF_Logger::error( 'Failed to create payment invoice', array(
+                        
+                        if ( empty( $payment_result ) || empty( $payment_result['invoice_id'] ) ) {
+				CoinsnapBIF_Logger::error( 'Failed to create payment invoice', array(
 					'form_id' => $form_id,
 					'amount'  => $amount,
 					'currency' => $currency,
@@ -224,7 +236,7 @@ class BIF_Services_Payment_Service {
 					'amount'             => $amount,
 					'currency'           => $currency,
 					'description'        => $invoice_data['description'],
-					'payment_provider'   => $payment_config['provider_override'] ?? BIF_Admin_Settings::get_settings()['payment_provider'],
+					'payment_provider'   => ( $payment_provider instanceof \CoinsnapBIF\Providers\Payment\BTCPayProvider ) ? 'btcpay' : 'coinsnap',
 					'payment_invoice_id' => $payment_result['invoice_id'],
 					'payment_url'        => $payment_result['payment_url'] ?? '',
 					'payment_status'     => 'unpaid',
@@ -239,7 +251,7 @@ class BIF_Services_Payment_Service {
 			);
 
 			if ( false === $insert_result ) {
-				BIF_Logger::error( 'Failed to save transaction to database', array(
+				CoinsnapBIF_Logger::error( 'Failed to save transaction to database', array(
 					'form_id' => $form_id,
 					'transaction_id' => $transaction_id,
 					'wpdb_error' => $wpdb->last_error,
@@ -250,7 +262,7 @@ class BIF_Services_Payment_Service {
 				);
 			}
 
-			BIF_Logger::info( 'Invoice created successfully', array(
+			CoinsnapBIF_Logger::info( 'Invoice created successfully', array(
 				'form_id' => $form_id,
 				'transaction_id' => $transaction_id,
 				'invoice_id' => $payment_result['invoice_id'],
@@ -259,7 +271,7 @@ class BIF_Services_Payment_Service {
 			) );
 
 			// Get redirect configuration
-			$redirect_config = get_post_meta( $form_id, '_bif_redirect', true );
+			$redirect_config = get_post_meta( $form_id, '_coinsnapbif_redirect', true );
 			$redirect_config = wp_parse_args( $redirect_config, array(
 				'success_page' => '',
 				'error_page'   => '',
@@ -281,10 +293,9 @@ class BIF_Services_Payment_Service {
 			);
 
 		} catch ( \Exception $e ) {
-			BIF_Logger::error( 'Exception in create_invoice', array(
+			CoinsnapBIF_Logger::error( 'Exception in create_invoice', array(
 				'form_id' => $form_id,
-				'error'   => $e->getMessage(),
-				'trace'   => $e->getTraceAsString(),
+				'error'   => get_class( $e ),
 			) );
 			return array(
 				'success' => false,
@@ -294,92 +305,134 @@ class BIF_Services_Payment_Service {
 	}
 
 	/**
-	 * Handle payment webhook.
+	 * Handle a webhook whose signature was already checked.
+	 * Takes only invoiceId from the body and decides from the API's answer.
 	 *
-	 * @param string $provider Payment provider name.
-	 * @param array  $data     Webhook data.
-	 * @return array Response data.
+	 * @param string $provider 'coinsnap' or 'btcpay'.
+	 * @param string $raw_body Raw request body.
+	 * @return int HTTP status to reply with.
 	 */
-	public static function handle_webhook( string $provider, array $data ): array {
-		global $wpdb;
+	public static function handle_webhook( string $provider, string $raw_body ): int {
+		$data       = json_decode( $raw_body, true );
+		$invoice_id = ( is_array( $data ) && is_string( $data['invoiceId'] ?? null ) ) ? $data['invoiceId'] : '';
+		if ( '' === $invoice_id ) {
+			return 200;
+		}
+		$claims_paid = in_array( $data['type'] ?? '', array( 'Settled', 'InvoiceSettled' ), true );
 
 		try {
-			// Create payment provider
-			$payment_provider = BIF_Util_Provider_Factory::payment_for_form( 0 );
-			if ( $provider === 'btcpay' ) {
-				$payment_provider = new \BitcoinInvoiceForm\Providers\Payment\BTCPayProvider();
-			} else {
-				$payment_provider = new \BitcoinInvoiceForm\Providers\Payment\CoinsnapProvider();
-			}
-
-			// Handle webhook
-			$webhook_result = $payment_provider->handle_webhook( $data );
-
-			if ( empty( $webhook_result ) || empty( $webhook_result['invoice_id'] ) ) {
-				return array(
-					'success' => false,
-					'message' => __( 'Invalid webhook data.', 'coinsnap-bitcoin-invoice-form' ),
-				);
-			}
-
-			$invoice_id = $webhook_result['invoice_id'];
-			$paid = $webhook_result['paid'] ?? false;
-
-			// Update transaction status
-			$table_name = Installer::table_name();
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Update via $wpdb is appropriate here to set status.
-			$update_result = $wpdb->update(
-				$table_name,
-				array(
-					'payment_status' => $paid ? 'paid' : 'failed',
-					'updated_at'     => current_time( 'mysql' ),
-				),
-				array(
-					'payment_invoice_id' => $invoice_id,
-				),
-				array( '%s', '%s' ),
-				array( '%s' )
-			);
-
-			if ( false === $update_result ) {
-				BIF_Logger::error( 'Failed to update transaction status', array(
-					'invoice_id' => $invoice_id,
-					'paid' => $paid,
-					'wpdb_error' => $wpdb->last_error,
-				) );
-			}
-
-			// If payment is successful, send email notification
-			if ( $paid ) {
-				self::send_payment_notification( $invoice_id );
-			}
-
-			BIF_Logger::info( 'Webhook processed successfully', array(
-				'provider' => $provider,
-				'invoice_id' => $invoice_id,
-				'paid' => $paid,
-			) );
-
-			return array(
-				'success' => true,
-				'message' => __( 'Webhook processed successfully.', 'coinsnap-bitcoin-invoice-form' ),
-			);
-
-		} catch ( \Exception $e ) {
-			BIF_Logger::error( 'Exception in handle_webhook', array(
-				'provider' => $provider,
-				'error'    => $e->getMessage(),
-				'trace'    => $e->getTraceAsString(),
-			) );
-			return array(
-				'success' => false,
-				'message' => __( 'An error occurred while processing the webhook.', 'coinsnap-bitcoin-invoice-form' ),
-			);
+			$invoice = Security::fetch_invoice( $provider, $invoice_id );
+		} catch ( \RuntimeException $e ) {
+			Security::log( 'info', 'retry: API unavailable', $invoice_id );
+			return 503;
 		}
+		if ( null === $invoice ) {
+			Security::log( 'info', 'unknown invoice', $invoice_id );
+			return 200;
+		}
+
+		$row = self::find_row( $provider, $invoice_id, $invoice );
+		if ( null === $row ) {
+			Security::log( 'info', 'not ours', $invoice_id );
+			return 200;
+		}
+
+		$result = self::apply_invoice( $row, $invoice, $provider );
+		if ( 'not paid' === $result ) {
+			$forged = $claims_paid && 'Marked' !== ( $invoice['additionalStatus'] ?? '' );
+			Security::log(
+				$forged ? 'security' : 'info',
+				$forged ? 'forged status' : 'status ' . preg_replace( '/[^A-Za-z]/', '', (string) ( $invoice['status'] ?? '?' ) ),
+				$invoice_id
+			);
+		} else {
+			Security::log( 'info', $result, $invoice_id );
+		}
+		return 200;
 	}
 
 	/**
-	 * Check payment status.
+	 * The transaction this plugin saved for the invoice, if the invoice belongs to it.
+	 *
+	 * @param string $provider   Provider.
+	 * @param string $invoice_id Invoice ID.
+	 * @param array  $invoice    Invoice from the API.
+	 * @return object|null Row.
+	 */
+	private static function find_row( string $provider, string $invoice_id, array $invoice ) {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- payment state must not come from a cache.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, form_id, transaction_id, amount, currency, payment_provider, payment_status FROM %i WHERE payment_invoice_id = %s AND payment_provider = %s',
+				Installer::table_name(),
+				$invoice_id,
+				$provider
+			)
+		);
+		if ( ! $row ) {
+			return null;
+		}
+		// The invoice must carry the IDs this plugin put in its metadata.
+		$meta = is_array( $invoice['metadata'] ?? null ) ? $invoice['metadata'] : array();
+		if ( (string) ( $meta['form_id'] ?? '' ) !== (string) $row->form_id ) {
+			return null;
+		}
+		// Invoices created before 1.1.1 have no transaction_id in their metadata.
+		if ( isset( $meta['transaction_id'] ) && (string) $meta['transaction_id'] !== (string) $row->transaction_id ) {
+			return null;
+		}
+		return $row;
+	}
+
+	/**
+	 * Apply the API's answer to a transaction. Only unpaid (or expired) becomes paid,
+	 * once; Expired/Invalid only ever turn an unpaid transaction into failed.
+	 *
+	 * @param object $row      Transaction row.
+	 * @param array  $invoice  Invoice from the API.
+	 * @param string $provider Provider.
+	 * @return string 'paid', 'already processed', 'expired' or 'not paid'.
+	 */
+	private static function apply_invoice( $row, array $invoice, string $provider ): string {
+		global $wpdb;
+		$table = Installer::table_name();
+
+		if ( Security::invoice_pays( $invoice, $row->amount, (string) $row->currency, 'btcpay' === $provider ) ) {
+			// One row per invoice: the conditional update lets exactly one request through.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- atomic state change.
+			$changed = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE %i SET payment_status = 'paid', updated_at = %s WHERE id = %d AND payment_status IN ('unpaid','failed')",
+					$table,
+					current_time( 'mysql' ),
+					(int) $row->id
+				)
+			);
+			if ( 1 === (int) $changed ) {
+				self::send_payment_notification( (int) $row->id );
+				return 'paid';
+			}
+			return 'already processed';
+		}
+
+		if ( in_array( $invoice['status'] ?? '', array( 'Expired', 'Invalid' ), true ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- atomic state change.
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE %i SET payment_status = 'failed', updated_at = %s WHERE id = %d AND payment_status = 'unpaid'",
+					$table,
+					current_time( 'mysql' ),
+					(int) $row->id
+				)
+			);
+		}
+		return 'not paid';
+	}
+
+	/**
+	 * Public status poll. Returns only whether the invoice is paid; it may ask the
+	 * API and record a payment the API confirms, with the same checks as the webhook.
 	 *
 	 * @param string $invoice_id Invoice ID.
 	 * @return array Response data.
@@ -387,104 +440,65 @@ class BIF_Services_Payment_Service {
 	public static function check_payment_status( string $invoice_id ): array {
 		global $wpdb;
 
-		try {
-			// Get transaction from database
-			$table_name = Installer::table_name();
-
-			// Properly prepare query inline
-			$transaction = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT * FROM %s WHERE payment_invoice_id = %s",
-                                        $table_name,
-					$invoice_id
-				)
-			);
-
-
-			if ( ! $transaction ) {
-				return array(
-					'success' => false,
-					'message' => __( 'Transaction not found.', 'coinsnap-bitcoin-invoice-form' ),
-				);
-			}
-
-			// If already paid, return status
-			if ( 'paid' === $transaction->payment_status ) {
-				return array(
-					'success' => true,
-					'data'    => array(
-						'invoice_id' => $invoice_id,
-						'paid'       => true,
-						'status'     => 'paid',
-					),
-				);
-			}
-
-			// Check with payment provider
-			$payment_provider = BIF_Util_Provider_Factory::payment_for_form( $transaction->form_id );
-			$status_result = $payment_provider->check_invoice_status( $invoice_id );
-
-			if ( ! empty( $status_result ) && $status_result['paid'] ) {
-				// Update status in database
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Update via $wpdb is appropriate here after status check.
-				$wpdb->update(
-					$table_name,
-					array(
-						'payment_status' => 'paid',
-						'updated_at'     => current_time( 'mysql' ),
-					),
-					array(
-						'payment_invoice_id' => $invoice_id,
-					),
-					array( '%s', '%s' ),
-					array( '%s' )
-				);
-
-				// Send email notification
-				self::send_payment_notification( $invoice_id );
-			}
-
-			return array(
-				'success' => true,
-				'data'    => array(
-					'invoice_id' => $invoice_id,
-					'paid'       => $status_result['paid'] ?? false,
-					'status'     => $status_result['status'] ?? 'unknown',
-				),
-			);
-
-		} catch ( \Exception $e ) {
-			BIF_Logger::error( 'Exception in check_payment_status', array(
-				'invoice_id' => $invoice_id,
-				'error'      => $e->getMessage(),
-				'trace'      => $e->getTraceAsString(),
-			) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- payment state must not come from a cache.
+		$transaction = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT payment_provider, payment_status FROM %i WHERE payment_invoice_id = %s',
+				Installer::table_name(),
+				$invoice_id
+			)
+		);
+		if ( ! $transaction ) {
 			return array(
 				'success' => false,
-				'message' => __( 'An error occurred while checking payment status.', 'coinsnap-bitcoin-invoice-form' ),
+				'message' => __( 'Transaction not found.', 'coinsnap-bitcoin-invoice-form' ),
 			);
 		}
+
+		$status = (string) $transaction->payment_status;
+		if ( 'unpaid' === $status ) {
+			$provider = 'btcpay' === $transaction->payment_provider ? 'btcpay' : 'coinsnap';
+			try {
+				$invoice = Security::fetch_invoice( $provider, $invoice_id );
+			} catch ( \RuntimeException $e ) {
+				$invoice = null;
+			}
+			$row = $invoice ? self::find_row( $provider, $invoice_id, $invoice ) : null;
+			if ( $row ) {
+				$result = self::apply_invoice( $row, $invoice, $provider );
+				if ( 'paid' === $result || 'already processed' === $result ) {
+					$status = 'paid';
+				}
+			}
+		}
+
+		return array(
+			'success' => true,
+			'data'    => array(
+				'invoice_id' => $invoice_id,
+				'paid'       => 'paid' === $status,
+				'status'     => 'paid' === $status ? 'paid' : ( 'unpaid' === $status ? 'pending' : $status ),
+			),
+		);
 	}
 
 	/**
 	 * Send payment notification email.
 	 *
-	 * @param string $invoice_id Invoice ID.
+	 * @param int $row_id Transaction row ID.
 	 */
-	private static function send_payment_notification( string $invoice_id ): void {
+	private static function send_payment_notification( int $row_id ): void {
 		global $wpdb;
 
-		// Get transaction details
-		$table_name = Installer::table_name();
-
-		// Properly prepare query inline
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- read right after the state change.
 		$transaction = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM %s WHERE payment_invoice_id = %s",
-                                $table_name,
-				$invoice_id
+				'SELECT * FROM %i WHERE id = %d',
+				Installer::table_name(),
+				$row_id
 			)
 		);
+		$invoice_id = $transaction ? (string) $transaction->payment_invoice_id : '';
 
 
 		if ( ! $transaction ) {
@@ -515,8 +529,8 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			'customer_email_template' => __( "Hello {customer_name},\n\nThank you for your payment. Here are the details of your receipt:\n\nInvoice Number: {invoice_number}\nAmount Paid: {amount} {currency}\nPayment Status: {payment_status}\n\nDescription: {description}\n\nTransaction ID: {transaction_id}\nPayment Provider: {payment_provider}\n\nIf you have any questions, reply to this email.\n\nBest regards,\n{site_name}", 'coinsnap-bitcoin-invoice-form' ),
 		);
 
-		$admin_config    = get_post_meta( $transaction->form_id, '_bif_email', true );
-		$customer_config = get_post_meta( $transaction->form_id, '_bif_email_customer', true );
+		$admin_config    = get_post_meta( $transaction->form_id, '_coinsnapbif_email', true );
+		$customer_config = get_post_meta( $transaction->form_id, '_coinsnapbif_email_customer', true );
 
 		// Backward compatibility: if customer metabox not saved, fall back to any customer keys stored in admin metabox
 		$legacy_customer_subset = array();
@@ -552,9 +566,8 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
 		wp_mail( $admin_config['admin_email'], $email_subject, $email_message, $headers );
 
-		BIF_Logger::info( 'Payment notification email sent (admin)', array(
+		CoinsnapBIF_Logger::info( 'Payment notification email sent (admin)', array(
 			'invoice_id' => $invoice_id,
-			'admin_email' => $admin_config['admin_email'],
 		) );
 
 		// Optionally send email to customer
@@ -565,12 +578,11 @@ Description: {description}', 'coinsnap-bitcoin-invoice-form' ),
 			$customer_subject = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $customer_config['customer_email_subject'] );
 			$customer_message = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $customer_config['customer_email_template'] );
 			wp_mail( $customer_email, $customer_subject, $customer_message, $headers );
-			BIF_Logger::info( 'Payment notification email sent (customer)', array(
+			CoinsnapBIF_Logger::info( 'Payment notification email sent (customer)', array(
 				'invoice_id' => $invoice_id,
-				'customer_email' => $customer_email,
 			) );
 		} else {
-			BIF_Logger::info( 'Customer email not sent', array(
+			CoinsnapBIF_Logger::info( 'Customer email not sent', array(
 				'invoice_id'      => $invoice_id,
 				'enabled_flag'    => $enabled_raw,
 				'has_customer_email' => ! empty( $customer_email ),

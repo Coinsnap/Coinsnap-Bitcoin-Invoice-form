@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Util;
+namespace CoinsnapBIF\Util;
 
-use BitcoinInvoiceForm\Admin\BIF_Admin_Settings as Settings;
+use CoinsnapBIF\Admin\CoinsnapBIF_Admin_Settings as Settings;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Logger class for handling plugin logging.
  */
-class BIF_Logger {
+class CoinsnapBIF_Logger {
 	/**
 	 * Log file path.
 	 *
@@ -58,9 +58,48 @@ class BIF_Logger {
 		if ( ! file_exists( $log_dir ) ) {
 			wp_mkdir_p( $log_dir );
 		}
+		self::protect_dir( $log_dir );
 
-		self::$log_file  = $log_dir . '/bif.log';
+		// The uploads folder is public. The file name has a random part so it can't be
+		// guessed on servers that ignore .htaccess (e.g. nginx).
+		$token = get_option( 'coinsnapbif_log_token' );
+		if ( ! is_string( $token ) || ! preg_match( '/^[a-f0-9]{32}$/', $token ) ) {
+			$token = bin2hex( random_bytes( 16 ) );
+			update_option( 'coinsnapbif_log_token', $token, false );
+		}
+		self::$log_file = $log_dir . '/bif-' . $token . '.log';
+
+		// Move a log written by an older version away from its guessable URL.
+		$legacy = $log_dir . '/bif.log';
+		if ( file_exists( $legacy ) && ! file_exists( self::$log_file ) ) {
+			@rename( $legacy, self::$log_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.rename_rename
+		}
+		if ( file_exists( $legacy ) ) {
+			wp_delete_file( $legacy );
+		}
+
 		self::$log_level = self::get_current_log_level();
+	}
+
+	/**
+	 * Deny web access to the log folder where the server honours it.
+	 *
+	 * @param string $log_dir Folder.
+	 */
+	private static function protect_dir( string $log_dir ): void {
+		if ( ! is_dir( $log_dir ) || ! is_writable( $log_dir ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+			return;
+		}
+		$files = array(
+			'.htaccess'  => "Require all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n",
+			'index.php'  => "<?php\n// Silence is golden.\n",
+			'web.config' => "<?xml version=\"1.0\"?>\n<configuration><system.webServer><authorization><deny users=\"*\" /></authorization></system.webServer></configuration>\n",
+		);
+		foreach ( $files as $name => $content ) {
+			if ( ! file_exists( $log_dir . '/' . $name ) ) {
+				file_put_contents( $log_dir . '/' . $name, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			}
+		}
 	}
 
 	/**
@@ -72,7 +111,7 @@ class BIF_Logger {
 		$settings = Settings::get_settings();
 		$level    = $settings['log_level'] ?? 'error';
 
-		return BIF_Log_Levels::is_valid_level( $level ) ? $level : 'error';
+		return CoinsnapBIF_Log_Levels::is_valid_level( $level ) ? $level : 'error';
 	}
 
 	/**
@@ -104,8 +143,8 @@ class BIF_Logger {
 	 * @return bool True if should log, false otherwise.
 	 */
 	private static function should_log( string $level ): bool {
-		$current_level_value = BIF_Log_Levels::get_level_value( self::$log_level );
-		$message_level_value = BIF_Log_Levels::get_level_value( $level );
+		$current_level_value = CoinsnapBIF_Log_Levels::get_level_value( self::$log_level );
+		$message_level_value = CoinsnapBIF_Log_Levels::get_level_value( $level );
 
 		return $message_level_value <= $current_level_value;
 	}
@@ -212,7 +251,11 @@ class BIF_Logger {
 	 */
 	private static function maybe_rotate_log_fallback(): void {
 		// Ensure WordPress file helpers are available for wp_delete_file.
-		require_once ABSPATH . '/wp-admin/includes/file.php';
+		global $wp_filesystem;
+		if ( empty( $wp_filesystem ) ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
 
 		if ( ! file_exists( self::$log_file ) ) {
 			return;
@@ -255,7 +298,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function emergency( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::EMERGENCY, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::EMERGENCY, $message, $context );
 	}
 
 	/**
@@ -266,7 +309,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function alert( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::ALERT, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::ALERT, $message, $context );
 	}
 
 	/**
@@ -277,7 +320,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function critical( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::CRITICAL, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::CRITICAL, $message, $context );
 	}
 
 	/**
@@ -288,7 +331,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function error( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::ERROR, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::ERROR, $message, $context );
 	}
 
 	/**
@@ -299,7 +342,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function warning( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::WARNING, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::WARNING, $message, $context );
 	}
 
 	/**
@@ -310,7 +353,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function notice( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::NOTICE, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::NOTICE, $message, $context );
 	}
 
 	/**
@@ -321,7 +364,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function info( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::INFO, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::INFO, $message, $context );
 	}
 
 	/**
@@ -332,7 +375,7 @@ class BIF_Logger {
 	 * @return bool True if logged, false otherwise.
 	 */
 	public static function debug( string $message, array $context = array() ): bool {
-		return self::log( BIF_Log_Levels::DEBUG, $message, $context );
+		return self::log( CoinsnapBIF_Log_Levels::DEBUG, $message, $context );
 	}
 
 	/**

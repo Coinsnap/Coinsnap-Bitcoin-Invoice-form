@@ -7,12 +7,12 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Util;
+namespace CoinsnapBIF\Util;
 
 /**
  * Log levels for the plugin logging system.
  */
-class BIF_Log_Levels {
+class CoinsnapBIF_Log_Levels {
 	/**
 	 * Emergency: system is unusable.
 	 */
