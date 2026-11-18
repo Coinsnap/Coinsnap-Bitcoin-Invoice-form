@@ -66,6 +66,7 @@ spl_autoload_register(
 
 			// Services classes.
 			'Services\\CoinsnapBIF_Services_Payment_Service'      => 'Services/class-coinsnapbif-services-payment-service',
+			'Services\\CoinsnapBIF_Security'                      => 'Services/class-coinsnapbif-security',
 
 			// Shortcode classes.
 			'Shortcode\\CoinsnapBIF_Shortcode_Invoice_Form_Shortcode' => 'Shortcode/class-coinsnapbif-shortcode-invoice-form-shortcode',

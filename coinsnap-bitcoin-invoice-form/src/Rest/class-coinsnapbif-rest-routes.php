@@ -11,6 +11,7 @@ namespace CoinsnapBIF\Rest;
 
 use CoinsnapBIF\CoinsnapBIF_Constants;
 use CoinsnapBIF\Services\CoinsnapBIF_Services_Payment_Service;
+use CoinsnapBIF\Services\CoinsnapBIF_Security;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -31,7 +32,7 @@ class CoinsnapBIF_Rest_Routes {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'create_payment' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => '__return_true', // public: visitors pay without an account; currency comes from the form, the amount is recorded server-side
 				'args'                => array(
 					'form_id' => array(
 						'required' => true,
@@ -49,12 +50,14 @@ class CoinsnapBIF_Rest_Routes {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( __CLASS__, 'check_payment_status' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => '__return_true', // public: returns only paid yes/no for one invoice
 				'args'                => array(
 					'invoice' => array(
 						'required' => true,
 						'type'     => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => function ( $value ) {
+							return is_string( $value ) && 1 === preg_match( '/^[A-Za-z0-9_-]{1,64}$/', $value );
+						},
 					),
 				),
 			)
@@ -67,7 +70,7 @@ class CoinsnapBIF_Rest_Routes {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'handle_coinsnap_webhook' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( CoinsnapBIF_Security::class, 'check_coinsnap_webhook' ),
 			)
 		);
 
@@ -78,7 +81,7 @@ class CoinsnapBIF_Rest_Routes {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( __CLASS__, 'handle_btcpay_webhook' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( CoinsnapBIF_Security::class, 'check_btcpay_webhook' ),
 			)
 		);
 	}
@@ -125,30 +128,22 @@ class CoinsnapBIF_Rest_Routes {
 	}
 
 	/**
-	 * Handle CoinSnap webhook.
+	 * Handle CoinSnap webhook. The signature was checked by the permission callback.
 	 *
 	 * @param \WP_REST_Request $request REST request object.
 	 * @return \WP_REST_Response REST response.
 	 */
 	public static function handle_coinsnap_webhook( \WP_REST_Request $request ): \WP_REST_Response {
-		$data = $request->get_json_params();
-		$result = CoinsnapBIF_Services_Payment_Service::handle_webhook( 'coinsnap', $data );
-
-		// Always return 200 to acknowledge webhook receipt
-		return new \WP_REST_Response( $result, 200 );
+		return new \WP_REST_Response( null, CoinsnapBIF_Services_Payment_Service::handle_webhook( 'coinsnap', $request->get_body() ) );
 	}
 
 	/**
-	 * Handle BTCPay webhook.
+	 * Handle BTCPay webhook. The signature was checked by the permission callback.
 	 *
 	 * @param \WP_REST_Request $request REST request object.
 	 * @return \WP_REST_Response REST response.
 	 */
 	public static function handle_btcpay_webhook( \WP_REST_Request $request ): \WP_REST_Response {
-		$data = $request->get_json_params();
-		$result = CoinsnapBIF_Services_Payment_Service::handle_webhook( 'btcpay', $data );
-
-		// Always return 200 to acknowledge webhook receipt
-		return new \WP_REST_Response( $result, 200 );
+		return new \WP_REST_Response( null, CoinsnapBIF_Services_Payment_Service::handle_webhook( 'btcpay', $request->get_body() ) );
 	}
 }

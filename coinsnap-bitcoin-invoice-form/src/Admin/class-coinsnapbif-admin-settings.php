@@ -18,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CoinsnapBIF_Admin_Settings {
 	public const OPTION_KEY = 'bif_settings';
-        public const WEBHOOK_KEY = 'coinsnapbif_webhook';
 
 	/** Register hooks to initialize settings. */
 	public static function register(): void {
@@ -36,11 +35,9 @@ class CoinsnapBIF_Admin_Settings {
 			'coinsnap_store_id'       => '',
 			'coinsnap_api_key'        => '',
 			'coinsnap_api_base'       => 'https://app.coinsnap.io',
-			'coinsnap_webhook_secret' => '',
 			'btcpay_host'             => '',
 			'btcpay_api_key'          => '',
 			'btcpay_store_id'         => '',
-			'btcpay_webhook_secret'   => '',
 			'log_level'               => 'error',
 			'disable_webhook_verification' => false,
 		);
@@ -108,8 +105,7 @@ class CoinsnapBIF_Admin_Settings {
 			'coinsnap_api_key',
 			__( 'Coinsnap API Key', 'coinsnap-bitcoin-invoice-form' ),
 			function () {
-				$s = self::get_settings();
-				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_api_key]" value="' . esc_attr( $s['coinsnap_api_key'] ) . '" />';
+				self::secret_field( 'coinsnap_api_key' );
 			},
 			'coinsnapbif-settings',
 			'coinsnapbif_coinsnap'
@@ -121,16 +117,6 @@ class CoinsnapBIF_Admin_Settings {
 //			function () {
 //				$s = self::get_settings();
 //				echo '<input type="url" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_api_base]" value="' . esc_attr( $s['coinsnap_api_base'] ) . '" />';
-//			},
-//			'coinsnapbif-settings',
-//			'coinsnapbif_coinsnap'
-//		);
-//		add_settings_field(
-//			'coinsnap_webhook_secret',
-//			__( 'Coinsnap Webhook Secret', 'coinsnap-bitcoin-invoice-form' ),
-//			function () {
-//				$s = self::get_settings();
-//				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[coinsnap_webhook_secret]" value="' . esc_attr( $s['coinsnap_webhook_secret'] ) . '" />';
 //			},
 //			'coinsnapbif-settings',
 //			'coinsnapbif_coinsnap'
@@ -153,8 +139,7 @@ class CoinsnapBIF_Admin_Settings {
 			'btcpay_api_key',
 			__( 'BTCPay API Key', 'coinsnap-bitcoin-invoice-form' ),
 			function () {
-				$s = self::get_settings();
-				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[btcpay_api_key]" value="' . esc_attr( $s['btcpay_api_key'] ) . '" />';
+				self::secret_field( 'btcpay_api_key' );
 			},
 			'coinsnapbif-settings',
 			'coinsnapbif_btcpay'
@@ -169,16 +154,6 @@ class CoinsnapBIF_Admin_Settings {
 			'coinsnapbif-settings',
 			'coinsnapbif_btcpay'
 		);
-//		add_settings_field(
-//			'btcpay_webhook_secret',
-//			__( 'BTCPay Webhook Secret', 'coinsnap-bitcoin-invoice-form' ),
-//			function () {
-//				$s = self::get_settings();
-//				echo '<input type="text" class="regular-text" name="' . esc_attr( self::OPTION_KEY ) . '[btcpay_webhook_secret]" value="' . esc_attr( $s['btcpay_webhook_secret'] ) . '" />';
-//			},
-//			'coinsnapbif-settings',
-//			'coinsnapbif_btcpay'
-//		);
 
 		add_settings_section( 'coinsnapbif_advanced', __( 'Advanced', 'coinsnap-bitcoin-invoice-form' ), function () {
 			echo '<p class="description">' . esc_html__( 'Advanced configuration options.', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
@@ -215,38 +190,123 @@ class CoinsnapBIF_Admin_Settings {
 	}
 
 	/**
+	 * API key field: never shows the stored key, only its last 4 characters.
+	 * Saving with the field empty keeps the stored key.
+	 *
+	 * @param string $field Field name.
+	 */
+	private static function secret_field( string $field ): void {
+		$hint = \CoinsnapBIF\Services\CoinsnapBIF_Security::secret_hint( (string) self::get_settings()[ $field ] );
+		printf(
+			'<input type="password" class="regular-text" name="%s" value="" autocomplete="new-password" placeholder="%s" />',
+			esc_attr( self::OPTION_KEY . '[' . $field . ']' ),
+			esc_attr( '' !== $hint ? $hint : __( 'Paste your API key', 'coinsnap-bitcoin-invoice-form' ) )
+		);
+	}
+
+	/**
 	 * Sanitize settings input.
 	 *
-	 * @param array $input Raw input.
+	 * Called for the settings form (options.php) and for programmatic updates of the
+	 * option. Only the settings form applies the "empty key keeps the stored key" rule.
+	 *
+	 * @param mixed $input Raw input.
 	 * @return array Sanitized input.
 	 */
-	public static function sanitize( array $input ): array {
+	public static function sanitize( $input ): array {
+		$input     = is_array( $input ) ? $input : array();
 		$sanitized = array();
 
-		// Sanitize text fields
+		// Sanitize text fields. Webhook secrets are not settings: the plugin creates them.
 		$text_fields = array(
 			'payment_provider',
 			'coinsnap_api_key',
 			'coinsnap_store_id',
 			'coinsnap_api_base',
-			'coinsnap_webhook_secret',
 			'btcpay_host',
 			'btcpay_api_key',
 			'btcpay_store_id',
-			'btcpay_webhook_secret',
 			'log_level',
 		);
 
 		foreach ( $text_fields as $field ) {
 			if ( isset( $input[ $field ] ) ) {
-				$sanitized[ $field ] = sanitize_text_field( $input[ $field ] );
+				$sanitized[ $field ] = trim( sanitize_text_field( (string) $input[ $field ] ) );
 			}
+		}
+		if ( isset( $sanitized['payment_provider'] ) && 'btcpay' !== $sanitized['payment_provider'] ) {
+			$sanitized['payment_provider'] = 'coinsnap';
+		}
+		if ( isset( $sanitized['btcpay_host'] ) ) {
+			$sanitized['btcpay_host'] = rtrim( esc_url_raw( $sanitized['btcpay_host'] ), '/' );
 		}
 
 		// Sanitize boolean fields
-		$sanitized['disable_webhook_verification'] = isset( $input['disable_webhook_verification'] ) && $input['disable_webhook_verification'];
+		$sanitized['disable_webhook_verification'] = false;
 
-		return $sanitized;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- options.php has checked the nonce.
+		$from_form = isset( $_POST['option_page'] ) && 'coinsnapbif_settings_group' === $_POST['option_page'];
+		if ( ! $from_form ) {
+			return array_merge( self::stored(), $sanitized );
+		}
+		return self::apply_form_rules( self::stored(), $sanitized );
+	}
+
+	/**
+	 * Stored option, without defaults.
+	 */
+	private static function stored(): array {
+		$opts = get_option( self::OPTION_KEY, array() );
+		return is_array( $opts ) ? $opts : array();
+	}
+
+	/**
+	 * Rules for the settings form: empty key fields keep the stored key; a new BTCPay
+	 * URL with an empty key drops the stored key (6.14); a pasted BTCPay key is accepted
+	 * only if BTCPay says it is limited to one store with the needed permissions.
+	 *
+	 * @param array $stored    Stored settings.
+	 * @param array $submitted Sanitized submitted settings.
+	 * @return array Settings to save.
+	 */
+	public static function apply_form_rules( array $stored, array $submitted ): array {
+		$out = array_merge( $stored, $submitted );
+
+		if ( '' === ( $submitted['coinsnap_api_key'] ?? '' ) ) {
+			$out['coinsnap_api_key'] = (string) ( $stored['coinsnap_api_key'] ?? '' );
+		}
+
+		$old_host = rtrim( (string) ( $stored['btcpay_host'] ?? '' ), '/' );
+		$new_host = (string) ( $out['btcpay_host'] ?? '' );
+		$new_key  = (string) ( $submitted['btcpay_api_key'] ?? '' );
+
+		if ( '' === $new_key || ( $new_key === (string) ( $stored['btcpay_api_key'] ?? '' ) && $new_host === $old_host ) ) {
+			$out['btcpay_api_key'] = ( $new_host === $old_host ) ? (string) ( $stored['btcpay_api_key'] ?? '' ) : '';
+			return $out;
+		}
+
+		$permissions = \CoinsnapBIF\Services\CoinsnapBIF_Security::btcpay_key_permissions( $new_host, $new_key );
+		$store       = null === $permissions ? '' : \CoinsnapBIF\Services\CoinsnapBIF_Security::btcpay_key_store( $permissions );
+		$wanted      = (string) ( $out['btcpay_store_id'] ?? '' );
+		if ( '' === $wanted ) {
+			$wanted = $store;
+		}
+		if ( null === $permissions || $store !== $wanted || ! \CoinsnapBIF\Services\CoinsnapBIF_Security::btcpay_key_is_acceptable( $permissions, $wanted ) ) {
+			if ( function_exists( 'add_settings_error' ) ) {
+				add_settings_error(
+					self::OPTION_KEY,
+					'coinsnapbif_btcpay_key',
+					__( 'The BTCPay API key was not saved: it must work on this BTCPay Server and be limited to one store with permission to create and view invoices and manage webhooks.', 'coinsnap-bitcoin-invoice-form' )
+				);
+			}
+			// Keep the old key only if it still belongs to the same server and store.
+			$same = $new_host === $old_host && (string) ( $out['btcpay_store_id'] ?? '' ) === (string) ( $stored['btcpay_store_id'] ?? '' );
+			$out['btcpay_api_key']  = $same ? (string) ( $stored['btcpay_api_key'] ?? '' ) : '';
+			return $out;
+		}
+		$out['btcpay_api_key']  = $new_key;
+		$out['btcpay_store_id'] = $wanted;
+		return $out;
 	}
 
 	/**

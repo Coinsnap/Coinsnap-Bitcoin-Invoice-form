@@ -58,9 +58,48 @@ class CoinsnapBIF_Logger {
 		if ( ! file_exists( $log_dir ) ) {
 			wp_mkdir_p( $log_dir );
 		}
+		self::protect_dir( $log_dir );
 
-		self::$log_file  = $log_dir . '/bif.log';
+		// The uploads folder is public. The file name has a random part so it can't be
+		// guessed on servers that ignore .htaccess (e.g. nginx).
+		$token = get_option( 'coinsnapbif_log_token' );
+		if ( ! is_string( $token ) || ! preg_match( '/^[a-f0-9]{32}$/', $token ) ) {
+			$token = bin2hex( random_bytes( 16 ) );
+			update_option( 'coinsnapbif_log_token', $token, false );
+		}
+		self::$log_file = $log_dir . '/bif-' . $token . '.log';
+
+		// Move a log written by an older version away from its guessable URL.
+		$legacy = $log_dir . '/bif.log';
+		if ( file_exists( $legacy ) && ! file_exists( self::$log_file ) ) {
+			@rename( $legacy, self::$log_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.rename_rename
+		}
+		if ( file_exists( $legacy ) ) {
+			wp_delete_file( $legacy );
+		}
+
 		self::$log_level = self::get_current_log_level();
+	}
+
+	/**
+	 * Deny web access to the log folder where the server honours it.
+	 *
+	 * @param string $log_dir Folder.
+	 */
+	private static function protect_dir( string $log_dir ): void {
+		if ( ! is_dir( $log_dir ) || ! is_writable( $log_dir ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+			return;
+		}
+		$files = array(
+			'.htaccess'  => "Require all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n",
+			'index.php'  => "<?php\n// Silence is golden.\n",
+			'web.config' => "<?xml version=\"1.0\"?>\n<configuration><system.webServer><authorization><deny users=\"*\" /></authorization></system.webServer></configuration>\n",
+		);
+		foreach ( $files as $name => $content ) {
+			if ( ! file_exists( $log_dir . '/' . $name ) ) {
+				file_put_contents( $log_dir . '/' . $name, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			}
+		}
 	}
 
 	/**
