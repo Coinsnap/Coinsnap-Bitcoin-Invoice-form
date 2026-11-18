@@ -110,9 +110,12 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
 			'description_order'   => '70',
 			'button_text'         => __( 'Pay Invoice with Bitcoin', 'coinsnap-bitcoin-invoice-form' ),
 			'discount_enabled'    => '1',
-			'discount_type'       => 'percentage',
+			'discount_type'       => 'percent', // the values the select and save_meta() know are 'fixed' and 'percent'
 			'discount_value'      => '10',
 			'discount_notice'     => '',
+			'discount_original_text' => '',
+			'discount_discount_text' => '',
+			'discount_youpay_text'   => '',
         );
 
         $values = get_post_meta( $post->ID, '_coinsnapbif_fields', true );
@@ -202,7 +205,7 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
 		echo '<label for="discount_type" style="margin:0;font-weight:500;white-space:nowrap;">' . esc_html__( 'Type', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
 		echo '<select name="coinsnapbif_fields[discount_type]" id="discount_type" style="min-width:120px;padding:4px 8px;border:1px solid #ccc;border-radius:3px;">';
 		echo '<option value="fixed" ' . selected( 'fixed', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Fixed amount', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
-		echo '<option selected value="percent" ' . selected( 'percent', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Percentage', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
+		echo '<option value="percent" ' . selected( 'percent', $values['discount_type'] ?? 'fixed', false ) . '>' . esc_html__( 'Percentage', 'coinsnap-bitcoin-invoice-form' ) . '</option>';
 		echo '</select>';
 		echo '</div>';
 		echo '<div class="bif-option-group" style="display:flex;align-items:center;gap:8px;">';
@@ -214,19 +217,19 @@ class CoinsnapBIF_CPT_Invoice_Form_Post_Type {
                 
                 echo '<div style="display:flex;align-items:center;gap:10px; margin:15px 0 0;">';
 		echo '<label for="discount_original_text" style="margin:0;font-weight:500;white-space:nowrap; width:100px;">' . esc_html__( 'Original', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
-		echo '<input type="text" id="discount_original_text" name="coinsnapbif_fields[discount_original_text]" value="' . esc_attr( $values['discount_original_text'] ) . '" style="width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'Original', 'coinsnap-bitcoin-invoice-form' ) . '" />';
+		echo '<input type="text" id="discount_original_text" name="coinsnapbif_fields[discount_original_text]" value="' . esc_attr( $values['discount_original_text'] ?? '' ) . '" style="width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'Original', 'coinsnap-bitcoin-invoice-form' ) . '" />';
 		echo '</div>';
                 
                 
                 echo '<div style="display:flex;align-items:center;gap:10px; margin:15px 0 0;">';
 		echo '<label for="discount_discount_text" style="margin:0;font-weight:500;white-space:nowrap; width:100px;">' . esc_html__( 'Discount', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
-		echo '<input type="text" id="discount_discount_text" name="coinsnapbif_fields[discount_discount_text]" value="' . esc_attr( $values['discount_discount_text'] ) . '" style="width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'Discount', 'coinsnap-bitcoin-invoice-form' ) . '" />';
+		echo '<input type="text" id="discount_discount_text" name="coinsnapbif_fields[discount_discount_text]" value="' . esc_attr( $values['discount_discount_text'] ?? '' ) . '" style="width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'Discount', 'coinsnap-bitcoin-invoice-form' ) . '" />';
 		echo '</div>';
                 
                 
                 echo '<div style="display:flex;align-items:center;gap:10px; margin:15px 0 0;">';
 		echo '<label for="discount_youpay_text" style="margin:0;font-weight:500;white-space:nowrap; width:100px;">' . esc_html__( 'You pay', 'coinsnap-bitcoin-invoice-form' ) . ':</label>';
-		echo '<input type="text" id="discount_youpay_text" name="coinsnapbif_fields[discount_youpay_text]" value="' . esc_attr( $values['discount_youpay_text'] ) . '" style="width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'You pay', 'coinsnap-bitcoin-invoice-form' ) . '" />';
+		echo '<input type="text" id="discount_youpay_text" name="coinsnapbif_fields[discount_youpay_text]" value="' . esc_attr( $values['discount_youpay_text'] ?? '' ) . '" style="width:200px;padding:6px 10px;border:1px solid #ccc;border-radius:3px;" placeholder="' . esc_attr__( 'You pay', 'coinsnap-bitcoin-invoice-form' ) . '" />';
 		echo '</div>';
                 
 		echo '<p class="description" style="margin:15px 0 20px 0;color:#666;font-size:13px;">' . esc_html__( 'Customize amount and discount labels', 'coinsnap-bitcoin-invoice-form' ) . '</p>';
