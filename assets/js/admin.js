@@ -48,7 +48,94 @@
 
         // Initialize other admin features
         initAdminFeatures();
+        
+        
+        
+    $('#coinsnapbif_btcpay_wizard_button').click(function(e) {
+        e.preventDefault();
+        const host = $('#coinsnapbif_btcpay_url').val();
+	if (isCoinsnapBIFValidUrl(host)) {
+            let data = {
+                'action': 'coinsnapbif_btcpay_apiurl_handler',
+                'host': host,
+                'apiNonce': coinsnapbif_ajax.nonce
+            };
+            
+            $.post(coinsnapbif_ajax.ajax_url, data, function(response) {
+                if (response.data.url) {
+                    window.location = response.data.url;
+		}
+            }).fail( function() {
+		alert('Error processing your request. Please make sure to enter a valid BTCPay Server instance URL.')
+            });
+	}
+        else {
+            alert('Please enter a valid url including https:// in the BTCPay Server URL input field.')
+        }
     });
+    
+    if($('#coinsnap_bitcoin_invoice_polls_currency').length){
+        
+        setStep();
+        $('#coinsnap_bitcoin_invoice_polls_currency').change(
+            function(){
+                setStep();
+            }    
+        );
+        
+    }
+    
+    if(!$('.coinsnapConnectionStatus').length){
+        $('form#post').prepend('<div class="coinsnapConnectionStatus"></div>');
+    }
+   
+    if($('.coinsnapConnectionStatus').length){
+        
+        
+        let ajaxurl = coinsnapbif_ajax.ajax_url;
+        let data = {
+            action: 'coinsnapbif_connection_handler',
+            apiNonce: coinsnapbif_ajax.nonce,
+            apiPost: coinsnapbif_ajax.post
+        };
+
+        jQuery.post( ajaxurl, data, function( response ){
+
+            var connectionCheckResponse = $.parseJSON(response);
+            let resultClass = (connectionCheckResponse.result === true)? 'success' : 'error';
+            $('.coinsnapConnectionStatus').html('<span class="'+resultClass+'">'+ connectionCheckResponse.message +'</span>');
+            
+        });
+    }
+  });
+  
+  function setStep(){
+        let step = 0.01;
+        let currency = $('#coinsnap_bitcoin_invoice_polls_currency').val();
+        if(currency === 'RUB' || currency === 'JPY' || currency === 'SATS'){
+            step = 1;
+        }
+        $('#coinsnap_bitcoin_invoice_polls_amount').attr('step', step);
+    }
+  
+    function isCoinsnapBIFValidUrl(serverUrl) {
+        if(serverUrl.indexOf('http') > -1){
+            try {
+                const url = new URL(serverUrl);
+                if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+                    return false;
+                }
+            }
+            catch (e) {
+                console.error(e);
+                return false;
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     /**
      * Initialize admin features
@@ -101,10 +188,10 @@
         
         // Load transaction details via AJAX
         $.ajax({
-            url: bifRestUrl.restUrl + 'transactions/' + transactionId,
+            url: CoinsnapBIFRestUrl.restUrl + 'transactions/' + transactionId,
             method: 'GET',
             headers: {
-                'X-WP-Nonce': bifRestUrl.nonce
+                'X-WP-Nonce': CoinsnapBIFRestUrl.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -219,14 +306,14 @@
         
         // Perform bulk action
         $.ajax({
-            url: bifRestUrl.restUrl + 'transactions/bulk-action',
+            url: CoinsnapBIFRestUrl.restUrl + 'transactions/bulk-action',
             method: 'POST',
             data: {
                 action: action,
                 ids: ids
             },
             headers: {
-                'X-WP-Nonce': bifRestUrl.nonce
+                'X-WP-Nonce': CoinsnapBIFRestUrl.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -329,10 +416,10 @@
         button.prop('disabled', true).text('Testing...');
         
         $.ajax({
-            url: bifRestUrl.restUrl + 'test-connection/' + provider,
+            url: CoinsnapBIFRestUrl.restUrl + 'test-connection/' + provider,
             method: 'POST',
             headers: {
-                'X-WP-Nonce': bifRestUrl.nonce
+                'X-WP-Nonce': CoinsnapBIFRestUrl.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -351,9 +438,9 @@
     });
 
     // Expose functions globally for external use
-    window.BIFAdmin = window.BIFAdmin || {};
-    window.BIFAdmin.handleBulkAction = handleBulkAction;
-    window.BIFAdmin.validateForm = validateForm;
-    window.BIFAdmin.closeModal = closeModal;
+    window.CoinsnapBIFAdmin = window.CoinsnapBIFAdmin || {};
+    window.CoinsnapBIFAdmin.handleBulkAction = handleBulkAction;
+    window.CoinsnapBIFAdmin.validateForm = validateForm;
+    window.CoinsnapBIFAdmin.closeModal = closeModal;
 
 })(jQuery);

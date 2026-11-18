@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace BitcoinInvoiceForm\Admin;
+namespace CoinsnapBIF\Admin;
 
-use BitcoinInvoiceForm\Util\BIF_Logger;
+use CoinsnapBIF\Util\CoinsnapBIF_Logger;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Admin logs page for viewing plugin logs.
  */
-class BIF_Admin_Logs_Page {
+class CoinsnapBIF_Admin_Logs_Page {
 	/**
 	 * Register the admin page.
 	 */
@@ -30,13 +30,13 @@ class BIF_Admin_Logs_Page {
 	 * Render the logs page.
 	 */
 	public static function render_page(): void {
-		$log_file_path = BIF_Logger::get_log_file_path();
-		$log_file_size = BIF_Logger::get_log_file_size();
-		$recent_entries = BIF_Logger::get_recent_entries( 100 );
+		$log_file_path = CoinsnapBIF_Logger::get_log_file_path();
+		$log_file_size = CoinsnapBIF_Logger::get_log_file_size();
+		$recent_entries = CoinsnapBIF_Logger::get_recent_entries( 100 );
 
 		// Handle log clearing
 		if ( isset( $_POST['clear_logs'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'bif_clear_logs' ) ) {
-			BIF_Logger::clear_log();
+			CoinsnapBIF_Logger::clear_log();
 			echo '<div class="notice notice-success"><p>' . esc_html__( 'Logs cleared successfully.', 'coinsnap-bitcoin-invoice-form' ) . '</p></div>';
 			$recent_entries = array();
 			$log_file_size = 0;
@@ -103,64 +103,6 @@ class BIF_Admin_Logs_Page {
 				<?php endif; ?>
 			</div>
 		</div>
-
-		<style>
-		.bif-logs-info {
-			background: #f1f1f1;
-			padding: 15px;
-			border-radius: 4px;
-			margin-bottom: 20px;
-		}
-		.bif-logs-info p {
-			margin: 5px 0;
-		}
-		.bif-logs-actions {
-			margin-bottom: 20px;
-		}
-		.bif-log-entries {
-			max-height: 600px;
-			overflow-y: auto;
-			border: 1px solid #ddd;
-			border-radius: 4px;
-		}
-		.bif-log-entry {
-			padding: 10px;
-			border-bottom: 1px solid #eee;
-			font-family: monospace;
-			font-size: 12px;
-		}
-		.bif-log-entry:last-child {
-			border-bottom: none;
-		}
-		.bif-log-header {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 5px;
-		}
-		.bif-log-timestamp {
-			color: #666;
-		}
-		.bif-log-level {
-			font-weight: bold;
-			padding: 2px 6px;
-			border-radius: 3px;
-			font-size: 10px;
-			text-transform: uppercase;
-		}
-		.bif-log-message {
-			white-space: pre-wrap;
-			word-break: break-word;
-		}
-		.bif-log-emergency .bif-log-level { background: #dc3545; color: white; }
-		.bif-log-alert .bif-log-level { background: #fd7e14; color: white; }
-		.bif-log-critical .bif-log-level { background: #dc3545; color: white; }
-		.bif-log-error .bif-log-level { background: #dc3545; color: white; }
-		.bif-log-warning .bif-log-level { background: #ffc107; color: black; }
-		.bif-log-notice .bif-log-level { background: #17a2b8; color: white; }
-		.bif-log-info .bif-log-level { background: #28a745; color: white; }
-		.bif-log-debug .bif-log-level { background: #6c757d; color: white; }
-		.bif-log-unknown .bif-log-level { background: #6c757d; color: white; }
-		</style>
 		<?php
 	}
 }
