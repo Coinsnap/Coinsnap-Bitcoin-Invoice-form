@@ -118,16 +118,21 @@ class CoinsnapProvider implements PaymentProviderInterface {
 			'currency'   => $currency,
 			'referralCode' => 'D2PVBL',
 			'buyerEmail' => isset( $invoice_data['email'] ) ? (string) $invoice_data['email'] : '',
-			'metadata'   => array(
-				'form_id' => $form_id,
-				'transaction_id' => (string) ( $invoice_data['transaction_id'] ?? '' ),
-				'email'   => (string) ( $invoice_data['email'] ?? '' ),
-				'name'    => (string) ( $invoice_data['name'] ?? '' ),
-				'company' => (string) ( $invoice_data['company'] ?? '' ),
-				'invoice_number' => (string) ( $invoice_data['invoice_number'] ?? '' ),
-				'description' => (string) ( $invoice_data['description'] ?? '' ),
-				'wp_version' => (string) ( $invoice_data['wp_version'] ?? '' ),
-				'plugin_version' => (string) ( $invoice_data['plugin_version'] ?? '' ),
+			'orderId'    => (string) ( $invoice_data['transaction_id'] ?? '' ),
+			'metadata'   => array_merge(
+				array(
+					'form_id' => $form_id,
+					'transaction_id' => (string) ( $invoice_data['transaction_id'] ?? '' ),
+					'email'   => (string) ( $invoice_data['email'] ?? '' ),
+					'name'    => (string) ( $invoice_data['name'] ?? '' ),
+					'company' => (string) ( $invoice_data['company'] ?? '' ),
+					'invoice_number' => (string) ( $invoice_data['invoice_number'] ?? '' ),
+					'description' => (string) ( $invoice_data['description'] ?? '' ),
+					'wp_version' => (string) ( $invoice_data['wp_version'] ?? '' ),
+					'plugin_version' => (string) ( $invoice_data['plugin_version'] ?? '' ),
+				),
+				// orderId, orderNumber, form, buyer and message (CoinsnapBIF_Invoice_Metadata).
+				is_array( $invoice_data['metadata'] ?? null ) ? $invoice_data['metadata'] : array()
 			),
 			'checkout'   => array(
 				'defaultPaymentMethod' => 'LightningNetwork',

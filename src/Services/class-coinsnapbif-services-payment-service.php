@@ -144,6 +144,8 @@ class CoinsnapBIF_Services_Payment_Service {
 				);
 			}
 
+			$amount_before_discount = $amount;
+
 			// Apply discount if configured on the form
 			$discount_enabled = $fields['discount_enabled'] ?? '0';
 			if ( '1' === $discount_enabled || 'on' === $discount_enabled ) {
@@ -193,6 +195,24 @@ class CoinsnapBIF_Services_Payment_Service {
 				'company'         => sanitize_text_field( $data['bif_company'] ?? '' ),
 				'invoice_number'  => sanitize_text_field( $data['bif_invoice_number'] ?? '' ),
 				'description'     => sanitize_textarea_field( $data['bif_description'] ?? '' ),
+			);
+			// Added to the invoice metadata next to the keys above (form_id and transaction_id stay what the webhook matches on).
+			$invoice_data['metadata'] = CoinsnapBIF_Invoice_Metadata::for_payment(
+				array(
+					'transaction_id' => $transaction_id,
+					'invoice_number' => $invoice_data['invoice_number'],
+					'form_id'        => $form_id,
+					'form_title'     => (string) $form->post_title,
+					'item_desc'      => (string) $payment_config['description'],
+					'name'           => $invoice_data['name'],
+					'email'          => $invoice_data['email'],
+					'company'        => $invoice_data['company'],
+					'message'        => $invoice_data['description'],
+					'discount_total' => max( 0, $amount_before_discount - $amount ),
+					'page_url'       => (string) wp_get_referer(),
+					'version'        => COINSNAPBIF_VERSION,
+					'language'       => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
+				)
 			);
 
 			// Create payment provider
