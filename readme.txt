@@ -5,7 +5,7 @@ Tags: bitcoin, lightning, invoice payments, bitcoin invoice, btcpay server
 Requires at least: 6.2
 Tested up to: 6.9.9
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.2
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -181,6 +181,20 @@ Depending on the merchant setup and supported partner integrations, Bitcoin paym
 10. Bitcoin and Lightning payment QR code
 
 == Changelog ==
+
+= 1.1.2 :: 2026-11-22 =
+* Security: webhooks are accepted only with a valid signature, and a payment is confirmed only after the invoice is fetched from Coinsnap or BTCPay Server and its form, transaction, amount and currency match.
+* Security: the webhook is registered only from the admin settings, with its own secret per provider; API keys are shown masked; logs no longer contain customer data.
+* Fixed: re-saving a form no longer turns a fixed Bitcoin discount into a percentage discount.
+* Invoices now carry orderId (the transaction ID) and standard buyer and invoice metadata.
+* Fixed: the payment window no longer calls a missing verify-payment endpoint (404). The status check already verifies the invoice with the payment provider.
+
+= 1.1.1 :: 2026-11-12 =
+* Enhanced invoice metadata sent to payment providers (Coinsnap & BTCPay Server)
+* Added transaction ID to payment metadata for better tracking
+* Added WordPress and plugin version information to metadata
+* Expanded metadata with customer form data (name, company, invoice number, description)
+* Improved payment reconciliation with comprehensive metadata
 
 = 1.1.0 :: 2026-03-01 =
 * Added BTCPay Server connection wizard on the Settings page.
