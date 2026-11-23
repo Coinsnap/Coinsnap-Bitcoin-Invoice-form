@@ -237,8 +237,6 @@
     function startPaymentPolling(invoiceId, modal) {
         var tries = 0;
         var maxTries = 60; // ~60s
-        var verifyTries = 0;
-        var maxVerifyTries = 3; // Try manual verification 3 times
 
         function step() {
             // Check if modal is still open and polling should continue
@@ -264,12 +262,6 @@
                     return;
                 }
 
-                // If we've been polling for a while and still not paid, try manual verification
-                if (tries > 30 && verifyTries < maxVerifyTries) {
-                    verifyTries++;
-                    return verifyPayment();
-                }
-
                 if (tries < maxTries) {
                     setTimeout(step, 1000);
                 } else {
@@ -283,42 +275,6 @@
                 } else {
                     console.error('Max polling attempts reached with errors');
                     // Don't show error - just stop polling silently
-                }
-            });
-        }
-
-        function verifyPayment() {
-            // Check if modal is still open and polling should continue
-            if (!modal.backdrop.pollingActive) {
-                return;
-            }
-
-            var verifyUrl = CoinsnapBIF.restUrl + 'verify-payment/' + encodeURIComponent(invoiceId);
-
-
-            $.ajax({
-                url: verifyUrl,
-                method: 'POST',
-                headers: {
-                    'X-WP-Nonce': CoinsnapBIF.nonce
-                }
-            })
-            .done(function(response) {
-
-                if (response && response.success && response.data && response.data.paid) {
-                    showPaymentSuccess(modal);
-                } else {
-                    // Continue polling after verification attempt
-                    if (tries < maxTries && modal.backdrop.pollingActive) {
-                        setTimeout(step, 1000);
-                    }
-                }
-            })
-            .fail(function(xhr) {
-                console.error('Manual verification failed:', xhr);
-                // Continue polling after verification attempt
-                if (tries < maxTries && modal.backdrop.pollingActive) {
-                    setTimeout(step, 1000);
                 }
             });
         }
